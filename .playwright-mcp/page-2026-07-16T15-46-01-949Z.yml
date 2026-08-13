@@ -1,0 +1,65 @@
+- generic [active] [ref=f13e1]:
+  - navigation [ref=f13e2]:
+    - generic [ref=f13e3]:
+      - link "🤖 MyGPGD J360" [ref=f13e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f13e6]:
+        - listitem [ref=f13e7]:
+          - link "Upload" [ref=f13e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f13e9]:
+          - link "Results" [ref=f13e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f13e11]:
+          - link "Dashboard" [ref=f13e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f13e13]:
+          - button "Manage" [ref=f13e14] [cursor=pointer]
+  - generic [ref=f13e15]:
+    - alert [ref=f13e16]:
+      - text: ✅ Dr.Jayanthi Jayaraman (GPGD-0B80BC43) marked as "Under Review".
+      - button [ref=f13e17] [cursor=pointer]
+    - heading "Manage Applications" [level=1] [ref=f13e18]
+    - paragraph [ref=f13e19]: Review submitted applications and update their status — the same as the Application list in Django admin.
+    - generic [ref=f13e21]:
+      - generic [ref=f13e22]: "Filter by status:"
+      - combobox [ref=f13e23]:
+        - option "All statuses" [selected]
+        - option "Application Submitted"
+        - option "Under Review"
+        - option "Shortlisted"
+        - option "Approved"
+        - option "Rejected"
+    - table [ref=f13e26]:
+      - rowgroup [ref=f13e27]:
+        - row [ref=f13e28]:
+          - columnheader "Reference" [ref=f13e29]
+          - columnheader "Name" [ref=f13e30]
+          - columnheader "IC Number" [ref=f13e31]
+          - columnheader "Track" [ref=f13e32]
+          - columnheader "State" [ref=f13e33]
+          - columnheader "Submitted" [ref=f13e34]
+          - columnheader "Status" [ref=f13e35]
+          - columnheader [ref=f13e36]
+      - rowgroup [ref=f13e37]:
+        - row [ref=f13e38]:
+          - cell [ref=f13e39]:
+            - strong [ref=f13e40]: GPGD-0B80BC43
+          - cell "Dr.Jayanthi Jayaraman" [ref=f13e41]
+          - cell "850610-01-6124" [ref=f13e42]
+          - cell "Google" [ref=f13e43]
+          - cell "Johor" [ref=f13e44]
+          - cell "16 Jul 2026, 15:12" [ref=f13e45]
+          - cell [ref=f13e46]:
+            - generic [ref=f13e47]:
+              - combobox [ref=f13e48]:
+                - option "Application Submitted"
+                - option "Under Review" [selected]
+                - option "Shortlisted"
+                - option "Approved"
+                - option "Rejected"
+              - button "Save" [ref=f13e49] [cursor=pointer]
+          - cell [ref=f13e50]:
+            - button "🗑️" [ref=f13e52] [cursor=pointer]
+  - contentinfo [ref=f13e53]:
+    - generic [ref=f13e54]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

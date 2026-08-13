@@ -1,0 +1,24 @@
+- generic [ref=f12e1]:
+  - navigation [ref=f12e2]:
+    - generic [ref=f12e3]:
+      - link "🤖 MyGPGD J360" [ref=f12e4] [cursor=pointer]:
+        - /url: /agents/state/review/
+      - list [ref=f12e6]:
+        - listitem [ref=f12e7]:
+          - link "State Review (Johor)" [ref=f12e8] [cursor=pointer]:
+            - /url: /agents/state/review/
+        - listitem [ref=f12e9]:
+          - button "Logout (johor_officer)" [ref=f12e11] [cursor=pointer]
+  - generic [ref=f12e15]:
+    - heading "Officer Login" [level=1] [ref=f12e16]
+    - paragraph [ref=f12e17]: Sign in to review and approve GPGD candidates.
+    - generic [ref=f12e18]:
+      - generic [ref=f12e19]:
+        - generic [ref=f12e20]: Username
+        - textbox "Username" [active] [ref=f12e21]: johor_officer
+      - generic [ref=f12e22]:
+        - generic [ref=f12e23]: Password
+        - textbox "Password" [ref=f12e24]: JohorTest123!
+      - button "Log In" [ref=f12e25] [cursor=pointer]
+  - contentinfo [ref=f12e26]:
+    - generic [ref=f12e27]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

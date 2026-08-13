@@ -1,0 +1,76 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "🤖 MyGPGD J360" [ref=e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "Upload" [ref=e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=e9]:
+          - link "Results" [ref=e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=e11]:
+          - link "Dashboard" [ref=e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+  - generic [ref=e15]:
+    - 'heading "Agent 1: Certification Collector" [level=1] [ref=e16]'
+    - generic [ref=e17]:
+      - heading "Upload Certified Teacher Lists" [level=3] [ref=e18]
+      - paragraph [ref=e19]: Upload three Excel files containing certified teacher data from Google, Microsoft, and Apple.
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: Provider
+          - combobox "Provider" [ref=e23]:
+            - option "Google Certified Teachers" [selected]
+            - option "Microsoft Certified Teachers"
+            - option "Apple Certified Teachers"
+        - generic [ref=e24]:
+          - generic [ref=e25]: Excel File (.xlsx)
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: 📁
+            - generic [ref=e29]: Click to upload or drag and drop
+            - generic [ref=e30]: Excel files (.xlsx) only
+          - text: "File must contain columns for: Name, IC Number, Email, School, State, Certification Level, Certification Year"
+        - button "📤 Upload File" [ref=e31] [cursor=pointer]
+    - generic [ref=e32]:
+      - heading "Recent Uploads" [level=5] [ref=e34]
+      - table [ref=e36]:
+        - rowgroup [ref=e37]:
+          - row [ref=e38]:
+            - columnheader "Provider" [ref=e39]
+            - columnheader "File Name" [ref=e40]
+            - columnheader "Records" [ref=e41]
+            - columnheader "Status" [ref=e42]
+            - columnheader "Uploaded" [ref=e43]
+            - columnheader [ref=e44]
+        - rowgroup [ref=e45]:
+          - row [ref=e46]:
+            - cell [ref=e47]:
+              - strong [ref=e48]: Apple
+            - cell "sample_apple.xlsx" [ref=e49]
+            - cell "6" [ref=e50]
+            - cell "✅ Valid" [ref=e51]
+            - cell "06:55" [ref=e53]
+            - cell [ref=e54]:
+              - button "🗑️" [ref=e56] [cursor=pointer]
+          - row [ref=e57]:
+            - cell [ref=e58]:
+              - strong [ref=e59]: Microsoft
+            - cell "sample_Microsoft.xlsx" [ref=e60]
+            - cell "10" [ref=e61]
+            - cell "✅ Valid" [ref=e62]
+            - cell "06:55" [ref=e64]
+            - cell [ref=e65]:
+              - button "🗑️" [ref=e67] [cursor=pointer]
+          - row [ref=e68]:
+            - cell [ref=e69]:
+              - strong [ref=e70]: Google
+            - cell "sample_Google.xlsx" [ref=e71]
+            - cell "13" [ref=e72]
+            - cell "✅ Valid" [ref=e73]
+            - cell "06:55" [ref=e75]
+            - cell [ref=e76]:
+              - button "🗑️" [ref=e78] [cursor=pointer]
+  - contentinfo [ref=e79]:
+    - generic [ref=e80]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

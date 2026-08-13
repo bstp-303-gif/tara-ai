@@ -1,0 +1,153 @@
+- generic [ref=f6e2]:
+  - complementary [ref=f6e3]:
+    - link "🤖 MyGPGD J360" [ref=f6e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+    - list [ref=f6e5]:
+      - listitem [ref=f6e6]:
+        - link "📤 Upload" [ref=f6e7] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+      - listitem [ref=f6e8]:
+        - link "📊 Results" [ref=f6e9] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+      - listitem [ref=f6e10]:
+        - link "📈 Dashboard" [ref=f6e11] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+      - listitem [ref=f6e12]: Manage
+      - listitem [ref=f6e13]:
+        - link "Providers & Rules" [ref=f6e14] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+      - listitem [ref=f6e15]:
+        - link "Applications" [ref=f6e16] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+      - listitem [ref=f6e17]:
+        - link "Teachers" [ref=f6e18] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+    - button "🚪 Logout (admin)" [ref=f6e21] [cursor=pointer]
+  - generic [ref=f6e22]:
+    - generic [ref=f6e23]:
+      - img "Kementerian Pendidikan Malaysia" [ref=f6e25]
+      - heading "Agent 1 Dashboard" [level=1] [ref=f6e26]
+      - paragraph [ref=f6e27]: Processing summary and statistics
+      - generic [ref=f6e28]:
+        - generic [ref=f6e30]:
+          - generic [ref=f6e31]: Total Records
+          - generic [ref=f6e32]: "0"
+          - generic [ref=f6e33]: from all providers
+        - generic [ref=f6e35]:
+          - generic [ref=f6e36]: Unique Teachers
+          - generic [ref=f6e37]: "0"
+          - generic [ref=f6e38]: after deduplication
+        - generic [ref=f6e40]:
+          - generic [ref=f6e41]: Multi-Certified
+          - generic [ref=f6e42]: "0"
+          - generic [ref=f6e43]: in multiple providers
+        - generic [ref=f6e45]:
+          - generic [ref=f6e46]: Eligible
+          - generic [ref=f6e47]: "0"
+          - generic [ref=f6e48]: for nomination
+      - generic [ref=f6e49]:
+        - heading "Processing Steps" [level=5] [ref=f6e51]
+        - generic [ref=f6e52]:
+          - generic [ref=f6e54]:
+            - generic [ref=f6e55]: ✓
+            - generic [ref=f6e56]:
+              - generic [ref=f6e57]: Files Validated
+              - generic [ref=f6e58]: 0 valid file(s) uploaded
+          - generic [ref=f6e60]:
+            - generic [ref=f6e61]: ✓
+            - generic [ref=f6e62]:
+              - generic [ref=f6e63]: Data Normalized
+              - generic [ref=f6e64]: Standard column schema applied to all files
+          - generic [ref=f6e66]:
+            - generic [ref=f6e67]: ✓
+            - generic [ref=f6e68]:
+              - generic [ref=f6e69]: Duplicates Merged
+              - generic [ref=f6e70]: 0 records → 0 unique teachers
+          - generic [ref=f6e72]:
+            - generic [ref=f6e73]: ✓
+            - generic [ref=f6e74]:
+              - generic [ref=f6e75]: Eligibility Applied
+              - generic [ref=f6e76]: 0 eligible | 0 not eligible
+      - generic [ref=f6e77]:
+        - heading "Download Results" [level=5] [ref=f6e79]
+        - generic [ref=f6e81]:
+          - link "📊 Combined Normalized Data" [ref=f6e82] [cursor=pointer]:
+            - /url: /agents/download-combined/
+            - generic [ref=f6e83]: 📊
+            - text: Combined Normalized Data
+          - link "🔄 Deduplicated Teacher List" [ref=f6e84] [cursor=pointer]:
+            - /url: /agents/download-dedup/
+            - generic [ref=f6e85]: 🔄
+            - text: Deduplicated Teacher List
+          - link "✅ Eligible Candidates (Ranked)" [ref=f6e86] [cursor=pointer]:
+            - /url: /agents/download-eligible/
+            - generic [ref=f6e87]: ✅
+            - text: Eligible Candidates (Ranked)
+      - generic [ref=f6e88]:
+        - heading "Eligible Candidates (Preview)" [level=5] [ref=f6e90]
+        - paragraph [ref=f6e92]: No eligible candidates yet. Upload and process files to see results.
+      - generic [ref=f6e93]:
+        - heading "🤖 Agent Activity" [level=5] [ref=f6e95]
+        - table [ref=f6e97]:
+          - rowgroup [ref=f6e98]:
+            - row [ref=f6e99]:
+              - columnheader "When" [ref=f6e100]
+              - columnheader "Trigger" [ref=f6e101]
+              - columnheader "Summary" [ref=f6e102]
+              - columnheader "Status" [ref=f6e103]
+          - rowgroup [ref=f6e104]:
+            - row [ref=f6e105]:
+              - cell "17 Jul, 11:05" [ref=f6e106]
+              - cell "Google certification file deleted — roster may need recomputing." [ref=f6e107]
+              - cell "The Google certification file was the last valid file, so with it deleted no provider has any data backing the roster. I ran the certification pipeline, which cleared the stale roster so the dashboard no longer shows teachers or eligible candidates that are no longer backed by any uploaded file. No invitations or application steps were needed since there's no eligible roster to act on." [ref=f6e108]
+              - cell "✅ Success" [ref=f6e109]
+            - row [ref=f6e111]:
+              - cell "17 Jul, 11:03" [ref=f6e112]
+              - cell "Google certification file deleted — roster may need recomputing." [ref=f6e113]
+              - cell "The Google certification file was deleted, which left no valid files remaining for any provider. I ran the certification pipeline to refresh the roster, but it declined to run because there are no valid files at all. Since any teachers or eligible candidates from the deleted files may still be showing on the dashboard, I've logged a note flagging that the stale roster may not have been cleared as expected — this is worth a staff check." [ref=f6e114]
+              - cell "✅ Success" [ref=f6e115]
+            - row [ref=f6e117]:
+              - cell "17 Jul, 10:57" [ref=f6e118]
+              - cell "Google certification file deleted — roster may need recomputing." [ref=f6e119]
+              - cell "I checked the certification files after the Google file was deleted, and found that no provider (Google, Microsoft, or Apple) currently has any valid file uploaded. Because there's no source data left, I did not recompute the roster — doing so would only produce an empty list and risk erasing the current roster. Please re-upload a valid certification file, and I'll rebuild the roster then." [ref=f6e120]
+              - cell "✅ Success" [ref=f6e121]
+            - row [ref=f6e123]:
+              - cell "17 Jul, 10:57" [ref=f6e124]
+              - cell "Google certification file uploaded (10 records)." [ref=f6e125]
+              - cell "A new Google certification file (10 records) was uploaded, so I tried to rebuild the teacher roster. However, the pipeline failed at the deduplication step, so the roster wasn't updated and no invitations were sent — this needs a staff member to look into the file's data before it can be re-run. I've logged the issue for follow-up." [ref=f6e126]
+              - cell "✅ Success" [ref=f6e127]
+            - row [ref=f6e129]:
+              - cell "17 Jul, 08:08" [ref=f6e130]
+              - cell "Manual verification run — confirming ANTHROPIC_API_KEY works end to end." [ref=f6e131]
+              - 'cell "The verification run confirmed the system is responding end to end — read-only status checks returned successfully. All three certification providers currently have valid files (Google: 10, Microsoft: 10, Apple: 6), and there is 1 pending application awaiting compilation. Since this trigger was only a manual connectivity check (not a request to process new work), I took no pipeline actions; if you''d like, I can run the roster pipeline or compile that pending application next." [ref=f6e132]'
+              - cell "✅ Success" [ref=f6e133]
+            - row [ref=f6e135]:
+              - cell "17 Jul, 06:18" [ref=f6e136]
+              - cell "Google certification file uploaded (10 records)." [ref=f6e137]
+              - cell "ANTHROPIC_API_KEY is not configured — the pipeline agent cannot run." [ref=f6e138]
+              - cell "⚠️ Error" [ref=f6e139]
+      - generic [ref=f6e141]:
+        - heading "📧 Send Invitations to Eligible Candidates (manual override)" [level=5] [ref=f6e143]
+        - generic [ref=f6e144]:
+          - paragraph [ref=f6e145]:
+            - text: Send a personalised invitation email to all
+            - strong [ref=f6e146]: "0"
+            - text: eligible teacher(s) who have not yet applied. Each email contains a secure, unique application link valid for 30 days.
+          - generic [ref=f6e147]:
+            - generic [ref=f6e148]: "Submission deadline:"
+            - textbox "Submission deadline:" [ref=f6e149]: 2026-09-15
+            - button "Save" [ref=f6e150] [cursor=pointer]
+            - generic [ref=f6e151]: Used as the closing date in every invitation email below.
+          - generic [ref=f6e152]:
+            - button "📨 Send Invitation Emails" [disabled]
+            - text: Emails print to the server console in development mode.
+      - generic [ref=f6e153]:
+        - heading "📋 Compile & Rank Applications (manual override)" [level=5] [ref=f6e155]
+        - generic [ref=f6e156]:
+          - paragraph [ref=f6e157]: Scores and ranks every submitted application within its state, and auto-flags the top-ranked candidates needed to fill each district's minimum quota (2 per technology; 5 per technology for Perlis, WP Putrajaya, and WP Labuan, which have no districts). Once compiled, each state's ranked shortlist becomes available to that State Officer for approval.
+          - paragraph [ref=f6e158]: ⚠️ The submission deadline (15 Sep 2026) hasn't passed yet. You can still compile now if needed.
+          - button "📋 Compile & Rank (1 pending)" [ref=f6e160] [cursor=pointer]
+      - link "← Upload New Files" [ref=f6e162] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+    - contentinfo [ref=f6e163]:
+      - generic [ref=f6e164]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

@@ -1,0 +1,51 @@
+- generic [ref=f1e2]:
+  - complementary [ref=f1e3]:
+    - link "🤖 MyGPGD J360" [ref=f1e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+    - list [ref=f1e5]:
+      - listitem [ref=f1e6]:
+        - link "📤 Upload" [ref=f1e7] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+      - listitem [ref=f1e8]:
+        - link "📊 Results" [ref=f1e9] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+      - listitem [ref=f1e10]:
+        - link "📈 Dashboard" [ref=f1e11] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+      - listitem [ref=f1e12]: Manage
+      - listitem [ref=f1e13]:
+        - link "Providers & Rules" [ref=f1e14] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+      - listitem [ref=f1e15]:
+        - link "Applications" [ref=f1e16] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+      - listitem [ref=f1e17]:
+        - link "Teachers" [ref=f1e18] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+    - button "🚪 Logout (admin)" [ref=f1e21] [cursor=pointer]
+  - generic [ref=f1e22]:
+    - generic [ref=f1e25]:
+      - 'heading "Agent 1: Certification Collector" [level=1] [ref=f1e26]'
+      - generic [ref=f1e27]:
+        - heading "Upload Certified Teacher Lists" [level=3] [ref=f1e28]
+        - paragraph [ref=f1e29]: Upload three Excel files containing certified teacher data from Google, Microsoft, and Apple.
+        - generic [ref=f1e30]:
+          - generic [ref=f1e31]:
+            - generic [ref=f1e32]: Provider
+            - combobox "Provider" [ref=f1e33]:
+              - option "Google Certified Teachers" [selected]
+              - option "Microsoft Certified Teachers"
+              - option "Apple Certified Teachers"
+          - generic [ref=f1e34]:
+            - generic [ref=f1e35]: Excel File (.xlsx)
+            - generic [ref=f1e37] [cursor=pointer]:
+              - generic [ref=f1e38]: 📁
+              - generic [ref=f1e39]: sample_Google.xlsx
+              - generic [ref=f1e40]: Excel files (.xlsx) only
+            - text: "File must contain columns for: Name, IC Number, Email, School, State, Certification Level, Certification Year"
+          - button "📤 Upload File" [ref=f1e41] [cursor=pointer]
+      - generic [ref=f1e42]:
+        - heading "Recent Uploads" [level=5] [ref=f1e44]
+        - paragraph [ref=f1e46]: No files uploaded yet. Start by uploading your first file above.
+    - contentinfo [ref=f1e47]:
+      - generic [ref=f1e48]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

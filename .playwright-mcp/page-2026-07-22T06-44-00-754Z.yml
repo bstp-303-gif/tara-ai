@@ -1,0 +1,164 @@
+- generic [ref=f3e2]:
+  - complementary [ref=f3e3]:
+    - link " MyGPGD J360" [ref=f3e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=f3e5]: 
+      - generic [ref=f3e7]: MyGPGD J360
+    - list [ref=f3e8]:
+      - listitem [ref=f3e9]:
+        - link " Upload" [ref=f3e10] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=f3e11]: 
+          - text: Upload
+      - listitem [ref=f3e12]:
+        - link " Results" [ref=f3e13] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=f3e14]: 
+          - text: Results
+      - listitem [ref=f3e15]:
+        - link " Dashboard" [ref=f3e16] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=f3e17]: 
+          - text: Dashboard
+      - listitem [ref=f3e18]:
+        - link " Error Log" [ref=f3e19] [cursor=pointer]:
+          - /url: /agents/error-log/
+          - generic [ref=f3e20]: 
+          - text: Error Log
+      - listitem [ref=f3e21]: GPGD Programme
+      - listitem [ref=f3e22]:
+        - link " Recognition Dashboard" [ref=f3e23] [cursor=pointer]:
+          - /url: /agents/recognition-dashboard/
+          - generic [ref=f3e24]: 
+          - text: Recognition Dashboard
+      - listitem [ref=f3e25]:
+        - link " Activity Reports" [ref=f3e26] [cursor=pointer]:
+          - /url: /agents/activity-dashboard/
+          - generic [ref=f3e27]: 
+          - text: Activity Reports
+      - listitem [ref=f3e28]: Manage
+      - listitem [ref=f3e29]:
+        - link " Providers & Rules" [ref=f3e30] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=f3e31]: 
+          - text: Providers & Rules
+      - listitem [ref=f3e32]:
+        - link " Applications" [ref=f3e33] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=f3e34]: 
+          - text: Applications
+      - listitem [ref=f3e35]:
+        - link " Teachers" [ref=f3e36] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=f3e37]: 
+          - text: Teachers
+    - button " Logout (qa_verify_temp)" [ref=f3e40] [cursor=pointer]:
+      - generic [ref=f3e41]: 
+      - text: Logout (qa_verify_temp)
+  - generic [ref=f3e42]:
+    - generic [ref=f3e43]:
+      - generic [ref=f3e44]:
+        - generic [ref=f3e45]: 
+        - heading "GPGD Activity & Training Reporting Dashboard" [level=1] [ref=f3e47]
+        - paragraph [ref=f3e48]: Professional development activities reported monthly by recognized GPGDs
+      - generic [ref=f3e51]:
+        - generic [ref=f3e52]:
+          - generic [ref=f3e53]: Technology Track
+          - combobox [ref=f3e54]:
+            - option "All Tracks" [selected]
+            - option "Microsoft"
+            - option "Google"
+            - option "Apple"
+        - generic [ref=f3e55]:
+          - generic [ref=f3e56]: State
+          - combobox [ref=f3e57]:
+            - option "All States" [selected]
+            - option "Johor"
+            - option "Kedah"
+            - option "Kelantan"
+            - option "Melaka"
+            - option "Negeri Sembilan"
+            - option "Pahang"
+            - option "Perak"
+            - option "Perlis"
+            - option "Pulau Pinang"
+            - option "Sabah"
+            - option "Sarawak"
+            - option "Selangor"
+            - option "Terengganu"
+            - option "W.P. Kuala Lumpur"
+            - option "W.P. Labuan"
+            - option "W.P. Putrajaya"
+        - generic [ref=f3e58]:
+          - generic [ref=f3e59]: District
+          - textbox "Any district" [ref=f3e60]
+        - generic [ref=f3e61]:
+          - generic [ref=f3e62]: Month
+          - textbox [ref=f3e63]
+        - generic [ref=f3e64]:
+          - generic [ref=f3e65]: Search (GPGD / Training Title)
+          - textbox [ref=f3e66]
+        - button " Apply" [ref=f3e68] [cursor=pointer]:
+          - generic [ref=f3e69]: 
+          - text: Apply
+        - link "Clear" [ref=f3e71] [cursor=pointer]:
+          - /url: /agents/activity-dashboard/
+      - generic [ref=f3e72]:
+        - generic [ref=f3e74]:
+          - generic [ref=f3e75]: 
+          - generic [ref=f3e77]: Total Trainings
+          - generic [ref=f3e78]: "0"
+        - generic [ref=f3e80]:
+          - generic [ref=f3e81]: 
+          - generic [ref=f3e83]: Total Hours Delivered
+          - generic [ref=f3e84]: "0"
+        - generic [ref=f3e86]:
+          - generic [ref=f3e87]: 
+          - generic [ref=f3e89]: Teachers Reached
+          - generic [ref=f3e90]: "0"
+        - generic [ref=f3e92]:
+          - generic [ref=f3e93]: 
+          - generic [ref=f3e95]: Students Reached
+          - generic [ref=f3e96]: "0"
+      - paragraph [ref=f3e97]:
+        - generic [ref=f3e98]: 
+        - text: Teachers/Students Reached sums each report's participant count where that audience was selected — a session logged for both audiences counts toward each.
+      - generic [ref=f3e99]:
+        - strong [ref=f3e103]: Monthly Trend
+        - strong [ref=f3e109]: By Technology Track
+        - strong [ref=f3e115]: By State
+      - generic [ref=f3e118]:
+        - generic [ref=f3e120]:
+          - strong [ref=f3e122]:
+            - generic [ref=f3e123]: 
+            - text: Top Active GPGDs
+          - paragraph [ref=f3e125]: No activity reports yet.
+        - generic [ref=f3e127]:
+          - strong [ref=f3e129]:
+            - generic [ref=f3e130]: 
+            - text: Monthly Reminder Emails
+          - generic [ref=f3e131]:
+            - paragraph [ref=f3e132]: Normally sent automatically to every recognized GPGD on the 1st of each month. Use this to trigger it manually (e.g. for testing, or a missed run).
+            - button " Send Monthly Reminders Now" [ref=f3e134] [cursor=pointer]:
+              - generic [ref=f3e135]: 
+              - text: Send Monthly Reminders Now
+      - generic [ref=f3e136]:
+        - heading " Recent Training Activities" [level=5] [ref=f3e138]:
+          - generic [ref=f3e139]: 
+          - text: Recent Training Activities
+        - table [ref=f3e142]:
+          - rowgroup [ref=f3e143]:
+            - row [ref=f3e144]:
+              - columnheader "GPGD" [ref=f3e145]
+              - columnheader "Training" [ref=f3e146]
+              - columnheader "Date / Time" [ref=f3e147]
+              - columnheader "Hours" [ref=f3e148]
+              - columnheader "Audience" [ref=f3e149]
+              - columnheader "Participants" [ref=f3e150]
+              - columnheader "Mode" [ref=f3e151]
+              - columnheader "Evidence" [ref=f3e152]
+          - rowgroup [ref=f3e153]:
+            - row [ref=f3e154]:
+              - cell "No training activities reported yet." [ref=f3e155]
+    - contentinfo [ref=f3e156]:
+      - generic [ref=f3e157]: MyGPGD J360 · Built with Django + Bootstrap

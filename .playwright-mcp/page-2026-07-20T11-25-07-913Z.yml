@@ -1,0 +1,72 @@
+- generic [ref=f4e2]:
+  - complementary [ref=f4e3]:
+    - link " MyGPGD J360 AGENT 1" [ref=f4e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=f4e5]: 
+      - generic [ref=f4e7]:
+        - text: MyGPGD J360
+        - generic [ref=f4e8]: AGENT 1
+    - list [ref=f4e9]:
+      - listitem [ref=f4e10]:
+        - link " Upload" [ref=f4e11] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=f4e12]: 
+          - text: Upload
+      - listitem [ref=f4e13]:
+        - link " Results" [ref=f4e14] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=f4e15]: 
+          - text: Results
+      - listitem [ref=f4e16]:
+        - link " Dashboard" [ref=f4e17] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=f4e18]: 
+          - text: Dashboard
+      - listitem [ref=f4e19]:
+        - link " Error Log" [ref=f4e20] [cursor=pointer]:
+          - /url: /agents/error-log/
+          - generic [ref=f4e21]: 
+          - text: Error Log
+      - listitem [ref=f4e22]: Manage
+      - listitem [ref=f4e23]:
+        - link " Providers & Rules" [ref=f4e24] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=f4e25]: 
+          - text: Providers & Rules
+      - listitem [ref=f4e26]:
+        - link " Applications" [ref=f4e27] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=f4e28]: 
+          - text: Applications
+      - listitem [ref=f4e29]:
+        - link " Teachers" [ref=f4e30] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=f4e31]: 
+          - text: Teachers
+    - button " Logout (admin)" [ref=f4e34] [cursor=pointer]:
+      - generic [ref=f4e35]: 
+      - text: Logout (admin)
+  - generic [ref=f4e36]:
+    - generic [ref=f4e37]:
+      - generic [ref=f4e38]:
+        - generic [ref=f4e39]: 
+        - heading "Error Log" [level=1] [ref=f4e41]
+        - paragraph [ref=f4e42]: Concrete, actionable failures from the system — right now, that means email delivery. Every failed send is logged here with the real reason and what to check next.
+      - generic [ref=f4e45]:
+        - generic [ref=f4e46]: "Filter by category:"
+        - combobox "Filter by category:" [ref=f4e47]:
+          - option "All categories (0)" [selected]
+          - option "Email — Authentication Failed"
+          - option "Email — Connection Timed Out"
+          - option "Email — Could Not Connect"
+          - option "Email — Invalid Recipient Address"
+          - option "Email — Other Error"
+      - generic [ref=f4e48]:
+        - heading " Logged Errors" [level=5] [ref=f4e50]:
+          - generic [ref=f4e51]: 
+          - text: Logged Errors
+        - paragraph [ref=f4e53]:
+          - generic [ref=f4e54]: 
+          - text: No errors logged — everything's running smoothly.
+    - contentinfo [ref=f4e55]:
+      - generic [ref=f4e56]: "MyGPGD J360 · Agent 1: Certification Collector · Built with Django + Bootstrap"

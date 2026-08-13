@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Error Log — MyGPGD J360{% endblock %}
+
+{% block content %}
+<div class="hero-banner" style="background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #f59e0b 100%);">
+    <div class="hero-icon-badge"><i class="bi bi-exclamation-triangle"></i></div>
+    <h1 style="font-size:1.9rem; font-weight:700; margin-bottom:0.4rem;">Error Log</h1>
+    <p style="margin-bottom:0; max-width:620px;">
+        Concrete, actionable failures from the system — right now, that means email delivery.
+        Every failed send is logged here with the real reason and what to check next.
+    </p>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-body" style="padding: 1.25rem 1.5rem;">
+        <form method="get" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+            <label for="category" style="font-weight:600; color:#374151; white-space:nowrap;">Filter by category:</label>
+            <select name="category" id="category" class="form-select" style="max-width:340px;" onchange="this.form.submit()">
+                <option value="">All categories ({{ total_count }})</option>
+                {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if category %}
+                <a href="{% url 'error_log' %}" class="btn btn-outline-secondary btn-sm">Clear filter</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header" style="background-color: #fafafa; border-bottom: 1px solid #ececf3; padding: 1rem 1.25rem;">
+        <h5 style="margin: 0; font-weight: 600;"><i class="bi bi-list-ul" style="color:#dc2626;"></i> Logged Errors {% if category %}<span style="color:#71717a; font-weight:400;">— filtered</span>{% endif %}</h5>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if errors %}
+            <div style="overflow-x:auto;">
+            <table class="table table-hover" style="margin: 0;">
+                <thead style="background-color: #fafafa; border-bottom: 1px solid #ececf3;">
+                    <tr>
+                        <th style="white-space:nowrap;">When</th>
+                        <th style="white-space:nowrap;">Category</th>
+                        <th>Context</th>
+                        <th>Technical Detail</th>
+                        <th>Suggested Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for error in errors %}
+                        <tr>
+                            <td style="white-space:nowrap; color:#71717a; font-size:0.85rem;">{{ error.occurred_at|date:"d M, H:i" }}</td>
+                            <td style="white-space:nowrap;">
+                                <span class="status-badge" style="background-color:#fee2e2; color:#7f1d1d;">
+                                    <i class="bi bi-exclamation-circle-fill"></i> {{ error.get_category_display }}
+                                </span>
+                            </td>
+                            <td style="font-size:0.9rem; white-space:nowrap;">{{ error.context|default:"—" }}</td>
+                            <td style="font-size:0.85rem; color:#374151; max-width:320px;">{{ error.technical_detail }}</td>
+                            <td style="font-size:0.85rem; color:#1e40af; max-width:360px;">{{ error.suggested_action }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% if errors|length >= 200 %}
+                <p style="color: #71717a; padding: 1rem; text-align: center; font-size: 0.875rem;">
+                    Showing the most recent 200 errors.
+                </p>
+            {% endif %}
+        {% else %}
+            <p style="color: #71717a; padding: 2.5rem 1rem; margin: 0; text-align: center;">
+                <i class="bi bi-check-circle" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; color:#86efac;"></i>
+                {% if category %}No errors logged in this category.{% else %}No errors logged — everything's running smoothly.{% endif %}
+            </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

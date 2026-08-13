@@ -1,0 +1,27 @@
+# VCS / editor / OS
+.git
+.gitignore
+.claude
+.playwright-mcp
+
+# Secrets — pass real values via `docker run --env-file` / compose, not the image
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Local dev data — the container gets its own via volumes, don't bake stale data in
+db.sqlite3
+media/
+temp_uploads/
+staticfiles/
+
+# Repo scratch files not needed at runtime
+*.png
+*.xlsx
+Documents/
+sample_data/

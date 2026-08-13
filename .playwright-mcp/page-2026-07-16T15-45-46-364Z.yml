@@ -1,0 +1,62 @@
+- generic [active] [ref=f12e1]:
+  - navigation [ref=f12e2]:
+    - generic [ref=f12e3]:
+      - link "🤖 MyGPGD J360" [ref=f12e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f12e6]:
+        - listitem [ref=f12e7]:
+          - link "Upload" [ref=f12e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f12e9]:
+          - link "Results" [ref=f12e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f12e11]:
+          - link "Dashboard" [ref=f12e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f12e13]:
+          - button "Manage" [ref=f12e14] [cursor=pointer]
+  - generic [ref=f12e15]:
+    - heading "Manage Applications" [level=1] [ref=f12e16]
+    - paragraph [ref=f12e17]: Review submitted applications and update their status — the same as the Application list in Django admin.
+    - generic [ref=f12e19]:
+      - generic [ref=f12e20]: "Filter by status:"
+      - combobox [ref=f12e21]:
+        - option "All statuses" [selected]
+        - option "Application Submitted"
+        - option "Under Review"
+        - option "Shortlisted"
+        - option "Approved"
+        - option "Rejected"
+    - table [ref=f12e24]:
+      - rowgroup [ref=f12e25]:
+        - row [ref=f12e26]:
+          - columnheader "Reference" [ref=f12e27]
+          - columnheader "Name" [ref=f12e28]
+          - columnheader "IC Number" [ref=f12e29]
+          - columnheader "Track" [ref=f12e30]
+          - columnheader "State" [ref=f12e31]
+          - columnheader "Submitted" [ref=f12e32]
+          - columnheader "Status" [ref=f12e33]
+          - columnheader [ref=f12e34]
+      - rowgroup [ref=f12e35]:
+        - row [ref=f12e36]:
+          - cell [ref=f12e37]:
+            - strong [ref=f12e38]: GPGD-0B80BC43
+          - cell "Dr.Jayanthi Jayaraman" [ref=f12e39]
+          - cell "850610-01-6124" [ref=f12e40]
+          - cell "Google" [ref=f12e41]
+          - cell "Johor" [ref=f12e42]
+          - cell "16 Jul 2026, 15:12" [ref=f12e43]
+          - cell [ref=f12e44]:
+            - generic [ref=f12e45]:
+              - combobox [ref=f12e46]:
+                - option "Application Submitted" [selected]
+                - option "Under Review"
+                - option "Shortlisted"
+                - option "Approved"
+                - option "Rejected"
+              - button "Save" [ref=f12e47] [cursor=pointer]
+          - cell [ref=f12e48]:
+            - button "🗑️" [ref=f12e50] [cursor=pointer]
+  - contentinfo [ref=f12e51]:
+    - generic [ref=f12e52]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

@@ -1,0 +1,24 @@
+==========================================
+STEP 1/4 — Ensure infra exists (idempotent)
+==========================================
+==> Project: prestij-jayanthi-gpgdselector | Region: asia-southeast1 | Zone: asia-southeast1-b
+[environment: untagged] Read more to tag: g.co/cloud/project-env-tag.
+Updated property [core/project].
+==> Enabling required APIs (compute, IAP for SSH tunneling)
+Operation "operations/acat.p2-125652283337-012339d1-78f0-4ae5-bf59-842a0e3f3baf" finished successfully.
+==> VPC network: gpgd-vpc
+    already exists, skipping
+==> Subnet: gpgd-subnet (10.10.0.0/24 in asia-southeast1)
+    already exists, skipping
+==> Reserving static external IP: gpgd-app-ip
+    already exists, skipping
+==> Firewall: allow HTTP (80) and HTTPS (443) from anywhere
+    gpgd-allow-http already exists, skipping
+    gpgd-allow-https already exists, skipping
+==> Firewall: allow SSH (22) only from Google's Identity-Aware Proxy range
+    gpgd-allow-ssh-iap already exists, skipping
+==> Creating VM: gpgd-app
+ERROR: (gcloud.compute.instances.create) Could not fetch resource:
+ - Constraint constraints/compute.vmExternalIpAccess violated for project 125652283337. Add instance projects/prestij-jayanthi-gpgdselector/zones/asia-southeast1-b/instances/gpgd-app to the constraint to use external IP with it.
+
+ERROR: setup.sh failed — infra isn't ready, aborting before touching the current deploy

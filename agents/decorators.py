@@ -1,0 +1,23 @@
+from functools import wraps
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
+
+def _require_role(role):
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def wrapped(request, *args, **kwargs):
+            profile = getattr(request.user, 'officerprofile', None)
+            if not profile or profile.role != role:
+                messages.error(request, 'You do not have access to that page.')
+                return redirect('officer_home')
+            return view_func(request, *args, **kwargs)
+        return wrapped
+    return decorator
+
+
+state_officer_required = _require_role('state_officer')
+moe_officer_required = _require_role('moe_officer')

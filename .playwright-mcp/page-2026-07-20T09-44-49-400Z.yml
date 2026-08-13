@@ -1,0 +1,128 @@
+- generic [active] [ref=f4e1]:
+  - banner [ref=f4e2]:
+    - heading "Page not found (404)" [level=1] [ref=f4e3]
+    - table [ref=f4e4]:
+      - rowgroup [ref=f4e5]:
+        - row [ref=f4e6]:
+          - rowheader "Request Method:" [ref=f4e7]
+          - cell "GET" [ref=f4e8]
+        - row [ref=f4e9]:
+          - rowheader "Request URL:" [ref=f4e10]
+          - cell "http://127.0.0.1:8001/agents/dashboard/" [ref=f4e11]
+  - main [ref=f4e12]:
+    - paragraph [ref=f4e13]:
+      - text: Using the URLconf defined in
+      - code [ref=f4e14]: mygpgd.urls
+      - text: ", Django tried these URL patterns, in this order:"
+    - list [ref=f4e15]:
+      - listitem [ref=f4e16]:
+        - code [ref=f4e17]: admin/
+      - listitem [ref=f4e18]:
+        - code [ref=f4e19]: agents/
+        - code [ref=f4e20]: login/ [name='login']
+      - listitem [ref=f4e21]:
+        - code [ref=f4e22]: agents/
+        - code [ref=f4e23]: logout/ [name='logout']
+      - listitem [ref=f4e24]:
+        - code [ref=f4e25]: agents/
+        - code [ref=f4e26]: officer/ [name='officer_home']
+      - listitem [ref=f4e27]:
+        - code [ref=f4e28]: agents/
+        - code [ref=f4e29]: compile-applications/ [name='compile_applications']
+      - listitem [ref=f4e30]:
+        - code [ref=f4e31]: agents/
+        - code [ref=f4e32]: state/review/ [name='state_review']
+      - listitem [ref=f4e33]:
+        - code [ref=f4e34]: agents/
+        - code [ref=f4e35]: moe/review/ [name='moe_review']
+      - listitem [ref=f4e36]:
+        - code [ref=f4e37]: agents/
+        - code [ref=f4e38]: upload-certifications/ [name='upload_certifications']
+      - listitem [ref=f4e39]:
+        - code [ref=f4e40]: agents/
+        - code [ref=f4e41]: agent1-results/ [name='agent1_results']
+      - listitem [ref=f4e42]:
+        - code [ref=f4e43]: agents/
+        - code [ref=f4e44]: agent1-dashboard/ [name='agent1_dashboard']
+      - listitem [ref=f4e45]:
+        - code [ref=f4e46]: agents/
+        - code [ref=f4e47]: download-file/<int:file_id>/<str:file_type>/ [name='download_file']
+      - listitem [ref=f4e48]:
+        - code [ref=f4e49]: agents/
+        - code [ref=f4e50]: process-files/ [name='process_files']
+      - listitem [ref=f4e51]:
+        - code [ref=f4e52]: agents/
+        - code [ref=f4e53]: delete-file/<int:file_id>/ [name='delete_file']
+      - listitem [ref=f4e54]:
+        - code [ref=f4e55]: agents/
+        - code [ref=f4e56]: download-combined/ [name='download_combined']
+      - listitem [ref=f4e57]:
+        - code [ref=f4e58]: agents/
+        - code [ref=f4e59]: send-invitations/ [name='send_invitations']
+      - listitem [ref=f4e60]:
+        - code [ref=f4e61]: agents/
+        - code [ref=f4e62]: update-submission-deadline/ [name='update_submission_deadline']
+      - listitem [ref=f4e63]:
+        - code [ref=f4e64]: agents/
+        - code [ref=f4e65]: apply/<str:token>/ [name='apply']
+      - listitem [ref=f4e66]:
+        - code [ref=f4e67]: agents/
+        - code [ref=f4e68]: apply-success/<str:ref>/ [name='apply_success']
+      - listitem [ref=f4e69]:
+        - code [ref=f4e70]: agents/
+        - code [ref=f4e71]: download-dedup/ [name='download_dedup']
+      - listitem [ref=f4e72]:
+        - code [ref=f4e73]: agents/
+        - code [ref=f4e74]: download-eligible/ [name='download_eligible']
+      - listitem [ref=f4e75]:
+        - code [ref=f4e76]: agents/
+        - code [ref=f4e77]: manage/providers/ [name='manage_providers']
+      - listitem [ref=f4e78]:
+        - code [ref=f4e79]: agents/
+        - code [ref=f4e80]: manage/providers/add/ [name='add_provider']
+      - listitem [ref=f4e81]:
+        - code [ref=f4e82]: agents/
+        - code [ref=f4e83]: manage/providers/<int:provider_id>/edit/ [name='edit_provider']
+      - listitem [ref=f4e84]:
+        - code [ref=f4e85]: agents/
+        - code [ref=f4e86]: manage/providers/<int:provider_id>/delete/ [name='delete_provider']
+      - listitem [ref=f4e87]:
+        - code [ref=f4e88]: agents/
+        - code [ref=f4e89]: manage/providers/<int:provider_id>/rules/add/ [name='add_rule']
+      - listitem [ref=f4e90]:
+        - code [ref=f4e91]: agents/
+        - code [ref=f4e92]: manage/rules/<int:rule_id>/edit/ [name='edit_rule']
+      - listitem [ref=f4e93]:
+        - code [ref=f4e94]: agents/
+        - code [ref=f4e95]: manage/rules/<int:rule_id>/delete/ [name='delete_rule']
+      - listitem [ref=f4e96]:
+        - code [ref=f4e97]: agents/
+        - code [ref=f4e98]: manage/applications/ [name='manage_applications']
+      - listitem [ref=f4e99]:
+        - code [ref=f4e100]: agents/
+        - code [ref=f4e101]: manage/applications/<int:application_id>/status/ [name='update_application_status']
+      - listitem [ref=f4e102]:
+        - code [ref=f4e103]: agents/
+        - code [ref=f4e104]: manage/applications/<int:application_id>/delete/ [name='delete_application']
+      - listitem [ref=f4e105]:
+        - code [ref=f4e106]: agents/
+        - code [ref=f4e107]: manage/teachers/ [name='manage_teachers']
+      - listitem [ref=f4e108]:
+        - code [ref=f4e109]: agents/
+        - code [ref=f4e110]: manage/teachers/<int:teacher_id>/edit/ [name='edit_teacher']
+      - listitem [ref=f4e111]:
+        - code [ref=f4e112]: agents/
+        - code [ref=f4e113]: manage/teachers/<int:teacher_id>/delete/ [name='delete_teacher']
+      - listitem [ref=f4e114]:
+        - code
+    - paragraph [ref=f4e115]:
+      - text: The current path,
+      - code [ref=f4e116]: agents/dashboard/
+      - text: ", didn’t match any of these."
+  - contentinfo [ref=f4e117]:
+    - paragraph [ref=f4e118]:
+      - text: You’re seeing this error because you have
+      - code [ref=f4e119]: DEBUG = True
+      - text: in your Django settings file. Change that to
+      - code [ref=f4e120]: "False"
+      - text: ", and Django will display a standard 404 page."

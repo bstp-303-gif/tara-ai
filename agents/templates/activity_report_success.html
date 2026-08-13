@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Report Submitted — GPGD{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2" style="text-align:center; padding:3rem 0;">
+        <div style="font-size:4rem; margin-bottom:1rem;">✅</div>
+        <h1 style="font-size:1.8rem; font-weight:700; color:#1e3a5f; margin-bottom:0.5rem;">Activity Report Submitted</h1>
+        <p style="color:#6b7280; margin-bottom:2rem;">Thank you, {{ report.gpgd.full_name }} — your training activity has been recorded.</p>
+
+        <div class="card" style="padding:1.5rem; text-align:left; margin-bottom:2rem;">
+            <h5 style="font-weight:600; margin-bottom:1rem;">Report Summary</h5>
+            <table style="width:100%; font-size:0.9rem;">
+                <tr><td style="color:#6b7280; padding:0.3rem 0; width:40%;">Training Title</td><td><strong>{{ report.training_title }}</strong></td></tr>
+                <tr><td style="color:#6b7280; padding:0.3rem 0;">Date</td><td>{{ report.training_date|date:"d M Y" }}, {{ report.start_time|time:"H:i" }}–{{ report.end_time|time:"H:i" }}</td></tr>
+                <tr><td style="color:#6b7280; padding:0.3rem 0;">Hours</td><td>{{ report.hours }}</td></tr>
+                <tr><td style="color:#6b7280; padding:0.3rem 0;">Participants</td><td>{{ report.num_participants }} ({{ report.audience_display }})</td></tr>
+                <tr><td style="color:#6b7280; padding:0.3rem 0;">Mode</td><td>{{ report.get_training_mode_display }}</td></tr>
+            </table>
+        </div>
+
+        <p style="color:#6b7280; font-size:0.875rem;">
+            Need to report another activity this month? Use the same link from your reminder email — it can be submitted more than once.
+        </p>
+        <p style="color:#6b7280; font-size:0.875rem;">
+            For enquiries, contact BSTP at <a href="mailto:sptp@moe.gov.my">sptp@moe.gov.my</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

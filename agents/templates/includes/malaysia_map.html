@@ -1,0 +1,67 @@
+<!--
+Schematic Malaysia state tile-map (a "tile-grid cartogram", not a geographically precise
+border trace). Each state/territory is a fixed-size tile positioned in roughly its real
+compass position (north-to-south, west-to-east; East Malaysia separated by a gap
+representing the South China Sea). Colored and made interactive by the including page's
+JS, which looks up each tile by its data-state attribute against a {state: count} map.
+-->
+<div style="position:relative; display:inline-block;">
+    <svg viewBox="0 0 480 470" width="100%" style="max-width:560px; height:auto;">
+        <g transform="translate(10,10)">
+            <!-- Peninsular Malaysia -->
+            <g>
+                <rect class="mys-tile" data-state="Perlis" x="100" y="0" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="145" y="20" text-anchor="middle">Perlis</text>
+
+                <rect class="mys-tile" data-state="Kelantan" x="200" y="0" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="245" y="20" text-anchor="middle">Kelantan</text>
+
+                <rect class="mys-tile" data-state="Pulau Pinang" x="0" y="64" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="45" y="84" text-anchor="middle">P. Pinang</text>
+
+                <rect class="mys-tile" data-state="Kedah" x="100" y="64" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="145" y="84" text-anchor="middle">Kedah</text>
+
+                <rect class="mys-tile" data-state="Terengganu" x="200" y="64" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="245" y="84" text-anchor="middle">Terengganu</text>
+
+                <rect class="mys-tile" data-state="Perak" x="100" y="128" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="145" y="148" text-anchor="middle">Perak</text>
+
+                <rect class="mys-tile" data-state="Pahang" x="200" y="128" width="90" height="118" rx="8"></rect>
+                <text class="mys-label" x="245" y="180" text-anchor="middle">Pahang</text>
+
+                <rect class="mys-tile" data-state="Selangor" x="100" y="192" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="145" y="212" text-anchor="middle">Selangor</text>
+
+                <rect class="mys-tile" data-state="W.P. Kuala Lumpur" x="100" y="256" width="42" height="28" rx="6"></rect>
+                <text class="mys-label" x="121" y="272" text-anchor="middle" style="font-size:7px;">KL</text>
+
+                <rect class="mys-tile" data-state="W.P. Putrajaya" x="148" y="256" width="42" height="28" rx="6"></rect>
+                <text class="mys-label" x="169" y="272" text-anchor="middle" style="font-size:7px;">Putrajaya</text>
+
+                <rect class="mys-tile" data-state="Negeri Sembilan" x="0" y="320" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="45" y="340" text-anchor="middle">N. Sembilan</text>
+
+                <rect class="mys-tile" data-state="Melaka" x="0" y="384" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="45" y="404" text-anchor="middle">Melaka</text>
+
+                <rect class="mys-tile" data-state="Johor" x="100" y="384" width="90" height="54" rx="8"></rect>
+                <text class="mys-label" x="145" y="404" text-anchor="middle">Johor</text>
+            </g>
+
+            <!-- East Malaysia (Sabah, Sarawak, Labuan) — offset right to represent the South China Sea gap -->
+            <g>
+                <rect class="mys-tile" data-state="Sabah" x="340" y="0" width="110" height="70" rx="8"></rect>
+                <text class="mys-label" x="395" y="30" text-anchor="middle">Sabah</text>
+
+                <rect class="mys-tile" data-state="W.P. Labuan" x="340" y="80" width="45" height="26" rx="6"></rect>
+                <text class="mys-label" x="362" y="96" text-anchor="middle" style="font-size:6.5px;">Labuan</text>
+
+                <rect class="mys-tile" data-state="Sarawak" x="340" y="118" width="110" height="320" rx="8"></rect>
+                <text class="mys-label" x="395" y="270" text-anchor="middle">Sarawak</text>
+            </g>
+        </g>
+    </svg>
+    <div id="mys-tooltip"></div>
+</div>

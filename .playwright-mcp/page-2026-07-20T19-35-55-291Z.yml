@@ -1,0 +1,30 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e7]: 
+    - heading "MyGPGD J360" [level=1] [ref=e9]
+    - paragraph [ref=e10]: Guru Peneraju Generasi Digital — the digital nomination & review platform for the Ministry of Education Malaysia.
+    - list [ref=e11]:
+      - listitem [ref=e12]:
+        - generic [ref=e13]: 
+        - text: Automated eligibility screening across providers
+      - listitem [ref=e14]:
+        - generic [ref=e15]: 
+        - text: State & MoE review workflows in one place
+      - listitem [ref=e16]:
+        - generic [ref=e17]: 
+        - text: Ranked, auditable shortlists per technology track
+  - generic [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]: 
+      - heading "Officer Login" [level=2] [ref=e23]
+      - paragraph [ref=e24]: Sign in to review and approve GPGD candidates.
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: Username
+        - textbox "Username" [active] [ref=e28]: johor_officer
+      - generic [ref=e29]:
+        - generic [ref=e30]: Password
+        - textbox "Password" [ref=e31]: JohorTest123!
+      - button " Log In" [ref=e32] [cursor=pointer]:
+        - generic [ref=e33]: 
+        - text: Log In

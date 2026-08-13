@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Recognition Dashboard — MyGPGD J360{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: end; }
+    .filter-bar .filter-field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-bar label { font-size: 0.72rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.04em; }
+    .chart-card canvas { max-height: 260px; }
+    .mys-tile { cursor: pointer; stroke: #fff; stroke-width: 2; transition: filter 0.15s ease; }
+    .mys-tile:hover { filter: brightness(0.92); }
+    .mys-label { font-size: 9px; font-weight: 600; fill: #1e1b4b; pointer-events: none; }
+    .mys-count { font-size: 11px; font-weight: 700; pointer-events: none; }
+    #mys-tooltip {
+        position: absolute; display: none; background: #1e1b4b; color: #fff; padding: 0.4rem 0.65rem;
+        border-radius: 8px; font-size: 0.8rem; pointer-events: none; z-index: 10; white-space: nowrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-banner" style="text-align:center;">
+    <div class="hero-icon-badge" style="margin-left:auto; margin-right:auto;"><i class="bi bi-award"></i></div>
+    <h1 style="font-size:1.7rem; font-weight:700; margin-bottom:0.35rem;">GPGD Recognition Dashboard</h1>
+    <p style="margin-bottom:0;">Nationwide view of every recognized Guru Peneraju Generasi Digital</p>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-body" style="padding:1.25rem 1.5rem;">
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label>Technology Track</label>
+                <select name="tech_track" class="form-select form-select-sm">
+                    <option value="">All Tracks</option>
+                    {% for track in tech_tracks %}
+                        <option value="{{ track }}" {% if filters.tech_track == track %}selected{% endif %}>{{ track }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>State</label>
+                <select name="state" class="form-select form-select-sm">
+                    <option value="">All States</option>
+                    {% for s in malaysia_states %}
+                        <option value="{{ s }}" {% if filters.state == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>District (PPD)</label>
+                <select name="district" class="form-select form-select-sm">
+                    <option value="">All Districts</option>
+                    {% for d in districts %}
+                        <option value="{{ d }}" {% if filters.district == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>School</label>
+                <select name="school" class="form-select form-select-sm">
+                    <option value="">All Schools</option>
+                    {% for sc in schools %}
+                        <option value="{{ sc }}" {% if filters.school == sc %}selected{% endif %}>{{ sc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>Year Recognized</label>
+                <select name="year" class="form-select form-select-sm">
+                    <option value="">All Years</option>
+                    {% for y in years %}
+                        <option value="{{ y }}" {% if filters.year == y|stringformat:'s' %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if categories %}
+            <div class="filter-field">
+                <label>Award Category</label>
+                <select name="category" class="form-select form-select-sm">
+                    <option value="">All Categories</option>
+                    {% for c in categories %}
+                        <option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="filter-field" style="flex:1; min-width:200px;">
+                <label>Search Teacher (Name / IC)</label>
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="e.g. Nurul Aisyah" value="{{ search }}">
+            </div>
+            <div class="filter-field">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel"></i> Apply</button>
+            </div>
+            <div class="filter-field">
+                <a href="{% url 'recognition_dashboard' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if search %}
+<div class="card" style="margin-bottom:1.5rem; border:1px solid #d4d4f7;">
+    <div class="card-header" style="background:var(--gradient-soft); border-bottom:1px solid #d4d4f7; padding:1rem 1.25rem;">
+        <h5 style="margin:0; font-weight:600;"><i class="bi bi-person-vcard" style="color:#4f46e5;"></i> Teacher Profile</h5>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        {% if search_result %}
+            <div class="row g-3">
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">Full Name</div><div style="font-weight:700; font-size:1.05rem;">{{ search_result.full_name }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">School</div><div style="font-weight:600;">{{ search_result.school_name }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">District</div><div style="font-weight:600;">{{ search_result.district }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">State</div><div style="font-weight:600;">{{ search_result.state }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">Technology Track</div><div style="font-weight:600;">{{ search_result.tech_track }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">Year Recognized</div><div style="font-weight:600;">{{ search_result.recognized_year|default:"—" }}</div></div>
+                <div class="col-md-4"><div style="font-size:0.75rem; color:#71717a; text-transform:uppercase;">Award Status</div><div><span class="status-badge status-valid"><i class="bi bi-check-circle-fill"></i> {{ search_result.award_category|default:"Recognised" }}</span></div></div>
+            </div>
+        {% else %}
+            <p style="color:#71717a; margin:0;"><i class="bi bi-search"></i> No recognized GPGD found matching "{{ search }}".</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- KPI cards -->
+<div class="row g-3" style="margin-bottom:1.5rem;">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#eef2ff; color:#4f46e5;"><i class="bi bi-people-fill"></i></div>
+            <div class="metric-label">Total Recognized</div>
+            <div class="metric-value">{{ total_recognized }}</div>
+        </div>
+    </div>
+    {% for row in by_tech_track %}
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#e0f2fe; color:#0369a1;"><i class="bi bi-cpu"></i></div>
+            <div class="metric-label">{{ row.tech_track }}</div>
+            <div class="metric-value">{{ row.count }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Charts -->
+<div class="row g-3" style="margin-bottom:1.5rem;">
+    <div class="col-md-4">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By Technology Track</strong></div>
+            <div class="card-body"><canvas id="chartTechTrack"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By State</strong></div>
+            <div class="card-body"><canvas id="chartState"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By District (Top 15)</strong></div>
+            <div class="card-body"><canvas id="chartDistrict"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By School (Top 15)</strong></div>
+            <div class="card-body"><canvas id="chartSchool"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- Malaysia tile map -->
+<div class="card" style="margin-bottom:1.5rem; position:relative;">
+    <div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong><i class="bi bi-geo-alt"></i> Distribution Across Malaysia</strong>
+        <span style="font-size:0.78rem; color:#a1a1aa; font-weight:400;"> — schematic state tile-map (click a state to filter); shade intensity = recognized-GPGD count</span>
+    </div>
+    <div class="card-body" style="display:flex; justify-content:center; padding:1.5rem;">
+        {% include 'includes/malaysia_map.html' %}
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-header" style="background:#fafafa; padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center;">
+        <h5 style="margin:0; font-weight:600;"><i class="bi bi-table" style="color:#4f46e5;"></i> Recognized GPGDs</h5>
+        <span style="color:#71717a; font-size:0.85rem;">{{ page_obj.paginator.count }} matching record(s)</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div style="overflow-x:auto;">
+        <table class="table table-hover" style="margin:0;">
+            <thead style="background-color:#fafafa; border-bottom:1px solid #ececf3;">
+                <tr>
+                    <th style="padding:0.85rem 1.1rem;">Name</th>
+                    <th>School</th>
+                    <th>District</th>
+                    <th>State</th>
+                    <th>Track</th>
+                    <th>Year</th>
+                    <th>Award</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in page_obj %}
+                <tr>
+                    <td style="padding:0.85rem 1.1rem;"><strong>{{ application.full_name }}</strong><br><span style="color:#a1a1aa; font-size:0.78rem;">{{ application.reference_number }}</span></td>
+                    <td>{{ application.school_name }}</td>
+                    <td>{{ application.district }}</td>
+                    <td>{{ application.state }}</td>
+                    <td>{{ application.tech_track }}</td>
+                    <td>{{ application.recognized_year|default:"—" }}</td>
+                    <td>{{ application.award_category|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center; color:#71717a; padding:2.5rem;">No recognized GPGDs match these filters yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div style="display:flex; justify-content:center; gap:0.5rem; padding:1.25rem;">
+            {% if page_obj.has_previous %}<a class="btn btn-sm btn-outline-secondary" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">&laquo; Prev</a>{% endif %}
+            <span style="align-self:center; color:#71717a; font-size:0.85rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a class="btn btn-sm btn-outline-secondary" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const byTechTrack = {{ by_tech_track_json|safe }};
+    const byState = {{ by_state_json|safe }};
+    const byDistrict = {{ by_district_json|safe }};
+    const bySchool = {{ by_school_json|safe }};
+    const stateCounts = {{ state_counts_json|safe }};
+
+    const palette = ['#4f46e5', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#818cf8', '#6b7280'];
+
+    new Chart(document.getElementById('chartTechTrack'), {
+        type: 'doughnut',
+        data: {
+            labels: byTechTrack.map(r => r.tech_track),
+            datasets: [{ data: byTechTrack.map(r => r.count), backgroundColor: palette }],
+        },
+        options: { plugins: { legend: { position: 'bottom' } } },
+    });
+
+    new Chart(document.getElementById('chartState'), {
+        type: 'bar',
+        data: {
+            labels: byState.map(r => r.state),
+            datasets: [{ label: 'Recognized GPGDs', data: byState.map(r => r.count), backgroundColor: '#4f46e5' }],
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+
+    new Chart(document.getElementById('chartDistrict'), {
+        type: 'bar',
+        data: {
+            labels: byDistrict.map(r => r.district),
+            datasets: [{ label: 'Recognized GPGDs', data: byDistrict.map(r => r.count), backgroundColor: '#06b6d4' }],
+        },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+
+    new Chart(document.getElementById('chartSchool'), {
+        type: 'bar',
+        data: {
+            labels: bySchool.map(r => r.school_name),
+            datasets: [{ label: 'Recognized GPGDs', data: bySchool.map(r => r.count), backgroundColor: '#f59e0b' }],
+        },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+
+    // --- Malaysia tile map: shade by count, hover tooltip, click-to-filter ---
+    (function () {
+        const counts = Object.values(stateCounts);
+        const maxCount = counts.length ? Math.max(...counts) : 0;
+        const tooltip = document.getElementById('mys-tooltip');
+
+        const svgNS = 'http://www.w3.org/2000/svg';
+
+        document.querySelectorAll('.mys-tile').forEach(tile => {
+            const stateName = tile.getAttribute('data-state');
+            const count = stateCounts[stateName] || 0;
+            const intensity = maxCount ? count / maxCount : 0;
+            tile.style.fill = count === 0 ? '#eceef7' : `rgba(79, 70, 229, ${0.15 + intensity * 0.75})`;
+
+            const box = tile.getBBox();
+            const countText = document.createElementNS(svgNS, 'text');
+            countText.setAttribute('x', box.x + box.width / 2);
+            countText.setAttribute('y', box.y + box.height - 6);
+            countText.setAttribute('text-anchor', 'middle');
+            countText.setAttribute('class', 'mys-count');
+            countText.style.fill = count === 0 ? '#c7c7d1' : '#1e1b4b';
+            countText.textContent = count;
+            tile.parentNode.appendChild(countText);
+
+            tile.addEventListener('mousemove', (e) => {
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.pageX + 14) + 'px';
+                tooltip.style.top = (e.pageY - 10) + 'px';
+                tooltip.textContent = `${stateName}: ${count} recognized GPGD(s)`;
+            });
+            tile.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+            tile.addEventListener('click', () => {
+                const url = new URL(window.location);
+                url.searchParams.set('state', stateName);
+                window.location = url;
+            });
+        });
+    })();
+</script>
+{% endblock %}

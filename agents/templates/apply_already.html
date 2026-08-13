@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Already Applied — GPGD{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3" style="text-align:center; padding:3rem 0;">
+        <div style="font-size:3rem; margin-bottom:1rem;">📋</div>
+        <h2 style="font-weight:700; margin-bottom:1rem;">Application Already Submitted</h2>
+        <p style="color:#6b7280;">You have already submitted an application for the GPGD Programme.</p>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:1rem 2rem; display:inline-block; margin:1rem 0;">
+            <div style="font-size:0.875rem; color:#6b7280;">Reference Number</div>
+            <div style="font-size:1.5rem; font-weight:700; color:#15803d;">{{ application.reference_number }}</div>
+            <div style="font-size:0.875rem; color:#6b7280; margin-top:0.25rem;">Status: {{ application.status }}</div>
+        </div>
+        <p style="color:#6b7280; font-size:0.875rem; margin-top:1rem;">
+            For enquiries, contact BSTP at <a href="mailto:sptp@moe.gov.my">sptp@moe.gov.my</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

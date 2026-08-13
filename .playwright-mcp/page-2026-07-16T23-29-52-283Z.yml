@@ -1,0 +1,33 @@
+- generic [ref=f16e1]:
+  - navigation [ref=f16e2]:
+    - generic [ref=f16e3]:
+      - link "🤖 MyGPGD J360" [ref=f16e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f16e6]:
+        - listitem [ref=f16e7]:
+          - link "Upload" [ref=f16e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f16e9]:
+          - link "Results" [ref=f16e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f16e11]:
+          - link "Dashboard" [ref=f16e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f16e13]:
+          - button "Manage" [ref=f16e14] [cursor=pointer]
+        - listitem [ref=f16e15]:
+          - link "Officer Login" [ref=f16e16] [cursor=pointer]:
+            - /url: /agents/login/
+  - generic [ref=f16e20]:
+    - heading "Officer Login" [level=1] [ref=f16e21]
+    - paragraph [ref=f16e22]: Sign in to review and approve GPGD candidates.
+    - generic [ref=f16e23]:
+      - generic [ref=f16e24]:
+        - generic [ref=f16e25]: Username
+        - textbox "Username" [active] [ref=f16e26]
+      - generic [ref=f16e27]:
+        - generic [ref=f16e28]: Password
+        - textbox "Password" [ref=f16e29]
+      - button "Log In" [ref=f16e30] [cursor=pointer]
+  - contentinfo [ref=f16e31]:
+    - generic [ref=f16e32]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

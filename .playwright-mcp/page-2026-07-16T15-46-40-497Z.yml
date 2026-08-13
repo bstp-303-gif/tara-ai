@@ -1,0 +1,63 @@
+- generic [active] [ref=f17e1]:
+  - navigation [ref=f17e2]:
+    - generic [ref=f17e3]:
+      - link "🤖 MyGPGD J360" [ref=f17e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f17e6]:
+        - listitem [ref=f17e7]:
+          - link "Upload" [ref=f17e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f17e9]:
+          - link "Results" [ref=f17e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f17e11]:
+          - link "Dashboard" [ref=f17e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f17e13]:
+          - button "Manage" [ref=f17e14] [cursor=pointer]
+  - generic [ref=f17e17]:
+    - heading "Edit Teacher — Dr.Jayanthi Jayaraman" [level=1] [ref=f17e18]
+    - generic [ref=f17e20]:
+      - generic [ref=f17e21]:
+        - generic [ref=f17e22]: Full name
+        - textbox [ref=f17e23]: Dr.Jayanthi Jayaraman
+      - generic [ref=f17e24]:
+        - generic [ref=f17e25]: Ic number
+        - textbox [ref=f17e26]: 850610-01-6124
+      - generic [ref=f17e27]:
+        - generic [ref=f17e28]: Email
+        - textbox [ref=f17e29]: jntjei@gmail.com
+      - generic [ref=f17e30]:
+        - generic [ref=f17e31]: School
+        - textbox [ref=f17e32]: BSTP HQ
+      - generic [ref=f17e33]:
+        - generic [ref=f17e34]: State
+        - textbox [ref=f17e35]: Johor
+      - generic [ref=f17e36]:
+        - generic [ref=f17e37]: Provider
+        - textbox "e.g. Google, Microsoft" [ref=f17e38]: Apple, Google
+      - generic [ref=f17e39]:
+        - generic [ref=f17e40]: Certification
+        - textbox [ref=f17e41]: Apple Teacher, Google Certified Educator Level 2 (GCE L2)
+      - generic [ref=f17e42]:
+        - generic [ref=f17e43]: Cert level
+        - textbox [ref=f17e44]: Level 2
+      - generic [ref=f17e45]:
+        - generic [ref=f17e46]: Cert year
+        - spinbutton [ref=f17e47]: "2026"
+      - generic [ref=f17e48]:
+        - generic [ref=f17e49]: Multi certified
+        - checkbox [checked] [ref=f17e50]
+      - generic [ref=f17e51]:
+        - generic [ref=f17e52]: Eligibility status
+        - combobox [ref=f17e53]:
+          - option "Eligible"
+          - option "Not Eligible"
+          - option "Pending"
+          - option "Application Submitted" [selected]
+      - generic [ref=f17e54]:
+        - button "Save Changes" [ref=f17e55] [cursor=pointer]
+        - link "Cancel" [ref=f17e56] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+  - contentinfo [ref=f17e57]:
+    - generic [ref=f17e58]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

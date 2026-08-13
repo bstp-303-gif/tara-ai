@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Dashboard — MyGPGD J360{% endblock %}
+
+{% block content %}
+<div class="hero-banner" style="text-align:center; padding: 2rem 2.5rem 2.25rem;">
+    <img src="{% static 'agents/images/kpm_logo.jpg' %}" alt="Kementerian Pendidikan Malaysia" style="max-height: 72px; width: auto; border-radius: 10px; margin-bottom: 1rem; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
+    <h1 style="margin-bottom: 0.35rem; font-size: 1.9rem; font-weight: 700;">Dashboard</h1>
+    <p style="margin-bottom: 0;">Processing summary and statistics</p>
+</div>
+
+<div class="row g-3" style="margin-bottom: 2rem;">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#eef2ff; color:#4f46e5;"><i class="bi bi-database"></i></div>
+            <div class="metric-label">Total Records</div>
+            <div class="metric-value">{{ total_records }}</div>
+            <div style="font-size: 0.85rem; color: #a1a1aa;">from all providers</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#e0f2fe; color:#0369a1;"><i class="bi bi-people"></i></div>
+            <div class="metric-label">Unique Teachers</div>
+            <div class="metric-value">{{ total_unique }}</div>
+            <div style="font-size: 0.85rem; color: #a1a1aa;">after deduplication</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#fef3c7; color:#b45309;"><i class="bi bi-layers"></i></div>
+            <div class="metric-label">Multi-Certified</div>
+            <div class="metric-value" style="color: #b45309;">{{ multi_certified }}</div>
+            <div style="font-size: 0.85rem; color: #a1a1aa;">in multiple providers</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#d1fae5; color:#065f46;"><i class="bi bi-patch-check"></i></div>
+            <div class="metric-label">Eligible</div>
+            <div class="metric-value" style="color: #059669;">{{ eligible }}</div>
+            <div style="font-size: 0.85rem; color: #a1a1aa;">for nomination</div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header" style="background-color: #fafafa; border-bottom: 1px solid #ececf3; padding: 1rem 1.25rem;">
+        <h5 style="margin: 0; font-weight: 600;"><i class="bi bi-diagram-2" style="color:#4f46e5;"></i> Processing Steps</h5>
+    </div>
+    <div class="card-body" style="padding: 1.5rem 1.5rem 0.5rem;">
+        <div class="step-indicator">
+            <div class="step-item">
+                <div class="step-number complete"><i class="bi bi-check-lg"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Files Validated</div>
+                    <div style="font-size: 0.875rem; color: #71717a;">{{ files.count }} valid file(s) uploaded</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step-item">
+                <div class="step-number complete"><i class="bi bi-check-lg"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Data Normalized</div>
+                    <div style="font-size: 0.875rem; color: #71717a;">Standard column schema applied to all files</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step-item">
+                <div class="step-number complete"><i class="bi bi-check-lg"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Duplicates Merged</div>
+                    <div style="font-size: 0.875rem; color: #71717a;">{{ total_records }} records → {{ total_unique }} unique teachers</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step-item">
+                <div class="step-number complete"><i class="bi bi-check-lg"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Eligibility Applied</div>
+                    <div style="font-size: 0.875rem; color: #71717a;">{{ eligible }} eligible | {{ not_eligible }} not eligible</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header" style="background-color: #fafafa; border-bottom: 1px solid #ececf3; padding: 1rem 1.25rem;">
+        <h5 style="margin: 0; font-weight: 600;"><i class="bi bi-download" style="color:#4f46e5;"></i> Download Results</h5>
+    </div>
+    <div class="card-body" style="padding: 1.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+            <a href="{% url 'download_combined' %}" class="btn btn-outline-primary" style="padding: 1.25rem 1rem;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;"><i class="bi bi-table"></i></div>
+                Combined Normalized Data
+            </a>
+
+            <a href="{% url 'download_dedup' %}" class="btn btn-outline-primary" style="padding: 1.25rem 1rem;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;"><i class="bi bi-arrow-repeat"></i></div>
+                Deduplicated Teacher List
+            </a>
+
+            <a href="{% url 'download_eligible' %}" class="btn btn-outline-success" style="padding: 1.25rem 1rem;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;"><i class="bi bi-patch-check-fill"></i></div>
+                Eligible Candidates (Ranked)
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header" style="background-color: #fafafa; border-bottom: 1px solid #ececf3; padding: 1rem 1.25rem;">
+        <h5 style="margin: 0; font-weight: 600;"><i class="bi bi-list-stars" style="color:#4f46e5;"></i> Eligible Candidates (Preview)</h5>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if eligible %}
+            <div style="overflow-x:auto;">
+            <table class="table table-hover" style="margin: 0;">
+                <thead style="background-color: #fafafa; border-bottom: 1px solid #ececf3;">
+                    <tr>
+                        <th>Name</th>
+                        <th>IC Number</th>
+                        <th>Email</th>
+                        <th>School</th>
+                        <th>State</th>
+                        <th>Providers</th>
+                        <th>Certification</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for teacher in teachers %}
+                        {% if teacher.eligibility_status == 'Eligible' %}
+                            <tr>
+                                <td><strong>{{ teacher.full_name }}</strong></td>
+                                <td>{{ teacher.ic_number }}</td>
+                                <td><a href="mailto:{{ teacher.email }}">{{ teacher.email }}</a></td>
+                                <td>{{ teacher.school }}</td>
+                                <td>{{ teacher.state }}</td>
+                                <td>
+                                    {% if teacher.multi_certified %}
+                                        <span style="background-color: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.8rem; font-weight:600;">{{ teacher.provider }}</span>
+                                    {% else %}
+                                        {{ teacher.provider }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for cert in teacher.certification|split_certs %}
+                                        <span style="display: inline-block; background-color: #eef2ff; color: #4338ca; border: 1px solid #d4d4f7; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; margin: 0.1rem 0.1rem 0.1rem 0;">{{ cert }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td><span class="status-badge status-valid"><i class="bi bi-check-circle-fill"></i> Eligible</span></td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            <p style="color: #71717a; padding: 1rem; text-align: center; font-size: 0.875rem;">
+                Showing all {{ eligible }} eligible candidates. Download the full list for offline use.
+            </p>
+        {% else %}
+            <p style="color: #71717a; padding: 2.5rem 1rem; margin: 0; text-align: center;"><i class="bi bi-inbox" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; color:#c7c7d1;"></i>No eligible candidates yet. Upload and process files to see results.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem; margin-bottom: 2rem; border: 1px solid #e9d5ff;">
+    <div class="card-header" style="background:#faf5ff; border-bottom:1px solid #e9d5ff; padding:1rem 1.25rem;">
+        <h5 style="margin:0; font-weight:600; color:#6d28d9;"><i class="bi bi-robot"></i> Agent Activity</h5>
+    </div>
+    <div class="card-body" style="padding:0;">
+        {% if agent_logs %}
+            <div style="overflow-x:auto;">
+            <table class="table table-hover" style="margin: 0;">
+                <thead style="background-color: #fafafa; border-bottom: 1px solid #ececf3;">
+                    <tr>
+                        <th style="white-space:nowrap;">When</th>
+                        <th style="white-space:nowrap;">Trigger</th>
+                        <th>Summary</th>
+                        <th style="white-space:nowrap;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in agent_logs %}
+                        <tr>
+                            <td style="white-space:nowrap; color:#71717a; font-size:0.85rem;">{{ log.triggered_at|date:"d M, H:i" }}</td>
+                            <td style="font-size:0.9rem;">{{ log.trigger_reason }}</td>
+                            <td style="font-size:0.9rem; color:#374151;">
+                                {% if log.status == 'success' %}
+                                    {{ log.summary|default:"No action needed." }}
+                                {% else %}
+                                    {{ log.error_message }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.status == 'success' %}
+                                    <span class="status-badge status-valid"><i class="bi bi-check-circle-fill"></i> Success</span>
+                                {% else %}
+                                    <span class="status-badge status-invalid"><i class="bi bi-exclamation-triangle-fill"></i> Error</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <p style="color: #71717a; padding: 1.5rem 1rem; margin: 0; text-align: center;">
+                No agent runs yet — the pipeline agent kicks in automatically after the next upload or application submission.
+                {% if not ANTHROPIC_API_KEY_SET %}<br>Add <code>ANTHROPIC_API_KEY</code> to your <code>.env</code> to enable it.{% endif %}
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem; border: 1px solid #bfdbfe;">
+    <div class="card-header" style="background:#eff6ff; border-bottom:1px solid #bfdbfe; padding:1rem 1.25rem;">
+        <h5 style="margin:0; font-weight:600; color:#1e40af;"><i class="bi bi-envelope-paper"></i> Send Invitations to Eligible Candidates (manual override)</h5>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        <p style="color:#374151; margin-bottom:1rem;">
+            Send a personalised invitation email to all <strong>{{ eligible }}</strong> eligible teacher(s) who have not yet applied.
+            Each email contains a secure, unique application link valid for 30 days.
+        </p>
+        <form method="post" action="{% url 'update_submission_deadline' %}" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid #e5e7eb;">
+            {% csrf_token %}
+            <label for="submission_deadline" style="font-weight:600; color:#1e40af; white-space:nowrap;">Submission deadline:</label>
+            <input type="date" id="submission_deadline" name="submission_deadline" value="{{ submission_deadline|date:'Y-m-d' }}" style="padding:0.4rem 0.6rem; border:1.5px solid #bfdbfe; border-radius:7px;">
+            <button type="submit" class="btn btn-outline-secondary" style="white-space:nowrap;">Save</button>
+            <span style="color:#71717a; font-size:0.875rem;">Used as the closing date in every invitation email below.</span>
+        </form>
+        <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Send invitation emails to all eligible teachers who have not yet applied?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" {% if not eligible %}disabled{% endif %}>
+                <i class="bi bi-send"></i> Send Invitation Emails
+            </button>
+            <span style="color:#71717a; font-size:0.875rem; margin-left:1rem;">
+                Emails print to the server console in development mode.
+            </span>
+        </form>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem; border: 1px solid #a7f3d0;">
+    <div class="card-header" style="background:#ecfdf5; border-bottom:1px solid #a7f3d0; padding:1rem 1.25rem;">
+        <h5 style="margin:0; font-weight:600; color:#065f46;"><i class="bi bi-list-check"></i> Compile &amp; Rank Applications (manual override)</h5>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        <p style="color:#374151; margin-bottom:1rem;">
+            Scores and ranks every submitted application within its state, and auto-flags the top-ranked
+            candidates needed to fill each district's minimum quota (2 per technology; 5 per technology for
+            Perlis, WP Putrajaya, and WP Labuan, which have no districts). Once compiled, each state's ranked
+            shortlist becomes available to that State Officer for approval.
+        </p>
+        {% if not deadline_passed %}
+            <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
+                <i class="bi bi-exclamation-triangle"></i> The submission deadline{% if submission_deadline %} ({{ submission_deadline|date:"d M Y" }}){% endif %} hasn't passed yet. You can still compile now if needed.
+            </p>
+        {% endif %}
+        <form method="post" action="{% url 'compile_applications' %}" onsubmit="return confirm('Compile and rank {{ pending_compile_count }} pending application(s)? This moves them into the State Officer review queue.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" {% if not pending_compile_count %}disabled{% endif %}>
+                <i class="bi bi-list-check"></i> Compile &amp; Rank ({{ pending_compile_count }} pending)
+            </button>
+        </form>
+    </div>
+</div>
+
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{% url 'upload_certifications' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Upload New Files</a>
+</div>
+{% endblock %}

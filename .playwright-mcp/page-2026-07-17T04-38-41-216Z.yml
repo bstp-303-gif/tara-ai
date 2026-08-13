@@ -1,0 +1,32 @@
+- generic [active] [ref=f31e1]:
+  - navigation [ref=f31e2]:
+    - generic [ref=f31e3]:
+      - link "🤖 MyGPGD J360" [ref=f31e4] [cursor=pointer]:
+        - /url: /agents/state/review/
+      - list [ref=f31e6]:
+        - listitem [ref=f31e7]:
+          - link "State Review (Johor)" [ref=f31e8] [cursor=pointer]:
+            - /url: /agents/state/review/
+        - listitem [ref=f31e9]:
+          - button "Logout (johor_officer)" [ref=f31e11] [cursor=pointer]
+  - generic [ref=f31e12]:
+    - heading "State Review — Johor" [level=1] [ref=f31e13]
+    - paragraph [ref=f31e14]:
+      - text: Ranked, compiled shortlist for Johor. Candidates marked
+      - strong [ref=f31e15]: Recommended
+      - text: are the top-ranked applicants needed to fill the minimum GPGD quota per district/technology. Approve or decline each candidate below.
+    - table [ref=f31e18]:
+      - rowgroup [ref=f31e19]:
+        - row [ref=f31e20]:
+          - columnheader "Rank" [ref=f31e21]
+          - columnheader "Name" [ref=f31e22]
+          - columnheader "District" [ref=f31e23]
+          - columnheader "Tech Track" [ref=f31e24]
+          - columnheader "Score" [ref=f31e25]
+          - columnheader "Recommended" [ref=f31e26]
+          - columnheader "Decision" [ref=f31e27]
+      - rowgroup [ref=f31e28]:
+        - row [ref=f31e29]:
+          - cell "No compiled applications for Johor yet." [ref=f31e30]
+  - contentinfo [ref=f31e31]:
+    - generic [ref=f31e32]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

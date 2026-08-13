@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Manage Providers — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Manage Providers &amp; Certification Rules</h1>
+<p style="color:#6b7280; margin-bottom:2rem;">Add certification providers (Google, Microsoft, Apple, etc.) and the keyword rules used to decide eligibility — the same data Django admin edited, now in-system.</p>
+
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-header" style="background:#eff6ff; padding:1rem;">
+        <h5 style="margin:0; font-weight:600; color:#1e40af;">➕ Add Provider</h5>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        <form method="post" action="{% url 'add_provider' %}" style="display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap;">
+            {% csrf_token %}
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Internal name</label>
+                {{ add_provider_form.name }}
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Display name</label>
+                {{ add_provider_form.display_name }}
+            </div>
+            <div style="padding-top:1.6rem;">
+                <label style="font-size:0.9rem;">{{ add_provider_form.is_active }} Active</label>
+            </div>
+            <div style="padding-top:1.4rem;">
+                <button type="submit" class="btn btn-primary">Add Provider</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for entry in providers_with_forms %}
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header" style="background:#f9fafb; padding:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h5 style="margin:0; font-weight:600;">{{ entry.provider.display_name }}
+            {% if not entry.provider.is_active %}<span class="status-badge status-invalid" style="margin-left:0.5rem;">Inactive</span>{% endif %}
+        </h5>
+        <form method="post" action="{% url 'delete_provider' entry.provider.id %}" onsubmit="return confirm('Delete provider {{ entry.provider.display_name }} and all its rules?');" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm" style="color:#ef4444; border:1px solid #fecaca; background:#fef2f2;">🗑️ Delete Provider</button>
+        </form>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        <form method="post" action="{% url 'edit_provider' entry.provider.id %}" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #e5e7eb;">
+            {% csrf_token %}
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Internal name</label>
+                {{ entry.edit_form.name }}
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Display name</label>
+                {{ entry.edit_form.display_name }}
+            </div>
+            <div>
+                <label style="font-size:0.9rem;">{{ entry.edit_form.is_active }} Active</label>
+            </div>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Save Provider</button>
+        </form>
+
+        <h6 style="font-weight:600; color:#374151; margin-bottom:1rem;">Certification Rules</h6>
+        {% if entry.rules %}
+        <div style="display:flex; gap:0.5rem; padding:0.5rem 0.75rem; font-size:0.8rem; color:#6b7280; font-weight:600; border-bottom:1px solid #e5e7eb;">
+            <div style="flex:1.4;">Canonical Name</div>
+            <div style="flex:1.4;">Required Keywords</div>
+            <div style="flex:1.2;">Exclude Keywords</div>
+            <div style="width:70px; text-align:center;">Eligible</div>
+            <div style="width:70px;">Priority</div>
+            <div style="width:110px;"></div>
+        </div>
+        {% for rule, rule_form in entry.rules %}
+        <div style="display:flex; gap:0.5rem; align-items:center; padding:0.6rem 0.75rem; border-bottom:1px solid #f3f4f6;">
+            <form method="post" action="{% url 'edit_rule' rule.id %}" style="display:flex; gap:0.5rem; align-items:center; flex:1; margin:0;">
+                {% csrf_token %}
+                <div style="flex:1.4;">{{ rule_form.canonical_name }}</div>
+                <div style="flex:1.4;">{{ rule_form.required_keywords_text }}</div>
+                <div style="flex:1.2;">{{ rule_form.exclude_keywords_text }}</div>
+                <div style="width:70px; text-align:center;">{{ rule_form.is_eligible }}</div>
+                <div style="width:70px;">{{ rule_form.priority }}</div>
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
+            </form>
+            <form method="post" action="{% url 'delete_rule' rule.id %}" onsubmit="return confirm('Delete rule {{ rule.canonical_name }}?');" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm" style="color:#ef4444;">🗑️</button>
+            </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p style="color:#6b7280; font-size:0.9rem;">No certification rules yet for this provider.</p>
+        {% endif %}
+
+        <form method="post" action="{% url 'add_rule' entry.provider.id %}" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; padding-top:0.5rem;">
+            {% csrf_token %}
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Canonical Name</label>
+                {{ entry.add_rule_form.canonical_name }}
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Required Keywords</label>
+                {{ entry.add_rule_form.required_keywords_text }}
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Exclude Keywords</label>
+                {{ entry.add_rule_form.exclude_keywords_text }}
+            </div>
+            <div>
+                <label style="font-size:0.9rem;">{{ entry.add_rule_form.is_eligible }} Eligible</label>
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#6b7280;">Priority</label>
+                {{ entry.add_rule_form.priority }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">➕ Add Rule</button>
+        </form>
+    </div>
+</div>
+{% empty %}
+<p style="color:#6b7280; padding:2rem; text-align:center;">No providers yet. Add one above to get started.</p>
+{% endfor %}
+{% endblock %}

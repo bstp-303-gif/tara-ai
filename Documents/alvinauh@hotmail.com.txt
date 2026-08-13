@@ -1,0 +1,15 @@
+alvinauh@hotmail.com
+pigraider@gmail.com
+Step 1 — Compile & Rank (as yourself/MoE uploader)
+Go to http://localhost:8000/agents/agent1-dashboard/, scroll to the green "📋 Compile & Rank Applications" card, and click Compile & Rank (1 pending). This scores the application, ranks it within Johor, and flags it Recommended if it fills a district/tech quota. Status moves to Compiled.
+
+Step 2 — Reset the Johor officer's password yourself (since I can't safely hand you that one — it got lost earlier)
+Go to http://localhost:8000/admin/, log in as admin, click Users → johor_officer → the "this form" link next to the password field → set a new password. Django admin doesn't need the old one, so this is entirely under your control.
+
+Step 3 — Act as the State Officer
+Log out of admin, go to http://localhost:8000/agents/login/, sign in as johor_officer with the password you just set. You'll land on State Review — Johor, see the candidate with her rank/score, and click Approve (add a remark if you like). Status moves to State Approved.
+
+Step 4 — Act as the MoE Officer (you)
+Log out, log back in as moe_officer / testpass123 (worth changing this password the same way, via admin, once you're done testing). You'll land on MoE Review, see the same candidate now — with her state, rank, and score — and can Approve (this fires the real Letter of Recognition email to her address) or Decline.
+
+Try it in that order and let me know what you see at each step — happy to adjust anything (page layout, what info is shown, wording) once you've clicked through it.

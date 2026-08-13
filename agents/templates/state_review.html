@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}State Review — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">State Review — {{ state }}</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Ranked, compiled shortlist for {{ state }}. Candidates marked <strong>Recommended</strong> are the top-ranked
+    applicants needed to fill the minimum GPGD quota per district/technology. Approve or decline each candidate below.
+</p>
+
+{% if shortfalls %}
+<div class="alert alert-warning" style="margin-bottom:1.5rem;">
+    <strong>⚠️ Quota shortfall(s) in {{ state }}:</strong>
+    <ul style="margin:0.5rem 0 0 1.25rem;">
+        {% for s in shortfalls %}
+            <li>{% if s.district %}{{ s.district }}{% else %}{{ state }} (no districts){% endif %} — {{ s.tech_track }}: only {{ s.have }} of {{ s.need }} required applicant(s) available.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="table table-hover" style="margin:0;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem;">Rank</th>
+                    <th>Name</th>
+                    <th>District</th>
+                    <th>Tech Track</th>
+                    <th>Score</th>
+                    <th>Recommended</th>
+                    <th style="min-width:260px;">Decision</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td style="padding:1rem;"><strong>#{{ application.rank_in_state }}</strong></td>
+                    <td>
+                        {{ application.full_name }}<br>
+                        <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }}</span>
+                    </td>
+                    <td>{{ application.district }}</td>
+                    <td>{{ application.tech_track }}</td>
+                    <td>{{ application.score }}</td>
+                    <td>
+                        {% if application.is_recommended %}
+                            <span class="status-badge" style="background-color:#d1fae5; color:#065f46;">✅ Recommended</span>
+                        {% else %}
+                            <span style="color:#9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="margin-bottom:0.4rem;">
+                            <span class="status-badge {% if application.status == 'State Approved' %}status-valid{% elif application.status == 'State Declined' %}status-invalid{% endif %}" style="{% if application.status == 'Compiled' %}background-color:#e5e7eb; color:#374151;{% endif %}">
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+                        <form method="post" style="display:flex; gap:0.4rem; align-items:center;"
+                              onsubmit="return confirmStateDecision(event, {{ application.is_recommended|yesno:'true,false' }}, '{{ application.full_name|escapejs }}', '{{ state|escapejs }}');">
+                            {% csrf_token %}
+                            <input type="hidden" name="application_id" value="{{ application.id }}">
+                            <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Remarks (optional)" value="{{ application.state_remarks }}" style="max-width:160px;">
+                            <button type="submit" name="decision" value="approve" class="btn btn-sm btn-outline-success">Approve</button>
+                            <button type="submit" name="decision" value="decline" class="btn btn-sm btn-outline-danger">Decline</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center; color:#6b7280; padding:2rem;">No compiled applications for {{ state }} yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function confirmStateDecision(event, isRecommended, name, state) {
+    var submitter = event.submitter;
+    if (isRecommended && submitter && submitter.value === 'decline') {
+        return confirm(name + ' is Recommended to fill ' + state + "'s minimum quota. Decline anyway?");
+    }
+    return true;
+}
+</script>
+{% endblock %}

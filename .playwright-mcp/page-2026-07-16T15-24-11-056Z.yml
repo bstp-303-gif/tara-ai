@@ -1,0 +1,285 @@
+- generic [active] [ref=f3e1]:
+  - navigation [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "🤖 MyGPGD J360" [ref=f3e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f3e6]:
+        - listitem [ref=f3e7]:
+          - link "Upload" [ref=f3e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f3e9]:
+          - link "Results" [ref=f3e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f3e11]:
+          - link "Dashboard" [ref=f3e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+  - generic [ref=f3e13]:
+    - alert [ref=f3e14]:
+      - text: ✅ Submission deadline set to 15 September 2026.
+      - button [ref=f3e15] [cursor=pointer]
+    - heading "Agent 1 Dashboard" [level=1] [ref=f3e16]
+    - paragraph [ref=f3e17]: Processing summary and statistics
+    - generic [ref=f3e18]:
+      - generic [ref=f3e20]:
+        - generic [ref=f3e21]: Total Records
+        - generic [ref=f3e22]: "29"
+        - generic [ref=f3e23]: from all providers
+      - generic [ref=f3e25]:
+        - generic [ref=f3e26]: Unique Teachers
+        - generic [ref=f3e27]: "24"
+        - generic [ref=f3e28]: after deduplication
+      - generic [ref=f3e30]:
+        - generic [ref=f3e31]: Multi-Certified
+        - generic [ref=f3e32]: "4"
+        - generic [ref=f3e33]: in multiple providers
+      - generic [ref=f3e35]:
+        - generic [ref=f3e36]: Eligible
+        - generic [ref=f3e37]: "14"
+        - generic [ref=f3e38]: for nomination
+    - generic [ref=f3e39]:
+      - heading "Processing Steps" [level=5] [ref=f3e41]
+      - generic [ref=f3e42]:
+        - generic [ref=f3e44]:
+          - generic [ref=f3e45]: ✓
+          - generic [ref=f3e46]:
+            - generic [ref=f3e47]: Files Validated
+            - generic [ref=f3e48]: 3 valid file(s) uploaded
+        - generic [ref=f3e50]:
+          - generic [ref=f3e51]: ✓
+          - generic [ref=f3e52]:
+            - generic [ref=f3e53]: Data Normalized
+            - generic [ref=f3e54]: Standard column schema applied to all files
+        - generic [ref=f3e56]:
+          - generic [ref=f3e57]: ✓
+          - generic [ref=f3e58]:
+            - generic [ref=f3e59]: Duplicates Merged
+            - generic [ref=f3e60]: 29 records → 24 unique teachers
+        - generic [ref=f3e62]:
+          - generic [ref=f3e63]: ✓
+          - generic [ref=f3e64]:
+            - generic [ref=f3e65]: Eligibility Applied
+            - generic [ref=f3e66]: 14 eligible | 9 not eligible
+    - generic [ref=f3e67]:
+      - heading "Download Results" [level=5] [ref=f3e69]
+      - generic [ref=f3e71]:
+        - link "📊 Combined Normalized Data" [ref=f3e72] [cursor=pointer]:
+          - /url: /agents/download-combined/
+          - generic [ref=f3e73]: 📊
+          - text: Combined Normalized Data
+        - link "🔄 Deduplicated Teacher List" [ref=f3e74] [cursor=pointer]:
+          - /url: /agents/download-dedup/
+          - generic [ref=f3e75]: 🔄
+          - text: Deduplicated Teacher List
+        - link "✅ Eligible Candidates (Ranked)" [ref=f3e76] [cursor=pointer]:
+          - /url: /agents/download-eligible/
+          - generic [ref=f3e77]: ✅
+          - text: Eligible Candidates (Ranked)
+    - generic [ref=f3e78]:
+      - heading "Eligible Candidates (Preview)" [level=5] [ref=f3e80]
+      - generic [ref=f3e81]:
+        - table [ref=f3e82]:
+          - rowgroup [ref=f3e83]:
+            - row [ref=f3e84]:
+              - columnheader "Name" [ref=f3e85]
+              - columnheader "IC Number" [ref=f3e86]
+              - columnheader "Email" [ref=f3e87]
+              - columnheader "School" [ref=f3e88]
+              - columnheader "State" [ref=f3e89]
+              - columnheader "Providers" [ref=f3e90]
+              - columnheader "Certification" [ref=f3e91]
+              - columnheader "Status" [ref=f3e92]
+          - rowgroup [ref=f3e93]:
+            - row [ref=f3e94]:
+              - cell [ref=f3e95]:
+                - strong [ref=f3e96]: Zuraidah Binti Othman
+              - cell "840901-04-3301" [ref=f3e97]
+              - cell [ref=f3e98]:
+                - link "zuraidah.othman@moe.edu.my" [ref=f3e99] [cursor=pointer]:
+                  - /url: mailto:zuraidah.othman@moe.edu.my
+              - cell "SK Kubang Pasu" [ref=f3e100]
+              - cell "Kedah" [ref=f3e101]
+              - cell "Microsoft" [ref=f3e102]
+              - cell "Microsoft Innovative Educator Expert (MIEE)" [ref=f3e103]
+              - cell "✅ Eligible" [ref=f3e105]
+            - row [ref=f3e107]:
+              - cell [ref=f3e108]:
+                - strong [ref=f3e109]: Siti Rohani Binti Yusoff
+              - cell "790623-07-4401" [ref=f3e110]
+              - cell [ref=f3e111]:
+                - link "sitirohani.yusoff@moe.edu.my" [ref=f3e112] [cursor=pointer]:
+                  - /url: mailto:sitirohani.yusoff@moe.edu.my
+              - cell "SMK Kota Bharu" [ref=f3e113]
+              - cell "Kelantan" [ref=f3e114]
+              - cell "Google, Microsoft" [ref=f3e115]
+              - cell "Google Certified Educator Level 2 (GCE L2) Microsoft Innovative Educator Expert (MIEE)" [ref=f3e116]:
+                - generic [ref=f3e117]: Google Certified Educator Level 2 (GCE L2)
+                - generic [ref=f3e118]: Microsoft Innovative Educator Expert (MIEE)
+              - cell "✅ Eligible" [ref=f3e119]
+            - row [ref=f3e121]:
+              - cell [ref=f3e122]:
+                - strong [ref=f3e123]: Anitha A/P Krishnan
+              - cell "880519-07-4438" [ref=f3e124]
+              - cell [ref=f3e125]:
+                - link "anitha.krishnan@moe.edu.my" [ref=f3e126] [cursor=pointer]:
+                  - /url: mailto:anitha.krishnan@moe.edu.my
+              - cell "SJKT Sungai Siput" [ref=f3e127]
+              - cell "Perak" [ref=f3e128]
+              - cell "Microsoft" [ref=f3e129]
+              - cell "Microsoft Innovative Educator Expert (MIEE)" [ref=f3e130]
+              - cell "✅ Eligible" [ref=f3e132]
+            - row [ref=f3e134]:
+              - cell [ref=f3e135]:
+                - strong [ref=f3e136]: Tan Bee Geok
+              - cell "830428-07-4412" [ref=f3e137]
+              - cell [ref=f3e138]:
+                - link "tanbeegek@moe.edu.my" [ref=f3e139] [cursor=pointer]:
+                  - /url: mailto:tanbeegek@moe.edu.my
+              - cell "SMJK Union" [ref=f3e140]
+              - cell "Perak" [ref=f3e141]
+              - cell "Apple" [ref=f3e142]
+              - cell "Apple Teacher" [ref=f3e143]
+              - cell "✅ Eligible" [ref=f3e145]
+            - row [ref=f3e147]:
+              - cell [ref=f3e148]:
+                - strong [ref=f3e149]: Noraini Binti Abdul Latif
+              - cell "811019-04-5509" [ref=f3e150]
+              - cell [ref=f3e151]:
+                - link "noraini.latif@moe.edu.my" [ref=f3e152] [cursor=pointer]:
+                  - /url: mailto:noraini.latif@moe.edu.my
+              - cell "SK Padang Besar" [ref=f3e153]
+              - cell "Perlis" [ref=f3e154]
+              - cell "Google" [ref=f3e155]
+              - cell "Google Certified Educator Level 2 (GCE L2)" [ref=f3e156]
+              - cell "✅ Eligible" [ref=f3e158]
+            - row [ref=f3e160]:
+              - cell [ref=f3e161]:
+                - strong [ref=f3e162]: Mohd Hafiz Bin Saad
+              - cell "910330-02-1123" [ref=f3e163]
+              - cell [ref=f3e164]:
+                - link "mohamadhafiz.saad@moe.edu.my" [ref=f3e165] [cursor=pointer]:
+                  - /url: mailto:mohamadhafiz.saad@moe.edu.my
+              - cell "SMK Butterworth" [ref=f3e166]
+              - cell "Pulau Pinang" [ref=f3e167]
+              - cell "Google" [ref=f3e168]
+              - cell "Google Certified Educator Level 2 (GCE L2)" [ref=f3e169]
+              - cell "✅ Eligible" [ref=f3e171]
+            - row [ref=f3e173]:
+              - cell [ref=f3e174]:
+                - strong [ref=f3e175]: Norashikin Binti Ramli
+              - cell "910903-08-5501" [ref=f3e176]
+              - cell [ref=f3e177]:
+                - link "norashikin.ramli@moe.edu.my" [ref=f3e178] [cursor=pointer]:
+                  - /url: mailto:norashikin.ramli@moe.edu.my
+              - cell "SK Tambunan" [ref=f3e179]
+              - cell "Sabah" [ref=f3e180]
+              - cell "Apple" [ref=f3e181]
+              - cell "Apple Teacher" [ref=f3e182]
+              - cell "✅ Eligible" [ref=f3e184]
+            - row [ref=f3e186]:
+              - cell [ref=f3e187]:
+                - strong [ref=f3e188]: Hasliza Binti Hamdan
+              - cell "870615-03-2201" [ref=f3e189]
+              - cell [ref=f3e190]:
+                - link "hasliza.hamdan@moe.edu.my" [ref=f3e191] [cursor=pointer]:
+                  - /url: mailto:hasliza.hamdan@moe.edu.my
+              - cell "SMK Kota Samarahan" [ref=f3e192]
+              - cell "Sarawak" [ref=f3e193]
+              - cell "Apple" [ref=f3e194]
+              - cell "Apple Teacher" [ref=f3e195]
+              - cell "✅ Eligible" [ref=f3e197]
+            - row [ref=f3e199]:
+              - cell [ref=f3e200]:
+                - strong [ref=f3e201]: Mohamad Izzat Bin Ismail
+              - cell "940102-14-7712" [ref=f3e202]
+              - cell [ref=f3e203]:
+                - link "izzat.ismail@moe.edu.my" [ref=f3e204] [cursor=pointer]:
+                  - /url: mailto:izzat.ismail@moe.edu.my
+              - cell "SMK Dato Harun" [ref=f3e205]
+              - cell "Selangor" [ref=f3e206]
+              - cell "Microsoft" [ref=f3e207]
+              - cell "Microsoft Innovative Educator Expert (MIEE)" [ref=f3e208]
+              - cell "✅ Eligible" [ref=f3e210]
+            - row [ref=f3e212]:
+              - cell [ref=f3e213]:
+                - strong [ref=f3e214]: Nurul Ain Binti Hassan
+              - cell "870312-14-5621" [ref=f3e215]
+              - cell [ref=f3e216]:
+                - link "nurulain.hassan@moe.edu.my" [ref=f3e217] [cursor=pointer]:
+                  - /url: mailto:nurulain.hassan@moe.edu.my
+              - cell "SMK Taman Melati" [ref=f3e218]
+              - cell "Selangor" [ref=f3e219]
+              - cell "Google, Microsoft" [ref=f3e220]
+              - cell "Google Certified Educator Level 2 (GCE L2) Microsoft Innovative Educator Expert (MIEE)" [ref=f3e221]:
+                - generic [ref=f3e222]: Google Certified Educator Level 2 (GCE L2)
+                - generic [ref=f3e223]: Microsoft Innovative Educator Expert (MIEE)
+              - cell "✅ Eligible" [ref=f3e224]
+            - row [ref=f3e226]:
+              - cell [ref=f3e227]:
+                - strong [ref=f3e228]: Zarina Binti Mahmud
+              - cell "830714-03-2201" [ref=f3e229]
+              - cell [ref=f3e230]:
+                - link "zarina.mahmud@moe.edu.my" [ref=f3e231] [cursor=pointer]:
+                  - /url: mailto:zarina.mahmud@moe.edu.my
+              - cell "SK Seri Kembangan" [ref=f3e232]
+              - cell "Selangor" [ref=f3e233]
+              - cell "Google" [ref=f3e234]
+              - cell "Google Certified Educator Level 2 (GCE L2)" [ref=f3e235]
+              - cell "✅ Eligible" [ref=f3e237]
+            - row [ref=f3e239]:
+              - cell [ref=f3e240]:
+                - strong [ref=f3e241]: Noor Hidayah Binti Karim
+              - cell "930712-09-4421" [ref=f3e242]
+              - cell [ref=f3e243]:
+                - link "noorhidayah.karim@moe.edu.my" [ref=f3e244] [cursor=pointer]:
+                  - /url: mailto:noorhidayah.karim@moe.edu.my
+              - cell "SMKA Sheikh Abdul Malek" [ref=f3e245]
+              - cell "Terengganu" [ref=f3e246]
+              - cell "Microsoft" [ref=f3e247]
+              - cell "Microsoft Innovative Educator Expert (MIEE)" [ref=f3e248]
+              - cell "✅ Eligible" [ref=f3e250]
+            - row [ref=f3e252]:
+              - cell [ref=f3e253]:
+                - strong [ref=f3e254]: Vinod Kumar A/L Suresh
+              - cell "900312-07-3312" [ref=f3e255]
+              - cell [ref=f3e256]:
+                - link "vinodkumar.suresh@moe.edu.my" [ref=f3e257] [cursor=pointer]:
+                  - /url: mailto:vinodkumar.suresh@moe.edu.my
+              - cell "SK Kepong Baru" [ref=f3e258]
+              - cell "W.P. Kuala Lumpur" [ref=f3e259]
+              - cell "Apple" [ref=f3e260]
+              - cell "Apple Teacher" [ref=f3e261]
+              - cell "✅ Eligible" [ref=f3e263]
+            - row [ref=f3e265]:
+              - cell [ref=f3e266]:
+                - strong [ref=f3e267]: Farah Nadia Binti Aziz
+              - cell "920115-05-6678" [ref=f3e268]
+              - cell [ref=f3e269]:
+                - link "farahnadia.aziz@moe.edu.my" [ref=f3e270] [cursor=pointer]:
+                  - /url: mailto:farahnadia.aziz@moe.edu.my
+              - cell "SMK Putrajaya 1" [ref=f3e271]
+              - cell "W.P. Putrajaya" [ref=f3e272]
+              - cell "Apple, Google" [ref=f3e273]
+              - cell "Apple Teacher Google Certified Educator Level 2 (GCE L2)" [ref=f3e274]:
+                - generic [ref=f3e275]: Apple Teacher
+                - generic [ref=f3e276]: Google Certified Educator Level 2 (GCE L2)
+              - cell "✅ Eligible" [ref=f3e277]
+        - paragraph [ref=f3e279]: Showing all 14 eligible candidates. Download the full list for offline use.
+    - generic [ref=f3e280]:
+      - heading "📧 Send Invitations to Eligible Candidates" [level=5] [ref=f3e282]
+      - generic [ref=f3e283]:
+        - paragraph [ref=f3e284]:
+          - text: Send a personalised invitation email to all
+          - strong [ref=f3e285]: "14"
+          - text: eligible teacher(s) who have not yet applied. Each email contains a secure, unique application link valid for 30 days.
+        - generic [ref=f3e286]:
+          - generic [ref=f3e287]: "Submission deadline:"
+          - textbox "Submission deadline:" [ref=f3e288]: 2026-09-15
+          - button "Save" [ref=f3e289] [cursor=pointer]
+          - generic [ref=f3e290]: Used as the closing date in every invitation email below.
+        - generic [ref=f3e291]:
+          - button "📨 Send Invitation Emails" [ref=f3e292] [cursor=pointer]
+          - text: Emails print to the server console in development mode.
+    - link "← Upload New Files" [ref=f3e294] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+  - contentinfo [ref=f3e295]:
+    - generic [ref=f3e296]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

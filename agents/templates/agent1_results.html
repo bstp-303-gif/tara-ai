@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Validation Results — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem; font-size: 2rem; font-weight: 700;">Validation Results</h1>
+
+<div class="row g-4">
+    {% for file in google_files %}
+        <div class="col-md-4">
+            <div class="card" style="height: 100%;">
+                <div class="card-header" style="background-color: #dbeafe; border-bottom: 1px solid #93c5fd; padding: 1rem;">
+                    <h5 style="margin: 0; color: #1e40af; font-weight: 600;">🔵 Google</h5>
+                </div>
+                <div class="card-body">
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">{{ file.uploaded_at|date:"M d, H:i" }}</p>
+                    <div style="margin: 1rem 0;">
+                        <span class="status-badge {% if file.validation_status == 'valid' %}status-valid{% else %}status-invalid{% endif %}">
+                            {% if file.validation_status == 'valid' %}✅ Valid{% else %}❌ Invalid{% endif %}
+                        </span>
+                    </div>
+                    <p style="margin: 1rem 0; font-size: 0.875rem;">
+                        <strong>Records:</strong> {{ file.record_count }}<br>
+                        <strong>Missing Values:</strong> {{ file.missing_values_map|length }}
+                    </p>
+                    {% if file.error_message %}
+                        <div style="background-color: #fee2e2; color: #7f1d1d; padding: 0.75rem; border-radius: 4px; font-size: 0.875rem; margin: 1rem 0;">
+                            {{ file.error_message }}
+                        </div>
+                    {% endif %}
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{% url 'download_file' file.id 'original' %}" class="btn btn-sm btn-outline-secondary">Download Original</a>
+                        {% if file.validation_status == 'valid' and file.missing_values_map %}
+                            <a href="{% url 'download_file' file.id 'highlighted' %}" class="btn btn-sm btn-outline-danger">Download Highlighted</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for file in microsoft_files %}
+        <div class="col-md-4">
+            <div class="card" style="height: 100%;">
+                <div class="card-header" style="background-color: #dbeafe; border-bottom: 1px solid #93c5fd; padding: 1rem;">
+                    <h5 style="margin: 0; color: #1e40af; font-weight: 600;">🟢 Microsoft</h5>
+                </div>
+                <div class="card-body">
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">{{ file.uploaded_at|date:"M d, H:i" }}</p>
+                    <div style="margin: 1rem 0;">
+                        <span class="status-badge {% if file.validation_status == 'valid' %}status-valid{% else %}status-invalid{% endif %}">
+                            {% if file.validation_status == 'valid' %}✅ Valid{% else %}❌ Invalid{% endif %}
+                        </span>
+                    </div>
+                    <p style="margin: 1rem 0; font-size: 0.875rem;">
+                        <strong>Records:</strong> {{ file.record_count }}<br>
+                        <strong>Missing Values:</strong> {{ file.missing_values_map|length }}
+                    </p>
+                    {% if file.error_message %}
+                        <div style="background-color: #fee2e2; color: #7f1d1d; padding: 0.75rem; border-radius: 4px; font-size: 0.875rem; margin: 1rem 0;">
+                            {{ file.error_message }}
+                        </div>
+                    {% endif %}
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{% url 'download_file' file.id 'original' %}" class="btn btn-sm btn-outline-secondary">Download Original</a>
+                        {% if file.validation_status == 'valid' and file.missing_values_map %}
+                            <a href="{% url 'download_file' file.id 'highlighted' %}" class="btn btn-sm btn-outline-danger">Download Highlighted</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for file in apple_files %}
+        <div class="col-md-4">
+            <div class="card" style="height: 100%;">
+                <div class="card-header" style="background-color: #dbeafe; border-bottom: 1px solid #93c5fd; padding: 1rem;">
+                    <h5 style="margin: 0; color: #1e40af; font-weight: 600;">🍎 Apple</h5>
+                </div>
+                <div class="card-body">
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">{{ file.uploaded_at|date:"M d, H:i" }}</p>
+                    <div style="margin: 1rem 0;">
+                        <span class="status-badge {% if file.validation_status == 'valid' %}status-valid{% else %}status-invalid{% endif %}">
+                            {% if file.validation_status == 'valid' %}✅ Valid{% else %}❌ Invalid{% endif %}
+                        </span>
+                    </div>
+                    <p style="margin: 1rem 0; font-size: 0.875rem;">
+                        <strong>Records:</strong> {{ file.record_count }}<br>
+                        <strong>Missing Values:</strong> {{ file.missing_values_map|length }}
+                    </p>
+                    {% if file.error_message %}
+                        <div style="background-color: #fee2e2; color: #7f1d1d; padding: 0.75rem; border-radius: 4px; font-size: 0.875rem; margin: 1rem 0;">
+                            {{ file.error_message }}
+                        </div>
+                    {% endif %}
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{% url 'download_file' file.id 'original' %}" class="btn btn-sm btn-outline-secondary">Download Original</a>
+                        {% if file.validation_status == 'valid' and file.missing_values_map %}
+                            <a href="{% url 'download_file' file.id 'highlighted' %}" class="btn btn-sm btn-outline-danger">Download Highlighted</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if not google_files and not microsoft_files and not apple_files %}
+        <div class="col-12">
+            <p style="color: #6b7280; text-align: center; padding: 3rem 0;">No files uploaded yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% if ready_to_process %}
+    <div style="margin-top: 3rem; text-align: center;">
+        <form method="post" action="{% url 'process_files' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-lg" style="padding: 0.75rem 2rem;">
+                ✨ Process All Files (Normalize & Deduplicate)
+            </button>
+        </form>
+    </div>
+{% else %}
+    <div style="margin-top: 3rem; text-align: center; color: #6b7280;">
+        Upload at least one valid provider file to enable processing.
+    </div>
+{% endif %}
+
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{% url 'upload_certifications' %}" class="btn btn-outline-secondary">← Upload New Files</a>
+</div>
+{% endblock %}

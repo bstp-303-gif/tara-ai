@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Activity Reports — MyGPGD J360{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: end; }
+    .filter-bar .filter-field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-bar label { font-size: 0.72rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.04em; }
+    .chart-card canvas { max-height: 260px; }
+    .evidence-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #ececf3; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-banner" style="text-align:center;">
+    <div class="hero-icon-badge" style="margin-left:auto; margin-right:auto;"><i class="bi bi-calendar2-check"></i></div>
+    <h1 style="font-size:1.7rem; font-weight:700; margin-bottom:0.35rem;">GPGD Activity &amp; Training Reporting Dashboard</h1>
+    <p style="margin-bottom:0;">Professional development activities reported monthly by recognized GPGDs</p>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-body" style="padding:1.25rem 1.5rem;">
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label>Technology Track</label>
+                <select name="tech_track" class="form-select form-select-sm">
+                    <option value="">All Tracks</option>
+                    {% for track in tech_tracks %}
+                        <option value="{{ track }}" {% if filters.tech_track == track %}selected{% endif %}>{{ track }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>State</label>
+                <select name="state" class="form-select form-select-sm">
+                    <option value="">All States</option>
+                    {% for s in malaysia_states %}
+                        <option value="{{ s }}" {% if filters.state == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>District</label>
+                <input type="text" name="district" class="form-control form-control-sm" placeholder="Any district" value="{{ filters.district }}">
+            </div>
+            <div class="filter-field">
+                <label>Month</label>
+                <input type="month" name="month" class="form-control form-control-sm" value="{{ filters.month }}">
+            </div>
+            <div class="filter-field" style="flex:1; min-width:200px;">
+                <label>Search (GPGD / Training Title)</label>
+                <input type="text" name="q" class="form-control form-control-sm" value="{{ filters.q }}">
+            </div>
+            <div class="filter-field">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel"></i> Apply</button>
+            </div>
+            <div class="filter-field">
+                <a href="{% url 'activity_dashboard' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- KPI cards -->
+<div class="row g-3" style="margin-bottom:1.5rem;">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#eef2ff; color:#4f46e5;"><i class="bi bi-mortarboard-fill"></i></div>
+            <div class="metric-label">Total Trainings</div>
+            <div class="metric-value">{{ total_trainings }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#e0f2fe; color:#0369a1;"><i class="bi bi-clock-history"></i></div>
+            <div class="metric-label">Total Hours Delivered</div>
+            <div class="metric-value">{{ total_hours }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#fef3c7; color:#b45309;"><i class="bi bi-person-workspace"></i></div>
+            <div class="metric-label">Teachers Reached</div>
+            <div class="metric-value" style="color:#b45309;">{{ total_teachers_trained }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-icon" style="background:#d1fae5; color:#065f46;"><i class="bi bi-backpack2-fill"></i></div>
+            <div class="metric-label">Students Reached</div>
+            <div class="metric-value" style="color:#059669;">{{ total_students_trained }}</div>
+        </div>
+    </div>
+</div>
+<p style="color:#a1a1aa; font-size:0.8rem; margin-top:-1rem; margin-bottom:1.5rem;">
+    <i class="bi bi-info-circle"></i> Teachers/Students Reached sums each report's participant count where that audience was selected — a session logged for both audiences counts toward each.
+</p>
+
+<!-- Charts -->
+<div class="row g-3" style="margin-bottom:1.5rem;">
+    <div class="col-md-8">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>Monthly Trend</strong></div>
+            <div class="card-body"><canvas id="chartMonthly"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By Technology Track</strong></div>
+            <div class="card-body"><canvas id="chartTechTrack"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card chart-card"><div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong>By State</strong></div>
+            <div class="card-body"><canvas id="chartState"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3" style="margin-bottom:1.5rem;">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header" style="background:#fafafa; padding:0.85rem 1.1rem;"><strong><i class="bi bi-trophy"></i> Top Active GPGDs</strong></div>
+            <div class="card-body" style="padding:0;">
+                {% if top_active %}
+                <table class="table table-hover" style="margin:0;">
+                    <tbody>
+                        {% for app in top_active %}
+                        <tr>
+                            <td style="padding:0.75rem 1.1rem;">
+                                <strong>{{ app.full_name }}</strong><br>
+                                <span style="color:#a1a1aa; font-size:0.78rem;">{{ app.school_name }} — {{ app.state }}</span>
+                            </td>
+                            <td style="text-align:right; padding:0.75rem 1.1rem;"><span class="status-badge status-valid">{{ app.report_count }} report{{ app.report_count|pluralize }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align:center; color:#71717a; padding:2rem;">No activity reports yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card" style="border:1px solid #bfdbfe;">
+            <div class="card-header" style="background:#eff6ff; border-bottom:1px solid #bfdbfe; padding:0.85rem 1.1rem;">
+                <strong style="color:#1e40af;"><i class="bi bi-envelope-paper"></i> Monthly Reminder Emails</strong>
+            </div>
+            <div class="card-body" style="padding:1.25rem;">
+                <p style="color:#374151; font-size:0.9rem; margin-bottom:1rem;">
+                    Normally sent automatically to every recognized GPGD on the 1st of each month.
+                    Use this to trigger it manually (e.g. for testing, or a missed run).
+                </p>
+                <form method="post" action="{% url 'send_monthly_reminders' %}" onsubmit="return confirm('Send this month\'s activity report reminder to every recognized GPGD who hasn\'t already been reminded?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Send Monthly Reminders Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent activities -->
+<div class="card">
+    <div class="card-header" style="background:#fafafa; padding:1rem 1.25rem;">
+        <h5 style="margin:0; font-weight:600;"><i class="bi bi-list-ul" style="color:#4f46e5;"></i> Recent Training Activities</h5>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div style="overflow-x:auto;">
+        <table class="table table-hover" style="margin:0;">
+            <thead style="background-color:#fafafa; border-bottom:1px solid #ececf3;">
+                <tr>
+                    <th style="padding:0.85rem 1.1rem;">GPGD</th>
+                    <th>Training</th>
+                    <th>Date / Time</th>
+                    <th>Hours</th>
+                    <th>Audience</th>
+                    <th>Participants</th>
+                    <th>Mode</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in recent_activities %}
+                <tr>
+                    <td style="padding:0.85rem 1.1rem;">
+                        <strong>{{ report.gpgd.full_name }}</strong><br>
+                        <span style="color:#a1a1aa; font-size:0.78rem;">{{ report.gpgd.tech_track }} — {{ report.gpgd.school_name }}, {{ report.gpgd.district }}, {{ report.gpgd.state }}</span>
+                    </td>
+                    <td>
+                        {{ report.training_title }}
+                        {% if report.description %}<br><span style="color:#71717a; font-size:0.8rem;">{{ report.description|truncatewords:20 }}</span>{% endif %}
+                    </td>
+                    <td style="white-space:nowrap;">{{ report.training_date|date:"d M Y" }}<br><span style="color:#a1a1aa; font-size:0.78rem;">{{ report.start_time|time:"H:i" }}–{{ report.end_time|time:"H:i" }}</span></td>
+                    <td>{{ report.hours }}</td>
+                    <td>{{ report.audience_display }}</td>
+                    <td>{{ report.num_participants }}</td>
+                    <td>{{ report.get_training_mode_display }}</td>
+                    <td>
+                        <div style="display:flex; gap:0.3rem;">
+                            <a href="{{ report.photo_1.url }}" target="_blank"><img class="evidence-thumb" src="{{ report.photo_1.url }}" alt="Evidence 1"></a>
+                            <a href="{{ report.photo_2.url }}" target="_blank"><img class="evidence-thumb" src="{{ report.photo_2.url }}" alt="Evidence 2"></a>
+                        </div>
+                        {% if report.supporting_document %}<a href="{{ report.supporting_document.url }}" target="_blank" style="font-size:0.78rem;"><i class="bi bi-paperclip"></i> Document</a>{% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center; color:#71717a; padding:2.5rem;">No training activities reported yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const byMonth = {{ by_month_json|safe }};
+    const byState = {{ by_state_json|safe }};
+    const byTechTrack = {{ by_tech_track_json|safe }};
+    const palette = ['#4f46e5', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#818cf8', '#6b7280'];
+
+    new Chart(document.getElementById('chartMonthly'), {
+        type: 'line',
+        data: {
+            labels: byMonth.map(r => r.month),
+            datasets: [{ label: 'Trainings', data: byMonth.map(r => r.count), borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.15)', fill: true, tension: 0.3 }],
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+
+    new Chart(document.getElementById('chartTechTrack'), {
+        type: 'doughnut',
+        data: {
+            labels: byTechTrack.map(r => r.gpgd__tech_track),
+            datasets: [{ data: byTechTrack.map(r => r.count), backgroundColor: palette }],
+        },
+        options: { plugins: { legend: { position: 'bottom' } } },
+    });
+
+    new Chart(document.getElementById('chartState'), {
+        type: 'bar',
+        data: {
+            labels: byState.map(r => r.gpgd__state),
+            datasets: [{ label: 'Trainings', data: byState.map(r => r.count), backgroundColor: '#06b6d4' }],
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+</script>
+{% endblock %}

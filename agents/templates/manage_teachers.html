@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Manage Teachers — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Manage Teachers</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">Manually correct or remove teacher records — the same as the Teacher list in Django admin.</p>
+
+<div style="margin-bottom:1.5rem;">
+    <form method="get" style="display:flex; gap:0.75rem;">
+        <input type="text" name="q" class="form-control" style="max-width:320px;" placeholder="Search by name..." value="{{ search }}">
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="table table-hover" style="margin:0;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem;">Name</th>
+                    <th>IC Number</th>
+                    <th>Email</th>
+                    <th>School</th>
+                    <th>State</th>
+                    <th>Provider(s)</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teachers %}
+                <tr>
+                    <td style="padding:1rem;"><strong>{{ teacher.full_name }}</strong></td>
+                    <td>{{ teacher.ic_number }}</td>
+                    <td>{{ teacher.email }}</td>
+                    <td>{{ teacher.school }}</td>
+                    <td>{{ teacher.state }}</td>
+                    <td>{{ teacher.provider }}</td>
+                    <td><span class="status-badge {% if teacher.eligibility_status == 'Eligible' %}status-valid{% else %}status-invalid{% endif %}">{{ teacher.eligibility_status }}</span></td>
+                    <td style="white-space:nowrap;">
+                        <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-sm btn-outline-secondary">✏️ Edit</a>
+                        <form method="post" action="{% url 'delete_teacher' teacher.id %}" onsubmit="return confirm('Delete teacher {{ teacher.full_name }}? This cannot be undone.');" style="display:inline; margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm" style="color:#ef4444;">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center; color:#6b7280; padding:2rem;">No teachers found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

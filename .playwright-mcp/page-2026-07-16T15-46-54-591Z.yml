@@ -1,0 +1,352 @@
+- generic [active] [ref=f18e1]:
+  - navigation [ref=f18e2]:
+    - generic [ref=f18e3]:
+      - link "🤖 MyGPGD J360" [ref=f18e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f18e6]:
+        - listitem [ref=f18e7]:
+          - link "Upload" [ref=f18e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f18e9]:
+          - link "Results" [ref=f18e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f18e11]:
+          - link "Dashboard" [ref=f18e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f18e13]:
+          - button "Manage" [ref=f18e14] [cursor=pointer]
+  - generic [ref=f18e15]:
+    - alert [ref=f18e16]:
+      - text: ✅ Dr.Jayanthi Jayaraman updated.
+      - button [ref=f18e17] [cursor=pointer]
+    - heading "Manage Teachers" [level=1] [ref=f18e18]
+    - paragraph [ref=f18e19]: Manually correct or remove teacher records — the same as the Teacher list in Django admin.
+    - generic [ref=f18e21]:
+      - textbox "Search by name..." [ref=f18e22]
+      - button "Search" [ref=f18e23] [cursor=pointer]
+    - table [ref=f18e26]:
+      - rowgroup [ref=f18e27]:
+        - row [ref=f18e28]:
+          - columnheader "Name" [ref=f18e29]
+          - columnheader "IC Number" [ref=f18e30]
+          - columnheader "Email" [ref=f18e31]
+          - columnheader "School" [ref=f18e32]
+          - columnheader "State" [ref=f18e33]
+          - columnheader "Provider(s)" [ref=f18e34]
+          - columnheader "Status" [ref=f18e35]
+          - columnheader [ref=f18e36]
+      - rowgroup [ref=f18e37]:
+        - row [ref=f18e38]:
+          - cell [ref=f18e39]:
+            - strong [ref=f18e40]: Dr.Jayanthi Jayaraman
+          - cell "850610-01-6124" [ref=f18e41]
+          - cell "jntjei@gmail.com" [ref=f18e42]
+          - cell "BSTP" [ref=f18e43]
+          - cell "Johor" [ref=f18e44]
+          - cell "Apple, Google" [ref=f18e45]
+          - cell "Application Submitted" [ref=f18e46]
+          - cell [ref=f18e48]:
+            - link "✏️ Edit" [ref=f18e49] [cursor=pointer]:
+              - /url: /agents/manage/teachers/195/edit/
+            - button "🗑️" [ref=f18e51] [cursor=pointer]
+        - row [ref=f18e52]:
+          - cell [ref=f18e53]:
+            - strong [ref=f18e54]: Zuraidah Binti Othman
+          - cell "840901-04-3301" [ref=f18e55]
+          - cell "zuraidah.othman@moe.edu.my" [ref=f18e56]
+          - cell "SK Kubang Pasu" [ref=f18e57]
+          - cell "Kedah" [ref=f18e58]
+          - cell "Microsoft" [ref=f18e59]
+          - cell "Eligible" [ref=f18e60]
+          - cell [ref=f18e62]:
+            - link "✏️ Edit" [ref=f18e63] [cursor=pointer]:
+              - /url: /agents/manage/teachers/201/edit/
+            - button "🗑️" [ref=f18e65] [cursor=pointer]
+        - row [ref=f18e66]:
+          - cell [ref=f18e67]:
+            - strong [ref=f18e68]: Siti Rohani Binti Yusoff
+          - cell "790623-07-4401" [ref=f18e69]
+          - cell "sitirohani.yusoff@moe.edu.my" [ref=f18e70]
+          - cell "SMK Kota Bharu" [ref=f18e71]
+          - cell "Kelantan" [ref=f18e72]
+          - cell "Google, Microsoft" [ref=f18e73]
+          - cell "Eligible" [ref=f18e74]
+          - cell [ref=f18e76]:
+            - link "✏️ Edit" [ref=f18e77] [cursor=pointer]:
+              - /url: /agents/manage/teachers/186/edit/
+            - button "🗑️" [ref=f18e79] [cursor=pointer]
+        - row [ref=f18e80]:
+          - cell [ref=f18e81]:
+            - strong [ref=f18e82]: Mohd Shahril Bin Azmi
+          - cell "970214-11-6634" [ref=f18e83]
+          - cell "shahril.azmi@moe.edu.my" [ref=f18e84]
+          - cell "SMK Tuanku Jaafar" [ref=f18e85]
+          - cell "Negeri Sembilan" [ref=f18e86]
+          - cell "Microsoft" [ref=f18e87]
+          - cell "Not Eligible" [ref=f18e88]
+          - cell [ref=f18e90]:
+            - link "✏️ Edit" [ref=f18e91] [cursor=pointer]:
+              - /url: /agents/manage/teachers/202/edit/
+            - button "🗑️" [ref=f18e93] [cursor=pointer]
+        - row [ref=f18e94]:
+          - cell [ref=f18e95]:
+            - strong [ref=f18e96]: Anitha A/P Krishnan
+          - cell "880519-07-4438" [ref=f18e97]
+          - cell "anitha.krishnan@moe.edu.my" [ref=f18e98]
+          - cell "SJKT Sungai Siput" [ref=f18e99]
+          - cell "Perak" [ref=f18e100]
+          - cell "Microsoft" [ref=f18e101]
+          - cell "Eligible" [ref=f18e102]
+          - cell [ref=f18e104]:
+            - link "✏️ Edit" [ref=f18e105] [cursor=pointer]:
+              - /url: /agents/manage/teachers/203/edit/
+            - button "🗑️" [ref=f18e107] [cursor=pointer]
+        - row [ref=f18e108]:
+          - cell [ref=f18e109]:
+            - strong [ref=f18e110]: Chong Wei Liang
+          - cell "890206-07-4412" [ref=f18e111]
+          - cell "chongweiliang@moe.edu.my" [ref=f18e112]
+          - cell "SMJK Sam Tet" [ref=f18e113]
+          - cell "Perak" [ref=f18e114]
+          - cell "Google" [ref=f18e115]
+          - cell "Not Eligible" [ref=f18e116]
+          - cell [ref=f18e118]:
+            - link "✏️ Edit" [ref=f18e119] [cursor=pointer]:
+              - /url: /agents/manage/teachers/194/edit/
+            - button "🗑️" [ref=f18e121] [cursor=pointer]
+        - row [ref=f18e122]:
+          - cell [ref=f18e123]:
+            - strong [ref=f18e124]: Kalai Selvi A/P Rajan
+          - cell "880827-10-5523" [ref=f18e125]
+          - cell "kalaiselvi.rajan@moe.edu.my" [ref=f18e126]
+          - cell "SK Ladang Bikam" [ref=f18e127]
+          - cell "Perak" [ref=f18e128]
+          - cell "Microsoft" [ref=f18e129]
+          - cell "Not Eligible" [ref=f18e130]
+          - cell [ref=f18e132]:
+            - link "✏️ Edit" [ref=f18e133] [cursor=pointer]:
+              - /url: /agents/manage/teachers/197/edit/
+            - button "🗑️" [ref=f18e135] [cursor=pointer]
+        - row [ref=f18e136]:
+          - cell [ref=f18e137]:
+            - strong [ref=f18e138]: Lee Pei Shan
+          - cell "910428-07-2219" [ref=f18e139]
+          - cell "leepeishan@moe.edu.my" [ref=f18e140]
+          - cell "SMJK Yuk Choy" [ref=f18e141]
+          - cell "Perak" [ref=f18e142]
+          - cell "Microsoft" [ref=f18e143]
+          - cell "Not Eligible" [ref=f18e144]
+          - cell [ref=f18e146]:
+            - link "✏️ Edit" [ref=f18e147] [cursor=pointer]:
+              - /url: /agents/manage/teachers/200/edit/
+            - button "🗑️" [ref=f18e149] [cursor=pointer]
+        - row [ref=f18e150]:
+          - cell [ref=f18e151]:
+            - strong [ref=f18e152]: Tan Bee Geok
+          - cell "830428-07-4412" [ref=f18e153]
+          - cell "tanbeegek@moe.edu.my" [ref=f18e154]
+          - cell "SMJK Union" [ref=f18e155]
+          - cell "Perak" [ref=f18e156]
+          - cell "Apple" [ref=f18e157]
+          - cell "Eligible" [ref=f18e158]
+          - cell [ref=f18e160]:
+            - link "✏️ Edit" [ref=f18e161] [cursor=pointer]:
+              - /url: /agents/manage/teachers/206/edit/
+            - button "🗑️" [ref=f18e163] [cursor=pointer]
+        - row [ref=f18e164]:
+          - cell [ref=f18e165]:
+            - strong [ref=f18e166]: Noraini Binti Abdul Latif
+          - cell "811019-04-5509" [ref=f18e167]
+          - cell "noraini.latif@moe.edu.my" [ref=f18e168]
+          - cell "SK Padang Besar" [ref=f18e169]
+          - cell "Perlis" [ref=f18e170]
+          - cell "Google" [ref=f18e171]
+          - cell "Eligible" [ref=f18e172]
+          - cell [ref=f18e174]:
+            - link "✏️ Edit" [ref=f18e175] [cursor=pointer]:
+              - /url: /agents/manage/teachers/193/edit/
+            - button "🗑️" [ref=f18e177] [cursor=pointer]
+        - row [ref=f18e178]:
+          - cell [ref=f18e179]:
+            - strong [ref=f18e180]: Lim Swee Lan
+          - cell "861204-07-3398" [ref=f18e181]
+          - cell "limsweelan@moe.edu.my" [ref=f18e182]
+          - cell "SMJK Chung Ling" [ref=f18e183]
+          - cell "Pulau Pinang" [ref=f18e184]
+          - cell "Google" [ref=f18e185]
+          - cell "Not Eligible" [ref=f18e186]
+          - cell [ref=f18e188]:
+            - link "✏️ Edit" [ref=f18e189] [cursor=pointer]:
+              - /url: /agents/manage/teachers/190/edit/
+            - button "🗑️" [ref=f18e191] [cursor=pointer]
+        - row [ref=f18e192]:
+          - cell [ref=f18e193]:
+            - strong [ref=f18e194]: Mohd Hafiz Bin Saad
+          - cell "910330-02-1123" [ref=f18e195]
+          - cell "mohamadhafiz.saad@moe.edu.my" [ref=f18e196]
+          - cell "SMK Butterworth" [ref=f18e197]
+          - cell "Pulau Pinang" [ref=f18e198]
+          - cell "Google" [ref=f18e199]
+          - cell "Eligible" [ref=f18e200]
+          - cell [ref=f18e202]:
+            - link "✏️ Edit" [ref=f18e203] [cursor=pointer]:
+              - /url: /agents/manage/teachers/189/edit/
+            - button "🗑️" [ref=f18e205] [cursor=pointer]
+        - row [ref=f18e206]:
+          - cell [ref=f18e207]:
+            - strong [ref=f18e208]: Norashikin Binti Ramli
+          - cell "910903-08-5501" [ref=f18e209]
+          - cell "norashikin.ramli@moe.edu.my" [ref=f18e210]
+          - cell "SK Tambunan" [ref=f18e211]
+          - cell "Sabah" [ref=f18e212]
+          - cell "Apple" [ref=f18e213]
+          - cell "Eligible" [ref=f18e214]
+          - cell [ref=f18e216]:
+            - link "✏️ Edit" [ref=f18e217] [cursor=pointer]:
+              - /url: /agents/manage/teachers/207/edit/
+            - button "🗑️" [ref=f18e219] [cursor=pointer]
+        - row [ref=f18e220]:
+          - cell [ref=f18e221]:
+            - strong [ref=f18e222]: Hasliza Binti Hamdan
+          - cell "870615-03-2201" [ref=f18e223]
+          - cell "hasliza.hamdan@moe.edu.my" [ref=f18e224]
+          - cell "SMK Kota Samarahan" [ref=f18e225]
+          - cell "Sarawak" [ref=f18e226]
+          - cell "Apple" [ref=f18e227]
+          - cell "Eligible" [ref=f18e228]
+          - cell [ref=f18e230]:
+            - link "✏️ Edit" [ref=f18e231] [cursor=pointer]:
+              - /url: /agents/manage/teachers/205/edit/
+            - button "🗑️" [ref=f18e233] [cursor=pointer]
+        - row [ref=f18e234]:
+          - cell [ref=f18e235]:
+            - strong [ref=f18e236]: Mohamad Izzat Bin Ismail
+          - cell "940102-14-7712" [ref=f18e237]
+          - cell "izzat.ismail@moe.edu.my" [ref=f18e238]
+          - cell "SMK Dato Harun" [ref=f18e239]
+          - cell "Selangor" [ref=f18e240]
+          - cell "Microsoft" [ref=f18e241]
+          - cell "Eligible" [ref=f18e242]
+          - cell [ref=f18e244]:
+            - link "✏️ Edit" [ref=f18e245] [cursor=pointer]:
+              - /url: /agents/manage/teachers/196/edit/
+            - button "🗑️" [ref=f18e247] [cursor=pointer]
+        - row [ref=f18e248]:
+          - cell [ref=f18e249]:
+            - strong [ref=f18e250]: Nurul Ain Binti Hassan
+          - cell "870312-14-5621" [ref=f18e251]
+          - cell "nurulain.hassan@moe.edu.my" [ref=f18e252]
+          - cell "SMK Taman Melati" [ref=f18e253]
+          - cell "Selangor" [ref=f18e254]
+          - cell "Google, Microsoft" [ref=f18e255]
+          - cell "Eligible" [ref=f18e256]
+          - cell [ref=f18e258]:
+            - link "✏️ Edit" [ref=f18e259] [cursor=pointer]:
+              - /url: /agents/manage/teachers/184/edit/
+            - button "🗑️" [ref=f18e261] [cursor=pointer]
+        - row [ref=f18e262]:
+          - cell [ref=f18e263]:
+            - strong [ref=f18e264]: Rajendran A/L Murugan
+          - cell "850911-10-2234" [ref=f18e265]
+          - cell "rajendran.murugan@moe.edu.my" [ref=f18e266]
+          - cell "SJKT Ladang Batu" [ref=f18e267]
+          - cell "Selangor" [ref=f18e268]
+          - cell "Google" [ref=f18e269]
+          - cell "Not Eligible" [ref=f18e270]
+          - cell [ref=f18e272]:
+            - link "✏️ Edit" [ref=f18e273] [cursor=pointer]:
+              - /url: /agents/manage/teachers/187/edit/
+            - button "🗑️" [ref=f18e275] [cursor=pointer]
+        - row [ref=f18e276]:
+          - cell [ref=f18e277]:
+            - strong [ref=f18e278]: Zarina Binti Mahmud
+          - cell "830714-03-2201" [ref=f18e279]
+          - cell "zarina.mahmud@moe.edu.my" [ref=f18e280]
+          - cell "SK Seri Kembangan" [ref=f18e281]
+          - cell "Selangor" [ref=f18e282]
+          - cell "Google" [ref=f18e283]
+          - cell "Eligible" [ref=f18e284]
+          - cell [ref=f18e286]:
+            - link "✏️ Edit" [ref=f18e287] [cursor=pointer]:
+              - /url: /agents/manage/teachers/191/edit/
+            - button "🗑️" [ref=f18e289] [cursor=pointer]
+        - row [ref=f18e290]:
+          - cell [ref=f18e291]:
+            - strong [ref=f18e292]: Noor Hidayah Binti Karim
+          - cell "930712-09-4421" [ref=f18e293]
+          - cell "noorhidayah.karim@moe.edu.my" [ref=f18e294]
+          - cell "SMKA Sheikh Abdul Malek" [ref=f18e295]
+          - cell "Terengganu" [ref=f18e296]
+          - cell "Microsoft" [ref=f18e297]
+          - cell "Eligible" [ref=f18e298]
+          - cell [ref=f18e300]:
+            - link "✏️ Edit" [ref=f18e301] [cursor=pointer]:
+              - /url: /agents/manage/teachers/199/edit/
+            - button "🗑️" [ref=f18e303] [cursor=pointer]
+        - row [ref=f18e304]:
+          - cell [ref=f18e305]:
+            - strong [ref=f18e306]: Tengku Amirul Bin Tengku Ibrahim
+          - cell "950820-11-8812" [ref=f18e307]
+          - cell "tengkuamirul@moe.edu.my" [ref=f18e308]
+          - cell "SMK Sultan Sulaiman" [ref=f18e309]
+          - cell "Terengganu" [ref=f18e310]
+          - cell "Google" [ref=f18e311]
+          - cell "Not Eligible" [ref=f18e312]
+          - cell [ref=f18e314]:
+            - link "✏️ Edit" [ref=f18e315] [cursor=pointer]:
+              - /url: /agents/manage/teachers/192/edit/
+            - button "🗑️" [ref=f18e317] [cursor=pointer]
+        - row [ref=f18e318]:
+          - cell [ref=f18e319]:
+            - strong [ref=f18e320]: Ahmad Fauzi Bin Ramli
+          - cell "880504-08-3312" [ref=f18e321]
+          - cell "ahmadfauzi.ramli@moe.edu.my" [ref=f18e322]
+          - cell "SK Bukit Jalil" [ref=f18e323]
+          - cell "W.P. Kuala Lumpur" [ref=f18e324]
+          - cell "Google" [ref=f18e325]
+          - cell "Not Eligible" [ref=f18e326]
+          - cell [ref=f18e328]:
+            - link "✏️ Edit" [ref=f18e329] [cursor=pointer]:
+              - /url: /agents/manage/teachers/185/edit/
+            - button "🗑️" [ref=f18e331] [cursor=pointer]
+        - row [ref=f18e332]:
+          - cell [ref=f18e333]:
+            - strong [ref=f18e334]: Vinod Kumar A/L Suresh
+          - cell "900312-07-3312" [ref=f18e335]
+          - cell "vinodkumar.suresh@moe.edu.my" [ref=f18e336]
+          - cell "SK Kepong Baru" [ref=f18e337]
+          - cell "W.P. Kuala Lumpur" [ref=f18e338]
+          - cell "Apple" [ref=f18e339]
+          - cell "Eligible" [ref=f18e340]
+          - cell [ref=f18e342]:
+            - link "✏️ Edit" [ref=f18e343] [cursor=pointer]:
+              - /url: /agents/manage/teachers/204/edit/
+            - button "🗑️" [ref=f18e345] [cursor=pointer]
+        - row [ref=f18e346]:
+          - cell [ref=f18e347]:
+            - strong [ref=f18e348]: Abdul Razak Bin Daud
+          - cell "860315-08-3301" [ref=f18e349]
+          - cell "abdulrazak.daud@moe.edu.my" [ref=f18e350]
+          - cell "SMK Labuan" [ref=f18e351]
+          - cell "W.P. Labuan" [ref=f18e352]
+          - cell "Microsoft" [ref=f18e353]
+          - cell "Not Eligible" [ref=f18e354]
+          - cell [ref=f18e356]:
+            - link "✏️ Edit" [ref=f18e357] [cursor=pointer]:
+              - /url: /agents/manage/teachers/198/edit/
+            - button "🗑️" [ref=f18e359] [cursor=pointer]
+        - row [ref=f18e360]:
+          - cell [ref=f18e361]:
+            - strong [ref=f18e362]: Farah Nadia Binti Aziz
+          - cell "920115-05-6678" [ref=f18e363]
+          - cell "farahnadia.aziz@moe.edu.my" [ref=f18e364]
+          - cell "SMK Putrajaya 1" [ref=f18e365]
+          - cell "W.P. Putrajaya" [ref=f18e366]
+          - cell "Apple, Google" [ref=f18e367]
+          - cell "Eligible" [ref=f18e368]
+          - cell [ref=f18e370]:
+            - link "✏️ Edit" [ref=f18e371] [cursor=pointer]:
+              - /url: /agents/manage/teachers/188/edit/
+            - button "🗑️" [ref=f18e373] [cursor=pointer]
+  - contentinfo [ref=f18e374]:
+    - generic [ref=f18e375]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

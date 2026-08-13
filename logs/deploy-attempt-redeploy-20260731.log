@@ -1,0 +1,307 @@
+==> Syncing project files to gpgd-app:/tmp/gpgd-deploy
+Dockerfile                | 0 kB |   0.6 kB/s | ETA: 00:00:00 | 100%
+docker-compose.yml        | 0 kB |   0.4 kB/s | ETA: 00:00:00 | 100%
+entrypoint.sh             | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+requirements.txt          | 0 kB |   0.1 kB/s | ETA: 00:00:00 | 100%
+manage.py                 | 0 kB |   0.7 kB/s | ETA: 00:00:00 | 100%
+asgi.py                   | 0 kB |   0.4 kB/s | ETA: 00:00:00 | 100%
+settings.py               | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  45%settings.py               | 8 kB |   8.8 kB/s | ETA: 00:00:00 | 100%
+urls.py                   | 1 kB |   1.1 kB/s | ETA: 00:00:00 | 100%
+wsgi.py                   | 0 kB |   0.4 kB/s | ETA: 00:00:00 | 100%
+settings.cpython-312.pyc  | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  95%settings.cpython-312.pyc  | 4 kB |   4.2 kB/s | ETA: 00:00:00 | 100%
+settings.cpython-313.pyc  | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  68%settings.cpython-313.pyc  | 5 kB |   5.8 kB/s | ETA: 00:00:00 | 100%
+urls.cpython-312.pyc      | 1 kB |   1.3 kB/s | ETA: 00:00:00 | 100%
+urls.cpython-313.pyc      | 1 kB |   1.6 kB/s | ETA: 00:00:00 | 100%
+wsgi.cpython-312.pyc      | 0 kB |   0.6 kB/s | ETA: 00:00:00 | 100%
+wsgi.cpython-313.pyc      | 0 kB |   0.6 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+admin.py                  | 3 kB |   3.9 kB/s | ETA: 00:00:00 | 100%
+ai_agent.py               | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  41%ai_agent.py               | 9 kB |   9.7 kB/s | ETA: 00:00:00 | 100%
+apps.py                   | 0 kB |   0.1 kB/s | ETA: 00:00:00 | 100%
+collector.py              | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  62%collector.py              | 6 kB |   6.4 kB/s | ETA: 00:00:00 | 100%
+constants.py              | 0 kB |   0.5 kB/s | ETA: 00:00:00 | 100%
+decorators.py             | 0 kB |   0.8 kB/s | ETA: 00:00:00 | 100%
+eligibility.py            | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  68%eligibility.py            | 5 kB |   5.8 kB/s | ETA: 00:00:00 | 100%
+forms.py                  | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  35%forms.py                  | 11 kB |  11.1 kB/s | ETA: 00:00:00 | 100%
+seed_providers.py         | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  93%seed_providers.py         | 4 kB |   4.3 kB/s | ETA: 00:00:00 | 100%
+send_monthly_report_email | 1 kB |   1.4 kB/s | ETA: 00:00:00 | 100%
+seed_providers.cpython-31 | 2 kB |   2.9 kB/s | ETA: 00:00:00 | 100%
+send_monthly_report_email | 2 kB |   2.4 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+middleware.py             | 1 kB |   1.6 kB/s | ETA: 00:00:00 | 100%
+0001_initial.py           | 3 kB |   3.3 kB/s | ETA: 00:00:00 | 100%
+0002_teacher_certificatio | 0 kB |   0.4 kB/s | ETA: 00:00:00 | 100%
+0003_provider_certificati | 2 kB |   2.0 kB/s | ETA: 00:00:00 | 100%
+0004_application.py       | 2 kB |   2.7 kB/s | ETA: 00:00:00 | 100%
+0005_programmesettings.py | 0 kB |   0.7 kB/s | ETA: 00:00:00 | 100%
+0006_application_compiled | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  83%0006_application_compiled | 4 kB |   4.8 kB/s | ETA: 00:00:00 | 100%
+0007_agentactivitylog.py  | 1 kB |   1.8 kB/s | ETA: 00:00:00 | 100%
+0008_errorlog.py          | 2 kB |   2.3 kB/s | ETA: 00:00:00 | 100%
+0009_application_award_ca | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  78%0009_application_award_ca | 5 kB |   5.1 kB/s | ETA: 00:00:00 | 100%
+0010_backfill_recognized_ | 0 kB |   0.7 kB/s | ETA: 00:00:00 | 100%
+0001_initial.cpython-312. | 2 kB |   2.9 kB/s | ETA: 00:00:00 | 100%
+0001_initial.cpython-313. | 2 kB |   2.8 kB/s | ETA: 00:00:00 | 100%
+0002_teacher_certificatio | 0 kB |   0.8 kB/s | ETA: 00:00:00 | 100%
+0002_teacher_certificatio | 0 kB |   0.8 kB/s | ETA: 00:00:00 | 100%
+0003_provider_certificati | 2 kB |   2.5 kB/s | ETA: 00:00:00 | 100%
+0003_provider_certificati | 2 kB |   2.5 kB/s | ETA: 00:00:00 | 100%
+0004_application.cpython- | 3 kB |   3.4 kB/s | ETA: 00:00:00 | 100%
+0004_application.cpython- | 3 kB |   3.3 kB/s | ETA: 00:00:00 | 100%
+0005_programmesettings.cp | 0 kB |   0.9 kB/s | ETA: 00:00:00 | 100%
+0005_programmesettings.cp | 0 kB |   1.0 kB/s | ETA: 00:00:00 | 100%
+0006_application_compiled | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  97%0006_application_compiled | 4 kB |   4.1 kB/s | ETA: 00:00:00 | 100%
+0006_application_compiled | 3 kB |   3.9 kB/s | ETA: 00:00:00 | 100%
+0007_agentactivitylog.cpy | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
+0007_agentactivitylog.cpy | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
+0008_errorlog.cpython-313 | 1 kB |   1.8 kB/s | ETA: 00:00:00 | 100%
+0009_application_award_ca | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  98%0009_application_award_ca | 4 kB |   4.1 kB/s | ETA: 00:00:00 | 100%
+0010_backfill_recognized_ | 1 kB |   1.5 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+models.py                 | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  30%models.py                 | 13 kB |  13.3 kB/s | ETA: 00:00:00 | 100%
+pipeline_ops.py           | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  26%pipeline_ops.py           | 15 kB |  15.3 kB/s | ETA: 00:00:00 | 100%
+ranking.py                | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  60%ranking.py                | 6 kB |   6.6 kB/s | ETA: 00:00:00 | 100%
+kpm_logo.jpg              | 4 kB |   4.0 kB/s | ETA: 00:00:08 |  10%kpm_logo.jpg              | 36 kB |  36.9 kB/s | ETA: 00:00:00 | 100%
+activity_dashboard.html   | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  31%activity_dashboard.html   | 12 kB |  12.8 kB/s | ETA: 00:00:00 | 100%
+activity_report_form.html | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  42%activity_report_form.html | 9 kB |   9.3 kB/s | ETA: 00:00:00 | 100%
+activity_report_success.h | 1 kB |   1.9 kB/s | ETA: 00:00:00 | 100%
+agent1_dashboard.html     | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  25%agent1_dashboard.html     | 15 kB |  15.8 kB/s | ETA: 00:00:00 | 100%
+agent1_results.html       | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  54%agent1_results.html       | 7 kB |   7.3 kB/s | ETA: 00:00:00 | 100%
+apply.html                | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  40%apply.html                | 9 kB |  10.0 kB/s | ETA: 00:00:00 | 100%
+apply_already.html        | 1 kB |   1.1 kB/s | ETA: 00:00:00 | 100%
+apply_invalid.html        | 0 kB |   0.6 kB/s | ETA: 00:00:00 | 100%
+apply_success.html        | 2 kB |   2.6 kB/s | ETA: 00:00:00 | 100%
+base.html                 | 4 kB |   4.0 kB/s | ETA: 00:00:03 |  21%base.html                 | 18 kB |  19.0 kB/s | ETA: 00:00:00 | 100%
+base_auth.html            | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  74%base_auth.html            | 5 kB |   5.3 kB/s | ETA: 00:00:00 | 100%
+error_log.html            | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  93%error_log.html            | 4 kB |   4.3 kB/s | ETA: 00:00:00 | 100%
+malaysia_map.html         | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  95%malaysia_map.html         | 4 kB |   4.2 kB/s | ETA: 00:00:00 | 100%
+login.html                | 2 kB |   2.6 kB/s | ETA: 00:00:00 | 100%
+manage_applications.html  | 3 kB |   3.5 kB/s | ETA: 00:00:00 | 100%
+manage_providers.html     | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  61%manage_providers.html     | 6 kB |   6.5 kB/s | ETA: 00:00:00 | 100%
+manage_teachers.html      | 2 kB |   2.7 kB/s | ETA: 00:00:00 | 100%
+moe_review.html           | 3 kB |   3.3 kB/s | ETA: 00:00:00 | 100%
+recognition_dashboard.htm | 4 kB |   4.0 kB/s | ETA: 00:00:03 |  24%recognition_dashboard.htm | 16 kB |  16.2 kB/s | ETA: 00:00:00 | 100%
+state_review.html         | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  89%state_review.html         | 4 kB |   4.5 kB/s | ETA: 00:00:00 | 100%
+teacher_form.html         | 1 kB |   1.1 kB/s | ETA: 00:00:00 | 100%
+upload_certifications.htm | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  55%upload_certifications.htm | 7 kB |   7.3 kB/s | ETA: 00:00:00 | 100%
+custom_filters.py         | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+custom_filters.cpython-31 | 0 kB |   0.9 kB/s | ETA: 00:00:00 | 100%
+custom_filters.cpython-31 | 0 kB |   0.9 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+tests.py                  | 0 kB |   0.1 kB/s | ETA: 00:00:00 | 100%
+urls.py                   | 3 kB |   3.5 kB/s | ETA: 00:00:00 | 100%
+views.py                  | 4 kB |   4.0 kB/s | ETA: 00:00:09 |   9%views.py                  | 40 kB |  40.7 kB/s | ETA: 00:00:00 | 100%
+admin.cpython-312.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  85%admin.cpython-312.pyc     | 4 kB |   4.7 kB/s | ETA: 00:00:00 | 100%
+admin.cpython-313.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  65%admin.cpython-313.pyc     | 6 kB |   6.1 kB/s | ETA: 00:00:00 | 100%
+ai_agent.cpython-312.pyc  | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  42%ai_agent.cpython-312.pyc  | 9 kB |   9.4 kB/s | ETA: 00:00:00 | 100%
+ai_agent.cpython-313.pyc  | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  39%ai_agent.cpython-313.pyc  | 10 kB |  10.2 kB/s | ETA: 00:00:00 | 100%
+apps.cpython-312.pyc      | 0 kB |   0.4 kB/s | ETA: 00:00:00 | 100%
+apps.cpython-313.pyc      | 0 kB |   0.5 kB/s | ETA: 00:00:00 | 100%
+collector.cpython-312.pyc | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  61%collector.cpython-312.pyc | 6 kB |   6.5 kB/s | ETA: 00:00:00 | 100%
+collector.cpython-313.pyc | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  61%collector.cpython-313.pyc | 6 kB |   6.5 kB/s | ETA: 00:00:00 | 100%
+constants.cpython-313.pyc | 0 kB |   0.6 kB/s | ETA: 00:00:00 | 100%
+decorators.cpython-312.py | 1 kB |   1.4 kB/s | ETA: 00:00:00 | 100%
+decorators.cpython-313.py | 1 kB |   1.4 kB/s | ETA: 00:00:00 | 100%
+eligibility.cpython-312.p | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  53%eligibility.cpython-312.p | 7 kB |   7.5 kB/s | ETA: 00:00:00 | 100%
+eligibility.cpython-313.p | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  53%eligibility.cpython-313.p | 7 kB |   7.5 kB/s | ETA: 00:00:00 | 100%
+forms.cpython-312.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  42%forms.cpython-312.pyc     | 9 kB |   9.4 kB/s | ETA: 00:00:00 | 100%
+forms.cpython-313.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  33%forms.cpython-313.pyc     | 12 kB |  12.1 kB/s | ETA: 00:00:00 | 100%
+middleware.cpython-312.py | 2 kB |   2.2 kB/s | ETA: 00:00:00 | 100%
+middleware.cpython-313.py | 2 kB |   2.3 kB/s | ETA: 00:00:00 | 100%
+models.cpython-312.pyc    | 4 kB |   4.0 kB/s | ETA: 00:00:02 |  28%models.cpython-312.pyc    | 14 kB |  14.3 kB/s | ETA: 00:00:00 | 100%
+models.cpython-313.pyc    | 4 kB |   4.0 kB/s | ETA: 00:00:04 |  19%models.cpython-313.pyc    | 20 kB |  20.7 kB/s | ETA: 00:00:00 | 100%
+pipeline_ops.cpython-312. | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  49%pipeline_ops.cpython-312. | 8 kB |   8.0 kB/s | ETA: 00:00:00 | 100%
+pipeline_ops.cpython-313. | 4 kB |   4.0 kB/s | ETA: 00:00:03 |  22%pipeline_ops.cpython-313. | 17 kB |  17.7 kB/s | ETA: 00:00:00 | 100%
+ranking.cpython-312.pyc   | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  41%ranking.cpython-312.pyc   | 9 kB |   9.7 kB/s | ETA: 00:00:00 | 100%
+ranking.cpython-313.pyc   | 4 kB |   4.0 kB/s | ETA: 00:00:01 |  40%ranking.cpython-313.pyc   | 9 kB |   9.8 kB/s | ETA: 00:00:00 | 100%
+urls.cpython-312.pyc      | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  95%urls.cpython-312.pyc      | 4 kB |   4.2 kB/s | ETA: 00:00:00 | 100%
+urls.cpython-313.pyc      | 4 kB |   4.0 kB/s | ETA: 00:00:00 |  86%urls.cpython-313.pyc      | 4 kB |   4.6 kB/s | ETA: 00:00:00 | 100%
+views.cpython-312.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:08 |  10%views.cpython-312.pyc     | 37 kB |  37.7 kB/s | ETA: 00:00:00 | 100%
+views.cpython-313.pyc     | 4 kB |   4.0 kB/s | ETA: 00:00:12 |   7%views.cpython-313.pyc     | 53 kB |  53.8 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-312.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+__init__.cpython-313.pyc  | 0 kB |   0.2 kB/s | ETA: 00:00:00 | 100%
+.env.production           | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
+==> Moving into place and starting containers
+ Image gpgd-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 452B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 613B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim
+#3 DONE 1.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/7] FROM docker.io/library/python:3.13-slim@sha256:6771159cd4fa5d9bba1258caf0b82e6b73458c694d178ad97c5e925c2d0e1a91
+#5 resolve docker.io/library/python:3.13-slim@sha256:6771159cd4fa5d9bba1258caf0b82e6b73458c694d178ad97c5e925c2d0e1a91 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 700.89kB 0.0s done
+#6 DONE 0.0s
+
+#7 [2/7] WORKDIR /app
+#7 CACHED
+
+#8 [3/7] COPY requirements.txt .
+#8 DONE 0.0s
+
+#9 [4/7] RUN pip install --no-cache-dir -r requirements.txt
+#9 2.473 Collecting Django==6.0.7 (from -r requirements.txt (line 1))
+#9 2.506   Downloading django-6.0.7-py3-none-any.whl.metadata (3.9 kB)
+#9 2.522 Collecting python-dotenv==1.1.0 (from -r requirements.txt (line 2))
+#9 2.526   Downloading python_dotenv-1.1.0-py3-none-any.whl.metadata (24 kB)
+#9 2.541 Collecting openpyxl==3.1.5 (from -r requirements.txt (line 3))
+#9 2.545   Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+#9 2.733 Collecting Pillow==11.1.0 (from -r requirements.txt (line 4))
+#9 2.738   Downloading pillow-11.1.0-cp313-cp313-manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+#9 2.762 Collecting anthropic==0.117.0 (from -r requirements.txt (line 5))
+#9 2.766   Downloading anthropic-0.117.0-py3-none-any.whl.metadata (3.3 kB)
+#9 2.867 Collecting pandas==2.3.3 (from -r requirements.txt (line 6))
+#9 2.873   Downloading pandas-2.3.3-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+#9 2.913 Collecting whitenoise==6.12.0 (from -r requirements.txt (line 7))
+#9 2.917   Downloading whitenoise-6.12.0-py3-none-any.whl.metadata (3.7 kB)
+#9 2.930 Collecting gunicorn==26.0.0 (from -r requirements.txt (line 8))
+#9 2.934   Downloading gunicorn-26.0.0-py3-none-any.whl.metadata (5.4 kB)
+#9 2.950 Collecting asgiref>=3.9.1 (from Django==6.0.7->-r requirements.txt (line 1))
+#9 2.954   Downloading asgiref-3.12.1-py3-none-any.whl.metadata (9.4 kB)
+#9 2.964 Collecting sqlparse>=0.5.0 (from Django==6.0.7->-r requirements.txt (line 1))
+#9 2.968   Downloading sqlparse-0.5.5-py3-none-any.whl.metadata (4.7 kB)
+#9 2.976 Collecting et-xmlfile (from openpyxl==3.1.5->-r requirements.txt (line 3))
+#9 2.980   Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+#9 2.994 Collecting anyio<5,>=3.5.0 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 2.998   Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+#9 3.006 Collecting distro<2,>=1.7.0 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.009   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+#9 3.022 Collecting docstring-parser<1,>=0.15 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.025   Downloading docstring_parser-0.18.0-py3-none-any.whl.metadata (3.5 kB)
+#9 3.038 Collecting httpx<1,>=0.25.0 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.043   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+#9 3.120 Collecting jiter<1,>=0.4.0 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.126   Downloading jiter-0.16.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+#9 3.226 Collecting pydantic<3,>=1.9.0 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.230   Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+#9 3.243 Collecting sniffio (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.246   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+#9 3.258 Collecting typing-extensions<5,>=4.14 (from anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.261   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#9 3.454 Collecting numpy>=1.26.0 (from pandas==2.3.3->-r requirements.txt (line 6))
+#9 3.458   Downloading numpy-2.5.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+#9 3.470 Collecting python-dateutil>=2.8.2 (from pandas==2.3.3->-r requirements.txt (line 6))
+#9 3.473   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+#9 3.502 Collecting pytz>=2020.1 (from pandas==2.3.3->-r requirements.txt (line 6))
+#9 3.506   Downloading pytz-2026.3.post1-py2.py3-none-any.whl.metadata (22 kB)
+#9 3.518 Collecting tzdata>=2022.7 (from pandas==2.3.3->-r requirements.txt (line 6))
+#9 3.523   Downloading tzdata-2026.3-py2.py3-none-any.whl.metadata (1.4 kB)
+#9 3.538 Collecting packaging (from gunicorn==26.0.0->-r requirements.txt (line 8))
+#9 3.542   Downloading packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+#9 3.554 Collecting idna>=2.8 (from anyio<5,>=3.5.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.557   Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+#9 3.572 Collecting certifi (from httpx<1,>=0.25.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.576   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+#9 3.587 Collecting httpcore==1.* (from httpx<1,>=0.25.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.590   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+#9 3.601 Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.25.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.605   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#9 3.615 Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 3.618   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#9 4.369 Collecting pydantic-core==2.46.4 (from pydantic<3,>=1.9.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 4.373   Downloading pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+#9 4.383 Collecting typing-inspection>=0.4.2 (from pydantic<3,>=1.9.0->anthropic==0.117.0->-r requirements.txt (line 5))
+#9 4.386   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+#9 4.401 Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3->-r requirements.txt (line 6))
+#9 4.405   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#9 4.418 Downloading django-6.0.7-py3-none-any.whl (8.4 MB)
+#9 4.450    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.4/8.4 MB 281.2 MB/s  0:00:00
+#9 4.456 Downloading python_dotenv-1.1.0-py3-none-any.whl (20 kB)
+#9 4.460 Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+#9 4.468 Downloading pillow-11.1.0-cp313-cp313-manylinux_2_28_x86_64.whl (4.5 MB)
+#9 4.487    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 263.3 MB/s  0:00:00
+#9 4.494 Downloading anthropic-0.117.0-py3-none-any.whl (998 kB)
+#9 4.499    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 998.3/998.3 kB 297.6 MB/s  0:00:00
+#9 4.504 Downloading pandas-2.3.3-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.3 MB)
+#9 4.559    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.3/12.3 MB 234.8 MB/s  0:00:00
+#9 4.564 Downloading whitenoise-6.12.0-py3-none-any.whl (20 kB)
+#9 4.568 Downloading gunicorn-26.0.0-py3-none-any.whl (212 kB)
+#9 4.573 Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+#9 4.582 Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+#9 4.586 Downloading docstring_parser-0.18.0-py3-none-any.whl (22 kB)
+#9 4.591 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+#9 4.595 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+#9 4.600 Downloading jiter-0.16.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (343 kB)
+#9 4.604 Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+#9 4.609 Downloading pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+#9 4.622    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 215.6 MB/s  0:00:00
+#9 4.627 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#9 4.630 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#9 4.634 Downloading asgiref-3.12.1-py3-none-any.whl (25 kB)
+#9 4.637 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#9 4.640 Downloading idna-3.18-py3-none-any.whl (65 kB)
+#9 4.644 Downloading numpy-2.5.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+#9 4.712    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 255.4 MB/s  0:00:00
+#9 4.717 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+#9 4.721 Downloading pytz-2026.3.post1-py2.py3-none-any.whl (508 kB)
+#9 4.726 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#9 4.729 Downloading sqlparse-0.5.5-py3-none-any.whl (46 kB)
+#9 4.734 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+#9 4.737 Downloading tzdata-2026.3-py2.py3-none-any.whl (348 kB)
+#9 4.742 Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+#9 4.746 Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+#9 4.749 Downloading packaging-26.2-py3-none-any.whl (100 kB)
+#9 4.753 Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+#9 4.972 Installing collected packages: pytz, whitenoise, tzdata, typing-extensions, sqlparse, sniffio, six, python-dotenv, Pillow, packaging, numpy, jiter, idna, h11, et-xmlfile, docstring-parser, distro, certifi, asgiref, annotated-types, typing-inspection, python-dateutil, pydantic-core, openpyxl, httpcore, gunicorn, Django, anyio, pydantic, pandas, httpx, anthropic
+#9 17.51 
+#9 17.52 Successfully installed Django-6.0.7 Pillow-11.1.0 annotated-types-0.8.0 anthropic-0.117.0 anyio-4.14.2 asgiref-3.12.1 certifi-2026.7.22 distro-1.9.0 docstring-parser-0.18.0 et-xmlfile-2.0.0 gunicorn-26.0.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.18 jiter-0.16.0 numpy-2.5.1 openpyxl-3.1.5 packaging-26.2 pandas-2.3.3 pydantic-2.13.4 pydantic-core-2.46.4 python-dateutil-2.9.0.post0 python-dotenv-1.1.0 pytz-2026.3.post1 six-1.17.0 sniffio-1.3.1 sqlparse-0.5.5 typing-extensions-4.16.0 typing-inspection-0.4.2 tzdata-2026.3 whitenoise-6.12.0
+#9 17.52 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#9 17.52 
+#9 17.52 [notice] A new release of pip is available: 26.1.2 -> 26.2
+#9 17.52 [notice] To update, run: pip install --upgrade pip
+#9 DONE 19.4s
+
+#10 [5/7] COPY . .
+#10 DONE 0.2s
+
+#11 [6/7] RUN chmod +x entrypoint.sh
+#11 DONE 0.3s
+
+#12 [7/7] RUN mkdir -p /app/media /app/temp_uploads /app/staticfiles /app/data     && adduser --disabled-password --gecos "" appuser     && chown -R appuser:appuser /app
+#12 0.474 usermod: no changes
+#12 DONE 0.7s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 8.2s done
+#13 exporting manifest sha256:95c286523be105ccb32fe1f6585f8b79eafb1fd7de6acc23183b0738564242b2 done
+#13 exporting config sha256:89bbe9d821dee52b4575325b119db8cf7219968e37661f1ce2e50ac812053a77 done
+#13 exporting attestation manifest sha256:2087ee62282a12e57c8ac11e506930ffce07b12c06f658ba491b68d9053accf6 0.0s done
+#13 exporting manifest list sha256:3e5868f8dd9d48f374738b2ed521cf35fa41c89bfbd553866cf681b7410c77a3 done
+#13 naming to docker.io/library/gpgd-web:latest done
+#13 unpacking to docker.io/library/gpgd-web:latest
+#13 unpacking to docker.io/library/gpgd-web:latest 4.4s done
+#13 DONE 12.8s
+
+#14 resolving provenance for metadata file
+#14 DONE 0.0s
+ Image gpgd-web Built 
+ Container gpgd-web-1 Recreate 
+ Container gpgd-web-1 Recreated 
+ Container gpgd-web-1 Starting 
+ Container gpgd-web-1 Started 
+NAME         IMAGE      COMMAND             SERVICE   CREATED         STATUS                  PORTS
+gpgd-web-1   gpgd-web   "./entrypoint.sh"   web       3 seconds ago   Up Less than a second   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+
+==> Deployed.
+
+Tail logs:
+  gcloud compute ssh gpgd-app --zone=asia-southeast1-b --tunnel-through-iap --project=prestij-jayanthi-gpgdselector --command="cd /opt/gpgd && sudo docker compose logs -f"

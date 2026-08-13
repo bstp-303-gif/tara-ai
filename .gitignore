@@ -1,0 +1,8 @@
+.env
+.env.production
+__pycache__/
+*.pyc
+db.sqlite3
+staticfiles/
+media/
+temp_uploads/

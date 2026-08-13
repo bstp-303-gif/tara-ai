@@ -1,0 +1,102 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - link " MyGPGD J360 AGENT 1" [ref=e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=e5]: 
+      - generic [ref=e7]:
+        - text: MyGPGD J360
+        - generic [ref=e8]: AGENT 1
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link " Upload" [ref=e11] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=e12]: 
+          - text: Upload
+      - listitem [ref=e13]:
+        - link " Results" [ref=e14] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=e15]: 
+          - text: Results
+      - listitem [ref=e16]:
+        - link " Dashboard" [ref=e17] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=e18]: 
+          - text: Dashboard
+      - listitem [ref=e19]: Manage
+      - listitem [ref=e20]:
+        - link " Providers & Rules" [ref=e21] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=e22]: 
+          - text: Providers & Rules
+      - listitem [ref=e23]:
+        - link " Applications" [ref=e24] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=e25]: 
+          - text: Applications
+      - listitem [ref=e26]:
+        - link " Teachers" [ref=e27] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=e28]: 
+          - text: Teachers
+    - button " Logout (admin)" [ref=e31] [cursor=pointer]:
+      - generic [ref=e32]: 
+      - text: Logout (admin)
+  - generic [ref=e33]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: 
+        - 'heading "Agent 1: Certification Collector" [level=1] [ref=e40]'
+        - paragraph [ref=e41]: Upload certified teacher lists from Google, Microsoft, and Apple — Agent 1 normalizes, deduplicates, and screens eligibility automatically.
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 
+          - heading "Upload Certified Teacher Lists" [level=3] [ref=e45]
+        - paragraph [ref=e46]: Upload three Excel files containing certified teacher data from Google, Microsoft, and Apple.
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic [ref=e49]: Provider
+            - combobox "Provider" [ref=e50]:
+              - option "Google Certified Teachers" [selected]
+              - option "Microsoft Certified Teachers"
+              - option "Apple Certified Teachers"
+          - generic [ref=e51]:
+            - generic [ref=e52]: Excel File (.xlsx)
+            - button " Click to upload or drag and drop Excel files (.xlsx) only" [ref=e53] [cursor=pointer]:
+              - generic:
+                - generic: 
+                - generic: Click to upload or drag and drop
+                - generic: Excel files (.xlsx) only
+            - generic [ref=e54]:
+              - generic [ref=e55]: 
+              - text: "File must contain columns for: Name, IC Number, Email, School, State, Certification Level, Certification Year"
+          - button " Upload File" [ref=e56] [cursor=pointer]:
+            - generic [ref=e57]: 
+            - text: Upload File
+      - generic [ref=e58]:
+        - heading " Recent Uploads" [level=5] [ref=e60]:
+          - generic [ref=e61]: 
+          - text: Recent Uploads
+        - table [ref=e63]:
+          - rowgroup [ref=e64]:
+            - row [ref=e65]:
+              - columnheader "Provider" [ref=e66]
+              - columnheader "File Name" [ref=e67]
+              - columnheader "Records" [ref=e68]
+              - columnheader "Status" [ref=e69]
+              - columnheader "Uploaded" [ref=e70]
+              - columnheader [ref=e71]
+          - rowgroup [ref=e72]:
+            - row [ref=e73]:
+              - cell [ref=e74]:
+                - strong [ref=e75]: Google
+              - cell "sample_Google.xlsx" [ref=e76]
+              - cell "14" [ref=e77]
+              - cell " Valid" [ref=e78]:
+                - generic [ref=e79]:
+                  - generic [ref=e80]: 
+                  - text: Valid
+              - cell "09:55" [ref=e81]
+              - cell [ref=e82]:
+                - button "" [ref=e84] [cursor=pointer]
+    - contentinfo [ref=e86]:
+      - generic [ref=e87]: "MyGPGD J360 · Agent 1: Certification Collector · Built with Django + Bootstrap"

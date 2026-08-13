@@ -1,0 +1,132 @@
+- generic [ref=f16e2]:
+  - complementary [ref=f16e3]:
+    - link " MyGPGD J360 AGENT 1" [ref=f16e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=f16e5]: 
+      - generic [ref=f16e7]:
+        - text: MyGPGD J360
+        - generic [ref=f16e8]: AGENT 1
+    - list [ref=f16e9]:
+      - listitem [ref=f16e10]:
+        - link " Upload" [ref=f16e11] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=f16e12]: 
+          - text: Upload
+      - listitem [ref=f16e13]:
+        - link " Results" [ref=f16e14] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=f16e15]: 
+          - text: Results
+      - listitem [ref=f16e16]:
+        - link " Dashboard" [ref=f16e17] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=f16e18]: 
+          - text: Dashboard
+      - listitem [ref=f16e19]:
+        - link " Error Log" [ref=f16e20] [cursor=pointer]:
+          - /url: /agents/error-log/
+          - generic [ref=f16e21]: 
+          - text: Error Log
+      - listitem [ref=f16e22]: Manage
+      - listitem [ref=f16e23]:
+        - link " Providers & Rules" [ref=f16e24] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=f16e25]: 
+          - text: Providers & Rules
+      - listitem [ref=f16e26]:
+        - link " Applications" [ref=f16e27] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=f16e28]: 
+          - text: Applications
+      - listitem [ref=f16e29]:
+        - link " Teachers" [ref=f16e30] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=f16e31]: 
+          - text: Teachers
+    - button " Logout (admin)" [ref=f16e34] [cursor=pointer]:
+      - generic [ref=f16e35]: 
+      - text: Logout (admin)
+  - generic [ref=f16e36]:
+    - generic [ref=f16e37]:
+      - generic [ref=f16e38]:
+        - generic [ref=f16e39]: 
+        - heading "Error Log" [level=1] [ref=f16e41]
+        - paragraph [ref=f16e42]: Concrete, actionable failures from the system — right now, that means email delivery. Every failed send is logged here with the real reason and what to check next.
+      - generic [ref=f16e45]:
+        - generic [ref=f16e46]: "Filter by category:"
+        - combobox "Filter by category:" [ref=f16e47]:
+          - option "All categories (6)" [selected]
+          - option "Email — Authentication Failed"
+          - option "Email — Connection Timed Out"
+          - option "Email — Could Not Connect"
+          - option "Email — Invalid Recipient Address"
+          - option "Email — Other Error"
+      - generic [ref=f16e48]:
+        - heading " Logged Errors" [level=5] [ref=f16e50]:
+          - generic [ref=f16e51]: 
+          - text: Logged Errors
+        - table [ref=f16e54]:
+          - rowgroup [ref=f16e55]:
+            - row [ref=f16e56]:
+              - columnheader "When" [ref=f16e57]
+              - columnheader "Category" [ref=f16e58]
+              - columnheader "Context" [ref=f16e59]
+              - columnheader "Technical Detail" [ref=f16e60]
+              - columnheader "Suggested Action" [ref=f16e61]
+          - rowgroup [ref=f16e62]:
+            - row [ref=f16e63]:
+              - cell "20 Jul, 11:27" [ref=f16e64]
+              - cell " Email — Connection Timed Out" [ref=f16e65]:
+                - generic [ref=f16e66]:
+                  - generic [ref=f16e67]: 
+                  - text: Email — Connection Timed Out
+              - cell "Tan Bee Geok <tanbeegek@moe.edu.my>" [ref=f16e68]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e69]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e70]
+            - row [ref=f16e71]:
+              - cell "20 Jul, 11:27" [ref=f16e72]
+              - cell " Email — Connection Timed Out" [ref=f16e73]:
+                - generic [ref=f16e74]:
+                  - generic [ref=f16e75]: 
+                  - text: Email — Connection Timed Out
+              - cell "Dr.Jayanthi Jayaraman <jntjei@gmail.com>" [ref=f16e76]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e77]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e78]
+            - row [ref=f16e79]:
+              - cell "20 Jul, 11:27" [ref=f16e80]
+              - cell " Email — Connection Timed Out" [ref=f16e81]:
+                - generic [ref=f16e82]:
+                  - generic [ref=f16e83]: 
+                  - text: Email — Connection Timed Out
+              - cell "Anitha A/P Krishnan <anitha.krishnan@moe.edu.my>" [ref=f16e84]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e85]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e86]
+            - row [ref=f16e87]:
+              - cell "20 Jul, 11:26" [ref=f16e88]
+              - cell " Email — Connection Timed Out" [ref=f16e89]:
+                - generic [ref=f16e90]:
+                  - generic [ref=f16e91]: 
+                  - text: Email — Connection Timed Out
+              - cell "Siti Rohani Binti Yusoff <sitirohani.yusoff@moe.edu.my>" [ref=f16e92]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e93]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e94]
+            - row [ref=f16e95]:
+              - cell "20 Jul, 11:26" [ref=f16e96]
+              - cell " Email — Connection Timed Out" [ref=f16e97]:
+                - generic [ref=f16e98]:
+                  - generic [ref=f16e99]: 
+                  - text: Email — Connection Timed Out
+              - cell "Zuraidah Binti Othman <zuraidah.othman@moe.edu.my>" [ref=f16e100]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e101]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e102]
+            - row [ref=f16e103]:
+              - cell "20 Jul, 11:26" [ref=f16e104]
+              - cell " Email — Connection Timed Out" [ref=f16e105]:
+                - generic [ref=f16e106]:
+                  - generic [ref=f16e107]: 
+                  - text: Email — Connection Timed Out
+              - cell "Dr.Jayanthi Jayaraman <jntjei@gmail.com>" [ref=f16e108]
+              - 'cell "Connection unexpectedly closed: timed out" [ref=f16e109]'
+              - cell "The mail server never responded (waited 25s). This usually means outbound SMTP is blocked by a firewall or network policy on whichever machine is running this server — common on sandboxed/restricted networks. Try again from the real production server/network, and confirm GPGD_EMAIL_HOST/GPGD_EMAIL_PORT in .env are correct." [ref=f16e110]
+    - contentinfo [ref=f16e111]:
+      - generic [ref=f16e112]: "MyGPGD J360 · Agent 1: Certification Collector · Built with Django + Bootstrap"

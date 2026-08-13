@@ -1,0 +1,34 @@
+services:
+  web:
+    build: .
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    volumes:
+      - sqlite-data:/app/data
+      - media-data:/app/media
+      - temp-uploads:/app/temp_uploads
+    environment:
+      # SQLite path points into the mounted volume dir above so the db file
+      # survives `docker compose down`/rebuilds.
+      - DJANGO_DB_PATH=/app/data/db.sqlite3
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - web
+
+volumes:
+  sqlite-data:
+  media-data:
+  temp-uploads:
+  caddy-data:
+  caddy-config:

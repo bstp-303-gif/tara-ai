@@ -1,0 +1,82 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - link " MyGPGD J360 AGENT 1" [ref=e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=e5]: 
+      - generic [ref=e7]:
+        - text: MyGPGD J360
+        - generic [ref=e8]: AGENT 1
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link " Upload" [ref=e11] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=e12]: 
+          - text: Upload
+      - listitem [ref=e13]:
+        - link " Results" [ref=e14] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=e15]: 
+          - text: Results
+      - listitem [ref=e16]:
+        - link " Dashboard" [ref=e17] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=e18]: 
+          - text: Dashboard
+      - listitem [ref=e19]: Manage
+      - listitem [ref=e20]:
+        - link " Providers & Rules" [ref=e21] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=e22]: 
+          - text: Providers & Rules
+      - listitem [ref=e23]:
+        - link " Applications" [ref=e24] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=e25]: 
+          - text: Applications
+      - listitem [ref=e26]:
+        - link " Teachers" [ref=e27] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=e28]: 
+          - text: Teachers
+    - button " Logout (admin)" [ref=e31] [cursor=pointer]:
+      - generic [ref=e32]: 
+      - text: Logout (admin)
+  - generic [ref=e33]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: 
+        - 'heading "Agent 1: Certification Collector" [level=1] [ref=e40]'
+        - paragraph [ref=e41]: Upload certified teacher lists from Google, Microsoft, and Apple — Agent 1 normalizes, deduplicates, and screens eligibility automatically.
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 
+          - heading "Upload Certified Teacher Lists" [level=3] [ref=e45]
+        - paragraph [ref=e46]: Upload three Excel files containing certified teacher data from Google, Microsoft, and Apple.
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic [ref=e49]: Provider
+            - combobox "Provider" [ref=e50]:
+              - option "Google Certified Teachers" [selected]
+              - option "Microsoft Certified Teachers"
+              - option "Apple Certified Teachers"
+          - generic [ref=e51]:
+            - generic [ref=e52]: Excel File (.xlsx)
+            - generic [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: 
+              - generic [ref=e57]: Click to upload or drag and drop
+              - generic [ref=e58]: Excel files (.xlsx) only
+            - generic [ref=e59]:
+              - generic [ref=e60]: 
+              - text: "File must contain columns for: Name, IC Number, Email, School, State, Certification Level, Certification Year"
+          - button " Upload File" [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]: 
+            - text: Upload File
+      - generic [ref=e63]:
+        - heading " Recent Uploads" [level=5] [ref=e65]:
+          - generic [ref=e66]: 
+          - text: Recent Uploads
+        - paragraph [ref=e68]:
+          - generic [ref=e69]: 
+          - text: No files uploaded yet. Start by uploading your first file above.
+    - contentinfo [ref=e70]:
+      - generic [ref=e71]: "MyGPGD J360 · Agent 1: Certification Collector · Built with Django + Bootstrap"

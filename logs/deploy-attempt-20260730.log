@@ -1,0 +1,78 @@
+==========================================
+STEP 1/4 — Ensure infra exists (idempotent)
+==========================================
+==> Project: prestij-jayanthi-gpgdselector | Region: asia-southeast1 | Zone: asia-southeast1-b
+[environment: untagged] Read more to tag: g.co/cloud/project-env-tag.
+Updated property [core/project].
+==> Enabling required APIs (compute, IAP for SSH tunneling)
+Operation "operations/acat.p2-125652283337-61877482-6e1f-47a6-9739-064c959b606f" finished successfully.
+==> VPC network: gpgd-vpc
+    already exists, skipping
+==> Subnet: gpgd-subnet (10.10.0.0/24 in asia-southeast1)
+    already exists, skipping
+==> Reserving static external IP: gpgd-app-ip
+    already exists, skipping
+==> Firewall: allow HTTP (80) and HTTPS (443) from anywhere
+    gpgd-allow-http already exists, skipping
+    gpgd-allow-https already exists, skipping
+==> Firewall: allow SSH (22) only from Google's Identity-Aware Proxy range
+    gpgd-allow-ssh-iap already exists, skipping
+==> Creating VM: gpgd-app
+Created [https://www.googleapis.com/compute/v1/projects/prestij-jayanthi-gpgdselector/zones/asia-southeast1-b/instances/gpgd-app].
+WARNING: Some requests generated warnings:
+ - Disk size: '30 GB' is larger than image size: '10 GB'. You might need to resize the root repartition manually if the operating system does not support automatic resizing. See https://cloud.google.com/compute/docs/disks/add-persistent-disk#resize_pd for details.
+
+NAME      ZONE               MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
+gpgd-app  asia-southeast1-b  e2-medium                  10.10.0.2    34.124.176.218  RUNNING
+
+==> Done.
+
+Static IP:       34.124.176.218
+SSH (via IAP):   gcloud compute ssh gpgd-app --zone=asia-southeast1-b --tunnel-through-iap --project=prestij-jayanthi-gpgdselector
+Firewall allows: 80, 443 from anywhere; 22 only from Google's IAP range (35.235.240.0/20)
+
+Next steps:
+  1. Point your domain's DNS A record at 34.124.176.218 (or use the IP directly for now).
+  2. In your local .env, set DJANGO_ALLOWED_HOSTS and GPGD_SITE_URL to match that domain/IP.
+  3. Wait ~1-2 min for the startup script to finish installing Docker on first boot.
+  4. Run ./gcp/deploy.sh to push the app code and start it.
+
+==========================================
+STEP 2/4 — Back up current known-good release
+==========================================
+WARNING: The private SSH key file for gcloud does not exist.
+WARNING: The public SSH key file for gcloud does not exist.
+WARNING: The PuTTY PPK SSH key file for gcloud does not exist.
+WARNING: You do not have an SSH key for gcloud.
+WARNING: SSH keygen will be executed to generate a key.
+This tool needs to create the directory [C:\Users\user\.ssh] before being able 
+to generate SSH keys.
+
+Do you want to continue (Y/n)?  
+Updating project ssh metadata...
+........................................................Updated [https://www.googleapis.com/compute/v1/projects/prestij-jayanthi-gpgdselector].
+...done.
+Waiting for SSH key to propagate.
+FATAL ERROR: Remote side unexpectedly closed network connection
+The host key is not cached for this server:
+  compute.8393547679279779068 (port 22)
+You have no guarantee that the server is the computer you
+think it is.
+The server's ssh-ed25519 key fingerprint is:
+  ssh-ed25519 255 SHA256:olhTf29FN2cLZWHLqf/01Ky1oVB8yps64wBeJ0DgpG8
+If you trust this host, enter "y" to add the key to Plink's
+cache and carry on connecting.
+If you want to carry on connecting just once, without adding
+the key to the cache, enter "n".
+If you do not trust this host, press Return to abandon the
+connection.
+Store key in cache? (y/n, Return cancels connection, i for more info) No running deployment found to back up (first deploy, or previous deploy was already broken)
+
+==========================================
+STEP 3/4 — Deploy
+==========================================
+==> Syncing project files to gpgd-app:/tmp/gpgd-deploy
+pscp: remote filespec /tmp/gpgd-deploy/: not a directory
+
+ERROR: (gcloud.compute.scp) [C:\Users\user\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\sdk\pscp.exe] exited with return code [1].
+ERROR: deploy.sh failed outright (containers likely never started) — check the output above

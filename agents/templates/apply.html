@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}GPGD Application Form{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+
+        <div class="hero-banner" style="text-align:center;">
+            <div class="hero-icon-badge" style="margin-left:auto; margin-right:auto;"><i class="bi bi-mortarboard"></i></div>
+            <h1 style="font-size:1.7rem; font-weight:700; margin-bottom:0.35rem;">Guru Peneraju Generasi Digital (GPGD)</h1>
+            <p style="margin-bottom:0;">Online Application Form — Ministry of Education Malaysia</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- SECTION 1: Personal Information -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-person-badge"></i> 1. Personal Information
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.full_name.label }} <span style="color:red">*</span></label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<div class="text-danger small">{{ form.full_name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.ic_number.label }} <span style="color:red">*</span></label>
+                            {{ form.ic_number }}
+                            {% if form.ic_number.errors %}<div class="text-danger small">{{ form.ic_number.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.email.label }} <span style="color:red">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.current_grade.label }} <span style="color:red">*</span></label>
+                            {{ form.current_grade }}
+                            {% if form.current_grade.errors %}<div class="text-danger small">{{ form.current_grade.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">{{ form.school_name.label }} <span style="color:red">*</span></label>
+                            {{ form.school_name }}
+                            {% if form.school_name.errors %}<div class="text-danger small">{{ form.school_name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.district.label }} <span style="color:red">*</span></label>
+                            {{ form.district }}
+                            {% if form.district.errors %}<div class="text-danger small">{{ form.district.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.state.label }} <span style="color:red">*</span></label>
+                            {{ form.state }}
+                            {% if form.state.errors %}<div class="text-danger small">{{ form.state.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Technology Track -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-cpu"></i> 2. Preferred Technology Track <span style="font-weight:400; font-size:0.875rem;">(Select one only)</span>
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <label class="form-label fw-semibold">{{ form.tech_track.label }} <span style="color:red">*</span></label>
+                    {{ form.tech_track }}
+                    {% if form.tech_track.errors %}<div class="text-danger small">{{ form.tech_track.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- SECTION 3: Professional Qualifications -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-award"></i> 3. Professional Qualifications
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ form.certifications.label }} <span style="color:red">*</span></label>
+                        <small class="d-block text-muted mb-1">List all relevant certifications, including the issuing organisation and year obtained.</small>
+                        {{ form.certifications }}
+                        {% if form.certifications.errors %}<div class="text-danger small">{{ form.certifications.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">{{ form.previous_gpgd.label }}</label>
+                        {{ form.previous_gpgd }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Performance Records -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-graph-up-arrow"></i> 4. Performance Records
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">{{ form.lnpt_current.label }} <span style="color:red">*</span></label>
+                            {{ form.lnpt_current }}
+                            {% if form.lnpt_current.errors %}<div class="text-danger small">{{ form.lnpt_current.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">{{ form.lnpt_previous.label }} <span style="color:red">*</span></label>
+                            {{ form.lnpt_previous }}
+                            {% if form.lnpt_previous.errors %}<div class="text-danger small">{{ form.lnpt_previous.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">{{ form.lnpt_two_years.label }} <span style="color:red">*</span></label>
+                            {{ form.lnpt_two_years }}
+                            {% if form.lnpt_two_years.errors %}<div class="text-danger small">{{ form.lnpt_two_years.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: Professional Contributions -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-briefcase"></i> 5. Professional Contributions
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ form.training_experience.label }} <span style="color:red">*</span></label>
+                        {{ form.training_experience }}
+                        {% if form.training_experience.errors %}<div class="text-danger small">{{ form.training_experience.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">{{ form.awards.label }}</label>
+                        {{ form.awards }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: Additional Information -->
+            <div class="card" style="margin-bottom:2rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-chat-text"></i> 6. Additional Information
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <label class="form-label fw-semibold">{{ form.additional_info.label }}</label>
+                    {{ form.additional_info }}
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-bottom:3rem;">
+                <p class="text-muted small mb-3">By submitting this form, you confirm that all information provided is accurate and complete.</p>
+                <button type="submit" class="btn btn-primary btn-lg" style="padding:0.75rem 3rem; font-size:1rem;">
+                    <i class="bi bi-send-check"></i> Submit Application
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

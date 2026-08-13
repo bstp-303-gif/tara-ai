@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Django Dev Server",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["manage.py", "runserver"],
+      "port": 8000
+    }
+  ]
+}

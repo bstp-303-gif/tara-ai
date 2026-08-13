@@ -1,0 +1,186 @@
+- generic [ref=f10e2]:
+  - complementary [ref=f10e3]:
+    - link " MyGPGD J360" [ref=f10e4] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+      - generic [ref=f10e5]: 
+      - generic [ref=f10e7]: MyGPGD J360
+    - list [ref=f10e8]:
+      - listitem [ref=f10e9]:
+        - link " Upload" [ref=f10e10] [cursor=pointer]:
+          - /url: /agents/upload-certifications/
+          - generic [ref=f10e11]: 
+          - text: Upload
+      - listitem [ref=f10e12]:
+        - link " Results" [ref=f10e13] [cursor=pointer]:
+          - /url: /agents/agent1-results/
+          - generic [ref=f10e14]: 
+          - text: Results
+      - listitem [ref=f10e15]:
+        - link " Dashboard" [ref=f10e16] [cursor=pointer]:
+          - /url: /agents/agent1-dashboard/
+          - generic [ref=f10e17]: 
+          - text: Dashboard
+      - listitem [ref=f10e18]:
+        - link " Error Log" [ref=f10e19] [cursor=pointer]:
+          - /url: /agents/error-log/
+          - generic [ref=f10e20]: 
+          - text: Error Log
+      - listitem [ref=f10e21]: GPGD Programme
+      - listitem [ref=f10e22]:
+        - link " Recognition Dashboard" [ref=f10e23] [cursor=pointer]:
+          - /url: /agents/recognition-dashboard/
+          - generic [ref=f10e24]: 
+          - text: Recognition Dashboard
+      - listitem [ref=f10e25]:
+        - link " Activity Reports" [ref=f10e26] [cursor=pointer]:
+          - /url: /agents/activity-dashboard/
+          - generic [ref=f10e27]: 
+          - text: Activity Reports
+      - listitem [ref=f10e28]: Manage
+      - listitem [ref=f10e29]:
+        - link " Providers & Rules" [ref=f10e30] [cursor=pointer]:
+          - /url: /agents/manage/providers/
+          - generic [ref=f10e31]: 
+          - text: Providers & Rules
+      - listitem [ref=f10e32]:
+        - link " Applications" [ref=f10e33] [cursor=pointer]:
+          - /url: /agents/manage/applications/
+          - generic [ref=f10e34]: 
+          - text: Applications
+      - listitem [ref=f10e35]:
+        - link " Teachers" [ref=f10e36] [cursor=pointer]:
+          - /url: /agents/manage/teachers/
+          - generic [ref=f10e37]: 
+          - text: Teachers
+    - button " Logout (qa_verify_temp)" [ref=f10e40] [cursor=pointer]:
+      - generic [ref=f10e41]: 
+      - text: Logout (qa_verify_temp)
+  - generic [ref=f10e42]:
+    - generic [ref=f10e43]:
+      - generic [ref=f10e44]:
+        - generic [ref=f10e45]: 
+        - heading "GPGD Activity & Training Reporting Dashboard" [level=1] [ref=f10e47]
+        - paragraph [ref=f10e48]: Professional development activities reported monthly by recognized GPGDs
+      - generic [ref=f10e51]:
+        - generic [ref=f10e52]:
+          - generic [ref=f10e53]: Technology Track
+          - combobox [ref=f10e54]:
+            - option "All Tracks" [selected]
+            - option "Microsoft"
+            - option "Google"
+            - option "Apple"
+        - generic [ref=f10e55]:
+          - generic [ref=f10e56]: State
+          - combobox [ref=f10e57]:
+            - option "All States" [selected]
+            - option "Johor"
+            - option "Kedah"
+            - option "Kelantan"
+            - option "Melaka"
+            - option "Negeri Sembilan"
+            - option "Pahang"
+            - option "Perak"
+            - option "Perlis"
+            - option "Pulau Pinang"
+            - option "Sabah"
+            - option "Sarawak"
+            - option "Selangor"
+            - option "Terengganu"
+            - option "W.P. Kuala Lumpur"
+            - option "W.P. Labuan"
+            - option "W.P. Putrajaya"
+        - generic [ref=f10e58]:
+          - generic [ref=f10e59]: District
+          - textbox "Any district" [ref=f10e60]
+        - generic [ref=f10e61]:
+          - generic [ref=f10e62]: Month
+          - textbox [ref=f10e63]
+        - generic [ref=f10e64]:
+          - generic [ref=f10e65]: Search (GPGD / Training Title)
+          - textbox [ref=f10e66]
+        - button " Apply" [ref=f10e68] [cursor=pointer]:
+          - generic [ref=f10e69]: 
+          - text: Apply
+        - link "Clear" [ref=f10e71] [cursor=pointer]:
+          - /url: /agents/activity-dashboard/
+      - generic [ref=f10e72]:
+        - generic [ref=f10e74]:
+          - generic [ref=f10e75]: 
+          - generic [ref=f10e77]: Total Trainings
+          - generic [ref=f10e78]: "1"
+        - generic [ref=f10e80]:
+          - generic [ref=f10e81]: 
+          - generic [ref=f10e83]: Total Hours Delivered
+          - generic [ref=f10e84]: "3.5"
+        - generic [ref=f10e86]:
+          - generic [ref=f10e87]: 
+          - generic [ref=f10e89]: Teachers Reached
+          - generic [ref=f10e90]: "32"
+        - generic [ref=f10e92]:
+          - generic [ref=f10e93]: 
+          - generic [ref=f10e95]: Students Reached
+          - generic [ref=f10e96]: "32"
+      - paragraph [ref=f10e97]:
+        - generic [ref=f10e98]: 
+        - text: Teachers/Students Reached sums each report's participant count where that audience was selected — a session logged for both audiences counts toward each.
+      - generic [ref=f10e99]:
+        - strong [ref=f10e103]: Monthly Trend
+        - strong [ref=f10e109]: By Technology Track
+        - strong [ref=f10e115]: By State
+      - generic [ref=f10e118]:
+        - generic [ref=f10e120]:
+          - strong [ref=f10e122]:
+            - generic [ref=f10e123]: 
+            - text: Top Active GPGDs
+          - table [ref=f10e125]:
+            - rowgroup [ref=f10e126]:
+              - row [ref=f10e127]:
+                - cell [ref=f10e128]:
+                  - strong [ref=f10e129]: Dr.Jayanthi Jayaraman
+                  - text: BSTP — Johor
+                - cell "1 report" [ref=f10e130]
+        - generic [ref=f10e133]:
+          - strong [ref=f10e135]:
+            - generic [ref=f10e136]: 
+            - text: Monthly Reminder Emails
+          - generic [ref=f10e137]:
+            - paragraph [ref=f10e138]: Normally sent automatically to every recognized GPGD on the 1st of each month. Use this to trigger it manually (e.g. for testing, or a missed run).
+            - button " Send Monthly Reminders Now" [ref=f10e140] [cursor=pointer]:
+              - generic [ref=f10e141]: 
+              - text: Send Monthly Reminders Now
+      - generic [ref=f10e142]:
+        - heading " Recent Training Activities" [level=5] [ref=f10e144]:
+          - generic [ref=f10e145]: 
+          - text: Recent Training Activities
+        - table [ref=f10e148]:
+          - rowgroup [ref=f10e149]:
+            - row [ref=f10e150]:
+              - columnheader "GPGD" [ref=f10e151]
+              - columnheader "Training" [ref=f10e152]
+              - columnheader "Date / Time" [ref=f10e153]
+              - columnheader "Hours" [ref=f10e154]
+              - columnheader "Audience" [ref=f10e155]
+              - columnheader "Participants" [ref=f10e156]
+              - columnheader "Mode" [ref=f10e157]
+              - columnheader "Evidence" [ref=f10e158]
+          - rowgroup [ref=f10e159]:
+            - row [ref=f10e160]:
+              - cell [ref=f10e161]:
+                - strong [ref=f10e162]: Dr.Jayanthi Jayaraman
+                - text: Google — BSTP, Segamat, Johor
+              - cell "Google Slides for Digital Storytelling Hands-on workshop introducing digital storytelling techniques using Google Slides and Google Sites for classroom projects." [ref=f10e163]
+              - cell "10 Jul 2026 09:00–12:30" [ref=f10e164]: 10 Jul 202609:00–12:30
+              - cell "3.50" [ref=f10e165]
+              - cell "Teachers, Students" [ref=f10e166]
+              - cell "32" [ref=f10e167]
+              - cell "Physical" [ref=f10e168]
+              - cell [ref=f10e169]:
+                - generic [ref=f10e170]:
+                  - link [ref=f10e171] [cursor=pointer]:
+                    - /url: /media/activity_evidence/photos/2026/07/demo1.jpg
+                    - img "Evidence 1" [ref=f10e172]
+                  - link [ref=f10e173] [cursor=pointer]:
+                    - /url: /media/activity_evidence/photos/2026/07/demo2.jpg
+                    - img "Evidence 2" [ref=f10e174]
+    - contentinfo [ref=f10e175]:
+      - generic [ref=f10e176]: MyGPGD J360 · Built with Django + Bootstrap

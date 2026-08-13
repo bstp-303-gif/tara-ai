@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Files — MyGPGD J360{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-9 mx-auto">
+
+        <div class="hero-banner">
+            <div class="hero-icon-badge"><i class="bi bi-cloud-arrow-up"></i></div>
+            <h1 style="font-size:1.9rem; font-weight:700; margin-bottom:0.4rem;">Certification Collector</h1>
+            <p style="margin-bottom:0; max-width:560px;">Upload certified teacher lists from Google, Microsoft, and Apple — the system normalizes, deduplicates, and screens eligibility automatically.</p>
+        </div>
+
+        <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-file-earmark-spreadsheet" style="color:#4f46e5; font-size:1.15rem;"></i>
+                <h3 style="margin-bottom:0; font-size:1.25rem;">Upload Certified Teacher Lists</h3>
+            </div>
+            <p style="color: #71717a; margin-bottom: 1.75rem;">Upload three Excel files containing certified teacher data from Google, Microsoft, and Apple.</p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_provider" class="form-label" style="font-weight: 600;">Provider</label>
+                    {{ form.provider }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_file_upload" class="form-label" style="font-weight: 600;">Excel File (.xlsx)</label>
+                    <div class="file-upload-box" id="upload-dropzone" role="button" tabindex="0">
+                        <input type="file" id="id_file_upload" name="file_upload" accept=".xlsx" style="display: none;">
+                        <div style="cursor: pointer; margin: 0; pointer-events: none;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem; color:#4f46e5;"><i class="bi bi-cloud-arrow-up" id="upload-icon"></i></div>
+                            <div style="font-weight: 600; color:#27272a;" id="file-upload-text">Click to upload or drag and drop</div>
+                            <div style="font-size: 0.875rem; color: #71717a;">Excel files (.xlsx) only</div>
+                        </div>
+                    </div>
+                    <small class="form-text" style="color: #71717a;">
+                        <i class="bi bi-info-circle"></i> File must contain columns for: Name, IC Number, Email, School, State, Certification Level, Certification Year
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;"><i class="bi bi-upload"></i> Upload File</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="background-color: #fafafa; border-bottom: 1px solid #ececf3; padding: 1rem 1.25rem;">
+                <h5 style="margin: 0; font-weight: 600;"><i class="bi bi-clock-history" style="color:#4f46e5;"></i> Recent Uploads</h5>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% if recent_uploads %}
+                    <table class="table table-hover" style="margin: 0;">
+                        <thead style="background-color: #fafafa; border-bottom: 1px solid #ececf3;">
+                            <tr>
+                                <th>Provider</th>
+                                <th>File Name</th>
+                                <th>Records</th>
+                                <th>Status</th>
+                                <th>Uploaded</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in recent_uploads %}
+                                <tr>
+                                    <td><strong>{{ file.provider }}</strong></td>
+                                    <td>{{ file.file_name }}</td>
+                                    <td>{{ file.record_count }}</td>
+                                    <td>
+                                        <span class="status-badge {% if file.validation_status == 'valid' %}status-valid{% else %}status-invalid{% endif %}">
+                                            {% if file.validation_status == 'valid' %}<i class="bi bi-check-circle-fill"></i> Valid{% else %}<i class="bi bi-x-circle-fill"></i> Invalid{% endif %}
+                                        </span>
+                                    </td>
+                                    <td style="font-size: 0.875rem; color: #71717a;">{{ file.uploaded_at|date:"H:i" }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'delete_file' file.id %}" onsubmit="return confirm('Delete {{ file.file_name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm" style="color: #ef4444; border: 1px solid #fecaca; padding: 0.2rem 0.6rem; background: #fff5f5; border-radius:7px;" title="Delete"><i class="bi bi-trash3"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p style="color: #71717a; padding: 2.5rem 1rem; margin: 0; text-align: center;"><i class="bi bi-inbox" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; color:#c7c7d1;"></i>No files uploaded yet. Start by uploading your first file above.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadBox = document.getElementById('upload-dropzone');
+    const fileInput = document.getElementById('id_file_upload');
+    const fileUploadText = document.getElementById('file-upload-text');
+    const uploadIcon = document.getElementById('upload-icon');
+
+    uploadBox.addEventListener('click', () => fileInput.click());
+    uploadBox.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInput.click();
+        }
+    });
+
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = 'var(--primary)';
+        uploadBox.style.backgroundColor = '#eef2ff';
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.style.borderColor = '#d4d4f7';
+        uploadBox.style.backgroundColor = '';
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = '#d4d4f7';
+        uploadBox.style.backgroundColor = '';
+        fileInput.files = e.dataTransfer.files;
+        if (fileInput.files.length > 0) {
+            fileUploadText.textContent = fileInput.files[0].name;
+            uploadIcon.className = 'bi bi-file-earmark-check';
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileUploadText.textContent = fileInput.files[0].name;
+            uploadIcon.className = 'bi bi-file-earmark-check';
+        }
+    });
+</script>
+{% endblock %}

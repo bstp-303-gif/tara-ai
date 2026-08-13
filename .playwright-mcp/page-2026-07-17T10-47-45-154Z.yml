@@ -1,0 +1,125 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "🤖 MyGPGD J360" [ref=e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "Upload" [ref=e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=e9]:
+          - link "Results" [ref=e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=e11]:
+          - link "Dashboard" [ref=e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=e13]:
+          - button "Manage" [ref=e14] [cursor=pointer]
+        - listitem [ref=e15]:
+          - button "Logout (admin)" [ref=e17] [cursor=pointer]
+  - generic [ref=e18]:
+    - heading "Agent 1 Dashboard" [level=1] [ref=e19]
+    - paragraph [ref=e20]: Processing summary and statistics
+    - generic [ref=e21]:
+      - generic [ref=e23]:
+        - generic [ref=e24]: Total Records
+        - generic [ref=e25]: "0"
+        - generic [ref=e26]: from all providers
+      - generic [ref=e28]:
+        - generic [ref=e29]: Unique Teachers
+        - generic [ref=e30]: "0"
+        - generic [ref=e31]: after deduplication
+      - generic [ref=e33]:
+        - generic [ref=e34]: Multi-Certified
+        - generic [ref=e35]: "0"
+        - generic [ref=e36]: in multiple providers
+      - generic [ref=e38]:
+        - generic [ref=e39]: Eligible
+        - generic [ref=e40]: "0"
+        - generic [ref=e41]: for nomination
+    - generic [ref=e42]:
+      - heading "Processing Steps" [level=5] [ref=e44]
+      - generic [ref=e45]:
+        - generic [ref=e47]:
+          - generic [ref=e48]: ✓
+          - generic [ref=e49]:
+            - generic [ref=e50]: Files Validated
+            - generic [ref=e51]: 0 valid file(s) uploaded
+        - generic [ref=e53]:
+          - generic [ref=e54]: ✓
+          - generic [ref=e55]:
+            - generic [ref=e56]: Data Normalized
+            - generic [ref=e57]: Standard column schema applied to all files
+        - generic [ref=e59]:
+          - generic [ref=e60]: ✓
+          - generic [ref=e61]:
+            - generic [ref=e62]: Duplicates Merged
+            - generic [ref=e63]: 0 records → 0 unique teachers
+        - generic [ref=e65]:
+          - generic [ref=e66]: ✓
+          - generic [ref=e67]:
+            - generic [ref=e68]: Eligibility Applied
+            - generic [ref=e69]: 0 eligible | 0 not eligible
+    - generic [ref=e70]:
+      - heading "Download Results" [level=5] [ref=e72]
+      - generic [ref=e74]:
+        - link "📊 Combined Normalized Data" [ref=e75] [cursor=pointer]:
+          - /url: /agents/download-combined/
+          - generic [ref=e76]: 📊
+          - text: Combined Normalized Data
+        - link "🔄 Deduplicated Teacher List" [ref=e77] [cursor=pointer]:
+          - /url: /agents/download-dedup/
+          - generic [ref=e78]: 🔄
+          - text: Deduplicated Teacher List
+        - link "✅ Eligible Candidates (Ranked)" [ref=e79] [cursor=pointer]:
+          - /url: /agents/download-eligible/
+          - generic [ref=e80]: ✅
+          - text: Eligible Candidates (Ranked)
+    - generic [ref=e81]:
+      - heading "Eligible Candidates (Preview)" [level=5] [ref=e83]
+      - paragraph [ref=e85]: No eligible candidates yet. Upload and process files to see results.
+    - generic [ref=e86]:
+      - heading "🤖 Agent Activity" [level=5] [ref=e88]
+      - table [ref=e90]:
+        - rowgroup [ref=e91]:
+          - row [ref=e92]:
+            - columnheader "When" [ref=e93]
+            - columnheader "Trigger" [ref=e94]
+            - columnheader "Summary" [ref=e95]
+            - columnheader "Status" [ref=e96]
+        - rowgroup [ref=e97]:
+          - row [ref=e98]:
+            - cell "17 Jul, 08:08" [ref=e99]
+            - cell "Manual verification run — confirming ANTHROPIC_API_KEY works end to end." [ref=e100]
+            - 'cell "The verification run confirmed the system is responding end to end — read-only status checks returned successfully. All three certification providers currently have valid files (Google: 10, Microsoft: 10, Apple: 6), and there is 1 pending application awaiting compilation. Since this trigger was only a manual connectivity check (not a request to process new work), I took no pipeline actions; if you''d like, I can run the roster pipeline or compile that pending application next." [ref=e101]'
+            - cell "✅ Success" [ref=e102]
+          - row [ref=e104]:
+            - cell "17 Jul, 06:18" [ref=e105]
+            - cell "Google certification file uploaded (10 records)." [ref=e106]
+            - cell "ANTHROPIC_API_KEY is not configured — the pipeline agent cannot run." [ref=e107]
+            - cell "⚠️ Error" [ref=e108]
+    - generic [ref=e110]:
+      - heading "📧 Send Invitations to Eligible Candidates (manual override)" [level=5] [ref=e112]
+      - generic [ref=e113]:
+        - paragraph [ref=e114]:
+          - text: Send a personalised invitation email to all
+          - strong [ref=e115]: "0"
+          - text: eligible teacher(s) who have not yet applied. Each email contains a secure, unique application link valid for 30 days.
+        - generic [ref=e116]:
+          - generic [ref=e117]: "Submission deadline:"
+          - textbox "Submission deadline:" [ref=e118]: 2026-09-15
+          - button "Save" [ref=e119] [cursor=pointer]
+          - generic [ref=e120]: Used as the closing date in every invitation email below.
+        - generic [ref=e121]:
+          - button "📨 Send Invitation Emails" [disabled]
+          - text: Emails print to the server console in development mode.
+    - generic [ref=e122]:
+      - heading "📋 Compile & Rank Applications (manual override)" [level=5] [ref=e124]
+      - generic [ref=e125]:
+        - paragraph [ref=e126]: Scores and ranks every submitted application within its state, and auto-flags the top-ranked candidates needed to fill each district's minimum quota (2 per technology; 5 per technology for Perlis, WP Putrajaya, and WP Labuan, which have no districts). Once compiled, each state's ranked shortlist becomes available to that State Officer for approval.
+        - paragraph [ref=e127]: ⚠️ The submission deadline (15 Sep 2026) hasn't passed yet. You can still compile now if needed.
+        - button "📋 Compile & Rank (1 pending)" [ref=e129] [cursor=pointer]
+    - link "← Upload New Files" [ref=e131] [cursor=pointer]:
+      - /url: /agents/upload-certifications/
+  - contentinfo [ref=e132]:
+    - generic [ref=e133]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

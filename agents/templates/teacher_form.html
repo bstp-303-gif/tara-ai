@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Edit Teacher — MyGPGD J360{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 style="font-size:1.5rem; font-weight:700; color:#1e3a5f; margin-bottom:1.5rem;">Edit Teacher — {{ teacher.full_name }}</h1>
+
+        <div class="card" style="padding:2rem;">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight:500;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div style="color:#ef4444; font-size:0.875rem;">{{ field.errors }}</div>{% endif %}
+                </div>
+                {% endfor %}
+
+                <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'manage_teachers' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

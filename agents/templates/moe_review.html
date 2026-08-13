@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}MoE Final Review — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">MoE Officer — Final Review</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Candidates approved by their State Officer, awaiting final MoE approval. Approving a candidate sends them
+    the Letter of Recognition by email.
+</p>
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="table table-hover" style="margin:0;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem;">State</th>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>District</th>
+                    <th>Tech Track</th>
+                    <th>Score</th>
+                    <th>Recommended</th>
+                    <th style="min-width:260px;">Decision</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td style="padding:1rem;">{{ application.state }}</td>
+                    <td><strong>#{{ application.rank_in_state }}</strong></td>
+                    <td>
+                        {{ application.full_name }}<br>
+                        <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }}</span>
+                    </td>
+                    <td>{{ application.district }}</td>
+                    <td>{{ application.tech_track }}</td>
+                    <td>{{ application.score }}</td>
+                    <td>
+                        {% if application.is_recommended %}
+                            <span class="status-badge" style="background-color:#d1fae5; color:#065f46;">✅ Recommended</span>
+                        {% else %}
+                            <span style="color:#9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+                            {% csrf_token %}
+                            <input type="hidden" name="application_id" value="{{ application.id }}">
+                            <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Remarks (optional)" value="{{ application.moe_remarks }}" style="max-width:160px;">
+                            <input type="text" name="award_category" class="form-control form-control-sm" placeholder="Award category (optional)" value="{{ application.award_category }}" style="max-width:160px;">
+                            <button type="submit" name="decision" value="approve" class="btn btn-sm btn-outline-success">Approve</button>
+                            <button type="submit" name="decision" value="decline" class="btn btn-sm btn-outline-danger" onclick="return confirm('Decline {{ application.full_name|escapejs }}?');">Decline</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center; color:#6b7280; padding:2rem;">No state-approved candidates awaiting final review yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

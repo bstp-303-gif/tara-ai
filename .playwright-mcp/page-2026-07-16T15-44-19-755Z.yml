@@ -1,0 +1,245 @@
+- generic [active] [ref=f7e1]:
+  - navigation [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - link "🤖 MyGPGD J360" [ref=f7e4] [cursor=pointer]:
+        - /url: /agents/upload-certifications/
+      - list [ref=f7e6]:
+        - listitem [ref=f7e7]:
+          - link "Upload" [ref=f7e8] [cursor=pointer]:
+            - /url: /agents/upload-certifications/
+        - listitem [ref=f7e9]:
+          - link "Results" [ref=f7e10] [cursor=pointer]:
+            - /url: /agents/agent1-results/
+        - listitem [ref=f7e11]:
+          - link "Dashboard" [ref=f7e12] [cursor=pointer]:
+            - /url: /agents/agent1-dashboard/
+        - listitem [ref=f7e13]:
+          - button "Manage" [ref=f7e14] [cursor=pointer]
+  - generic [ref=f7e15]:
+    - heading "Manage Providers & Certification Rules" [level=1] [ref=f7e16]
+    - paragraph [ref=f7e17]: Add certification providers (Google, Microsoft, Apple, etc.) and the keyword rules used to decide eligibility — the same data Django admin edited, now in-system.
+    - generic [ref=f7e18]:
+      - heading "➕ Add Provider" [level=5] [ref=f7e20]
+      - generic [ref=f7e22]:
+        - generic [ref=f7e23]:
+          - generic [ref=f7e24]: Internal name
+          - textbox "e.g. Google" [ref=f7e25]
+        - generic [ref=f7e26]:
+          - generic [ref=f7e27]: Display name
+          - textbox "e.g. Google Certified Teachers" [ref=f7e28]
+        - generic [ref=f7e30]:
+          - checkbox "Active" [checked] [ref=f7e31]
+          - text: Active
+        - button "Add Provider" [ref=f7e33] [cursor=pointer]
+    - generic [ref=f7e34]:
+      - generic [ref=f7e35]:
+        - heading "Apple" [level=5] [ref=f7e36]
+        - button "🗑️ Delete Provider" [ref=f7e38] [cursor=pointer]
+      - generic [ref=f7e39]:
+        - generic [ref=f7e40]:
+          - generic [ref=f7e41]:
+            - generic [ref=f7e42]: Internal name
+            - textbox "e.g. Google" [ref=f7e43]: Apple
+          - generic [ref=f7e44]:
+            - generic [ref=f7e45]: Display name
+            - textbox "e.g. Google Certified Teachers" [ref=f7e46]: Apple
+          - generic [ref=f7e48]:
+            - checkbox "Active" [checked] [ref=f7e49]
+            - text: Active
+          - button "Save Provider" [ref=f7e50] [cursor=pointer]
+        - heading "Certification Rules" [level=6] [ref=f7e51]
+        - generic [ref=f7e52]:
+          - generic [ref=f7e53]: Canonical Name
+          - generic [ref=f7e54]: Required Keywords
+          - generic [ref=f7e55]: Exclude Keywords
+          - generic [ref=f7e56]: Eligible
+          - generic [ref=f7e57]: Priority
+        - generic [ref=f7e59]:
+          - generic [ref=f7e60]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e62]: Apple Learning Coach (ALC)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e64]: learning coach
+            - textbox "comma-separated, e.g. trainer" [ref=f7e66]
+            - checkbox [checked] [ref=f7e68]
+            - spinbutton [ref=f7e70]: "10"
+            - button "Save" [ref=f7e71] [cursor=pointer]
+          - button "🗑️" [ref=f7e73] [cursor=pointer]
+        - generic [ref=f7e74]:
+          - generic [ref=f7e75]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e77]: Apple Teacher
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e79]: apple teacher
+            - textbox "comma-separated, e.g. trainer" [ref=f7e81]
+            - checkbox [checked] [ref=f7e83]
+            - spinbutton [ref=f7e85]: "5"
+            - button "Save" [ref=f7e86] [cursor=pointer]
+          - button "🗑️" [ref=f7e88] [cursor=pointer]
+        - generic [ref=f7e89]:
+          - generic [ref=f7e90]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e92]: Apple Teacher
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e94]: teacher
+            - textbox "comma-separated, e.g. trainer" [ref=f7e96]: learning coach
+            - checkbox [checked] [ref=f7e98]
+            - spinbutton [ref=f7e100]: "4"
+            - button "Save" [ref=f7e101] [cursor=pointer]
+          - button "🗑️" [ref=f7e103] [cursor=pointer]
+        - generic [ref=f7e104]:
+          - generic [ref=f7e105]:
+            - generic [ref=f7e106]: Canonical Name
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e107]
+          - generic [ref=f7e108]:
+            - generic [ref=f7e109]: Required Keywords
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e110]
+          - generic [ref=f7e111]:
+            - generic [ref=f7e112]: Exclude Keywords
+            - textbox "comma-separated, e.g. trainer" [ref=f7e113]
+          - generic [ref=f7e115]:
+            - checkbox "Eligible" [checked] [ref=f7e116]
+            - text: Eligible
+          - generic [ref=f7e117]:
+            - generic [ref=f7e118]: Priority
+            - spinbutton [ref=f7e119]: "0"
+          - button "➕ Add Rule" [ref=f7e120] [cursor=pointer]
+    - generic [ref=f7e121]:
+      - generic [ref=f7e122]:
+        - heading "Google" [level=5] [ref=f7e123]
+        - button "🗑️ Delete Provider" [ref=f7e125] [cursor=pointer]
+      - generic [ref=f7e126]:
+        - generic [ref=f7e127]:
+          - generic [ref=f7e128]:
+            - generic [ref=f7e129]: Internal name
+            - textbox "e.g. Google" [ref=f7e130]: Google
+          - generic [ref=f7e131]:
+            - generic [ref=f7e132]: Display name
+            - textbox "e.g. Google Certified Teachers" [ref=f7e133]: Google
+          - generic [ref=f7e135]:
+            - checkbox "Active" [checked] [ref=f7e136]
+            - text: Active
+          - button "Save Provider" [ref=f7e137] [cursor=pointer]
+        - heading "Certification Rules" [level=6] [ref=f7e138]
+        - generic [ref=f7e139]:
+          - generic [ref=f7e140]: Canonical Name
+          - generic [ref=f7e141]: Required Keywords
+          - generic [ref=f7e142]: Exclude Keywords
+          - generic [ref=f7e143]: Eligible
+          - generic [ref=f7e144]: Priority
+        - generic [ref=f7e146]:
+          - generic [ref=f7e147]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e149]: Google Certified Trainer (GCT)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e151]: trainer
+            - textbox "comma-separated, e.g. trainer" [ref=f7e153]
+            - checkbox [checked] [ref=f7e155]
+            - spinbutton [ref=f7e157]: "10"
+            - button "Save" [ref=f7e158] [cursor=pointer]
+          - button "🗑️" [ref=f7e160] [cursor=pointer]
+        - generic [ref=f7e161]:
+          - generic [ref=f7e162]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e164]: Google Certified Coach (GCC)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e166]: coach
+            - textbox "comma-separated, e.g. trainer" [ref=f7e168]
+            - checkbox [checked] [ref=f7e170]
+            - spinbutton [ref=f7e172]: "9"
+            - button "Save" [ref=f7e173] [cursor=pointer]
+          - button "🗑️" [ref=f7e175] [cursor=pointer]
+        - generic [ref=f7e176]:
+          - generic [ref=f7e177]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e179]: Google Certified Educator Level 2 (GCE L2)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e181]: level 2
+            - textbox "comma-separated, e.g. trainer" [ref=f7e183]
+            - checkbox [checked] [ref=f7e185]
+            - spinbutton [ref=f7e187]: "8"
+            - button "Save" [ref=f7e188] [cursor=pointer]
+          - button "🗑️" [ref=f7e190] [cursor=pointer]
+        - generic [ref=f7e191]:
+          - generic [ref=f7e192]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e194]: Google Certified Educator Level 2 (GCE L2)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e196]: l2
+            - textbox "comma-separated, e.g. trainer" [ref=f7e198]: level 1, l1
+            - checkbox [checked] [ref=f7e200]
+            - spinbutton [ref=f7e202]: "7"
+            - button "Save" [ref=f7e203] [cursor=pointer]
+          - button "🗑️" [ref=f7e205] [cursor=pointer]
+        - generic [ref=f7e206]:
+          - generic [ref=f7e207]:
+            - generic [ref=f7e208]: Canonical Name
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e209]
+          - generic [ref=f7e210]:
+            - generic [ref=f7e211]: Required Keywords
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e212]
+          - generic [ref=f7e213]:
+            - generic [ref=f7e214]: Exclude Keywords
+            - textbox "comma-separated, e.g. trainer" [ref=f7e215]
+          - generic [ref=f7e217]:
+            - checkbox "Eligible" [checked] [ref=f7e218]
+            - text: Eligible
+          - generic [ref=f7e219]:
+            - generic [ref=f7e220]: Priority
+            - spinbutton [ref=f7e221]: "0"
+          - button "➕ Add Rule" [ref=f7e222] [cursor=pointer]
+    - generic [ref=f7e223]:
+      - generic [ref=f7e224]:
+        - heading "Microsoft" [level=5] [ref=f7e225]
+        - button "🗑️ Delete Provider" [ref=f7e227] [cursor=pointer]
+      - generic [ref=f7e228]:
+        - generic [ref=f7e229]:
+          - generic [ref=f7e230]:
+            - generic [ref=f7e231]: Internal name
+            - textbox "e.g. Google" [ref=f7e232]: Microsoft
+          - generic [ref=f7e233]:
+            - generic [ref=f7e234]: Display name
+            - textbox "e.g. Google Certified Teachers" [ref=f7e235]: Microsoft
+          - generic [ref=f7e237]:
+            - checkbox "Active" [checked] [ref=f7e238]
+            - text: Active
+          - button "Save Provider" [ref=f7e239] [cursor=pointer]
+        - heading "Certification Rules" [level=6] [ref=f7e240]
+        - generic [ref=f7e241]:
+          - generic [ref=f7e242]: Canonical Name
+          - generic [ref=f7e243]: Required Keywords
+          - generic [ref=f7e244]: Exclude Keywords
+          - generic [ref=f7e245]: Eligible
+          - generic [ref=f7e246]: Priority
+        - generic [ref=f7e248]:
+          - generic [ref=f7e249]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e251]: Microsoft Certified Educator (MCE)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e253]: certified educator
+            - textbox "comma-separated, e.g. trainer" [ref=f7e255]
+            - checkbox [checked] [ref=f7e257]
+            - spinbutton [ref=f7e259]: "10"
+            - button "Save" [ref=f7e260] [cursor=pointer]
+          - button "🗑️" [ref=f7e262] [cursor=pointer]
+        - generic [ref=f7e263]:
+          - generic [ref=f7e264]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e266]: Microsoft Innovative Educator Expert (MIEE)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e268]: innovative educator, expert
+            - textbox "comma-separated, e.g. trainer" [ref=f7e270]
+            - checkbox [checked] [ref=f7e272]
+            - spinbutton [ref=f7e274]: "5"
+            - button "Save" [ref=f7e275] [cursor=pointer]
+          - button "🗑️" [ref=f7e277] [cursor=pointer]
+        - generic [ref=f7e278]:
+          - generic [ref=f7e279]:
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e281]: Microsoft Innovative Educator Expert (MIEE)
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e283]: expert
+            - textbox "comma-separated, e.g. trainer" [ref=f7e285]: certified educator, innovative educator
+            - checkbox [checked] [ref=f7e287]
+            - spinbutton [ref=f7e289]: "4"
+            - button "Save" [ref=f7e290] [cursor=pointer]
+          - button "🗑️" [ref=f7e292] [cursor=pointer]
+        - generic [ref=f7e293]:
+          - generic [ref=f7e294]:
+            - generic [ref=f7e295]: Canonical Name
+            - textbox "e.g. Microsoft Innovative Educator Expert (MIEE)" [ref=f7e296]
+          - generic [ref=f7e297]:
+            - generic [ref=f7e298]: Required Keywords
+            - textbox "comma-separated, e.g. innovative educator, expert" [ref=f7e299]
+          - generic [ref=f7e300]:
+            - generic [ref=f7e301]: Exclude Keywords
+            - textbox "comma-separated, e.g. trainer" [ref=f7e302]
+          - generic [ref=f7e304]:
+            - checkbox "Eligible" [checked] [ref=f7e305]
+            - text: Eligible
+          - generic [ref=f7e306]:
+            - generic [ref=f7e307]: Priority
+            - spinbutton [ref=f7e308]: "0"
+          - button "➕ Add Rule" [ref=f7e309] [cursor=pointer]
+  - contentinfo [ref=f7e310]:
+    - generic [ref=f7e311]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"

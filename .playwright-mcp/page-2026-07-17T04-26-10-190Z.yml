@@ -1,0 +1,30 @@
+- generic [active] [ref=f23e1]:
+  - navigation [ref=f23e2]:
+    - generic [ref=f23e3]:
+      - link "🤖 MyGPGD J360" [ref=f23e4] [cursor=pointer]:
+        - /url: /agents/moe/review/
+      - list [ref=f23e6]:
+        - listitem [ref=f23e7]:
+          - link "MoE Review" [ref=f23e8] [cursor=pointer]:
+            - /url: /agents/moe/review/
+        - listitem [ref=f23e9]:
+          - button "Logout (moe_officer)" [ref=f23e11] [cursor=pointer]
+  - generic [ref=f23e12]:
+    - heading "MoE Officer — Final Review" [level=1] [ref=f23e13]
+    - paragraph [ref=f23e14]: Candidates approved by their State Officer, awaiting final MoE approval. Approving a candidate sends them the Letter of Recognition by email.
+    - table [ref=f23e17]:
+      - rowgroup [ref=f23e18]:
+        - row [ref=f23e19]:
+          - columnheader "State" [ref=f23e20]
+          - columnheader "Rank" [ref=f23e21]
+          - columnheader "Name" [ref=f23e22]
+          - columnheader "District" [ref=f23e23]
+          - columnheader "Tech Track" [ref=f23e24]
+          - columnheader "Score" [ref=f23e25]
+          - columnheader "Recommended" [ref=f23e26]
+          - columnheader "Decision" [ref=f23e27]
+      - rowgroup [ref=f23e28]:
+        - row [ref=f23e29]:
+          - cell "No state-approved candidates awaiting final review yet." [ref=f23e30]
+  - contentinfo [ref=f23e31]:
+    - generic [ref=f23e32]: "MyGPGD J360 — Agent 1: Certification Collector | Built with Django + Bootstrap"
