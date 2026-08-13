@@ -59,7 +59,24 @@
       "PowerShell(gh *)",
       "PowerShell(winget *)",
       "PowerShell($ghPath = \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\"; if \\(Test-Path $ghPath\\) { & $ghPath --version } else { Get-ChildItem \"C:\\\\Program Files\\\\GitHub CLI\" -ErrorAction SilentlyContinue })",
-      "PowerShell(gh auth *)"
+      "PowerShell(gh auth *)",
+      "Bash(grep -E '^\\\\S+\\\\s+\\\\.env$|^\\\\S+\\\\s+\\\\.env\\\\.production$|db\\\\.sqlite3')",
+      "Bash(git check-ignore *)",
+      "Bash(git commit *)",
+      "PowerShell(gh repo *)",
+      "Bash(gcloud --version)",
+      "Bash(gcloud auth *)",
+      "Bash(gcloud compute *)",
+      "Bash(gcloud billing accounts list *)",
+      "Bash(gcloud billing projects describe *)",
+      "Bash(awk -F= '{if \\($2==\"\" || $0 ~ /^#/\\) print $1\"=<EMPTY>\"; else print $1\"=<SET>\"}' .env.production)",
+      "Bash(bash gcp/release.sh)",
+      "Bash(bash gcp/smoke-test.sh)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} -> %{redirect_url}\\\\n\" http://34.124.176.218/)",
+      "Bash(curl -sv -L --max-time 15 http://34.124.176.218/ -o /dev/null)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 15 https://34-124-176-218.sslip.io/)",
+      "Bash(bash gcp/smoke-test.sh https://34-124-176-218.sslip.io)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }
