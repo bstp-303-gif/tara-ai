@@ -76,7 +76,9 @@
       "Bash(curl -sv -L --max-time 15 http://34.124.176.218/ -o /dev/null)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 15 https://34-124-176-218.sslip.io/)",
       "Bash(bash gcp/smoke-test.sh https://34-124-176-218.sslip.io)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(git config *)",
+      "Bash(gh api *)"
     ]
   }
 }
