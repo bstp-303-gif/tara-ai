@@ -10,6 +10,7 @@
     .filter-bar label { font-size: 0.72rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.04em; }
     .chart-card canvas { max-height: 260px; }
     .evidence-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #ececf3; }
+    #recent-activities-table td, #recent-activities-table th { word-wrap: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: top; }
 </style>
 {% endblock %}
 
@@ -170,7 +171,11 @@
     </div>
     <div class="card-body" style="padding:0;">
         <div style="overflow-x:auto;">
-        <table class="table table-hover" style="margin:0;">
+        <table id="recent-activities-table" class="table table-hover" style="margin:0; table-layout:fixed; min-width:1000px;">
+            <colgroup>
+                <col style="width:12.5%;"><col style="width:12.5%;"><col style="width:12.5%;"><col style="width:12.5%;">
+                <col style="width:12.5%;"><col style="width:12.5%;"><col style="width:12.5%;"><col style="width:12.5%;">
+            </colgroup>
             <thead style="background-color:#fafafa; border-bottom:1px solid #ececf3;">
                 <tr>
                     <th style="padding:0.85rem 1.1rem;">GPGD</th>
@@ -194,7 +199,7 @@
                         {{ report.training_title }}
                         {% if report.description %}<br><span style="color:#71717a; font-size:0.8rem;">{{ report.description|truncatewords:20 }}</span>{% endif %}
                     </td>
-                    <td style="white-space:nowrap;">{{ report.training_date|date:"d M Y" }}<br><span style="color:#a1a1aa; font-size:0.78rem;">{{ report.start_time|time:"H:i" }}–{{ report.end_time|time:"H:i" }}</span></td>
+                    <td>{{ report.training_date|date:"d M Y" }}<br><span style="color:#a1a1aa; font-size:0.78rem;">{{ report.start_time|time:"H:i" }}–{{ report.end_time|time:"H:i" }}</span></td>
                     <td>{{ report.hours }}</td>
                     <td>{{ report.audience_display }}</td>
                     <td>{{ report.num_participants }}</td>

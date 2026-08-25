@@ -22,7 +22,7 @@ from django.conf import settings
 from . import pipeline_ops, ranking
 from .models import AgentActivityLog, Application, FileUpload
 
-MODEL = 'claude-opus-4-8'
+MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-5')
 MAX_STEPS = 6
 
 SYSTEM_PROMPT = """You are the autonomous pipeline agent for MyGPGD J360, a Malaysian Ministry of \
@@ -122,6 +122,27 @@ def _tool_log_note(tool_input):
     return {'logged': True, 'note': tool_input.get('note', '')}
 
 
+def _format_anthropic_error(exc):
+    """Convert Anthropic provider failures into plain app-safe messages."""
+    message = str(exc)
+    lower = message.lower()
+
+    if 'credit balance' in lower or 'insufficient credits' in lower or 'billing' in lower:
+        return (
+            'Anthropic API is unavailable because the current account has insufficient credit balance. '
+            'Add billing credits in the Anthropic dashboard or disable the AI pipeline agent until a '
+            'working key is available.'
+        )
+    if 'invalid_request_error' in lower or 'model' in lower and 'not found' in lower:
+        return (
+            'Anthropic rejected the request. Check that the API key is valid and that the configured '
+            'model name is supported by your Anthropic account.'
+        )
+    if 'api key' in lower or 'authentication' in lower or 'unauthorized' in lower:
+        return 'Anthropic API authentication failed. Check that ANTHROPIC_API_KEY is valid.'
+    return message
+
+
 TOOL_IMPLEMENTATIONS = {
     'get_certification_upload_status': _tool_get_certification_upload_status,
     'run_certification_pipeline': _tool_run_certification_pipeline,
@@ -215,5 +236,5 @@ def run_pipeline_agent(trigger_reason):
             trigger_reason=trigger_reason,
             actions_taken=actions_taken,
             status='error',
-            error_message=str(e),
+            error_message=_format_anthropic_error(e),
         )

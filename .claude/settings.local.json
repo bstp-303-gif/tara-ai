@@ -78,7 +78,8 @@
       "Bash(bash gcp/smoke-test.sh https://34-124-176-218.sslip.io)",
       "Bash(python3 -c ' *)",
       "Bash(git config *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(gcloud services api-keys list *)"
     ]
   }
 }
