@@ -106,9 +106,24 @@ class Teacher(models.Model):
 
 
 class ProgrammeSettings(models.Model):
-    """Singleton row holding programme-wide settings, e.g. the application submission deadline."""
+    """Singleton row holding programme-wide settings, e.g. the application submission deadline,
+    and the user-editable content templates (invitation email, recognition letter, application
+    form copy) — see agents/content_defaults.py for the fallback text used when a field is blank."""
 
     submission_deadline = models.DateField(null=True, blank=True)
+
+    # --- Invitation email (sent to eligible teachers who haven't applied yet) ---
+    invitation_email_subject = models.CharField(max_length=255, blank=True)
+    invitation_email_body = models.TextField(blank=True)
+
+    # --- Recognition letter (sent when the MoE Officer approves an application) ---
+    recognition_letter_subject = models.CharField(max_length=255, blank=True)
+    recognition_letter_body = models.TextField(blank=True)
+
+    # --- Application form copy (apply.html): section headings, field labels, help text ---
+    apply_form_section_labels = models.JSONField(default=dict, blank=True)
+    apply_form_field_labels = models.JSONField(default=dict, blank=True)
+    apply_form_help_texts = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"Programme settings (deadline: {self.submission_deadline or 'not set'})"

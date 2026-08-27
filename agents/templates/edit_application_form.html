@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Application Form Text — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Application Form Text</h1>
+<p style="color:#6b7280; margin-bottom:2rem;">Edit the section headings, field labels, and help text shown on the public application form. The fields themselves (what's asked, validation) aren't changed here — only the wording.</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header" style="background:#f9fafb; padding:1rem;">
+            <h5 style="margin:0; font-weight:600;">Section Headings</h5>
+        </div>
+        <div class="card-body" style="padding:1.5rem;">
+            <div class="row g-3">
+                {% for key, value in section_labels.items %}
+                <div class="col-md-6">
+                    <label class="form-label" style="font-size:0.8rem; color:#6b7280;">{{ key }}</label>
+                    <input type="text" name="section__{{ key }}" class="form-control" value="{{ value }}" maxlength="255">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header" style="background:#f9fafb; padding:1rem;">
+            <h5 style="margin:0; font-weight:600;">Field Labels</h5>
+        </div>
+        <div class="card-body" style="padding:1.5rem;">
+            <div class="row g-3">
+                {% for key, value in field_labels.items %}
+                <div class="col-md-6">
+                    <label class="form-label" style="font-size:0.8rem; color:#6b7280;">{{ key }}</label>
+                    <input type="text" name="field__{{ key }}" class="form-control" value="{{ value }}" maxlength="255">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header" style="background:#f9fafb; padding:1rem;">
+            <h5 style="margin:0; font-weight:600;">Help Text &amp; Submit Button</h5>
+        </div>
+        <div class="card-body" style="padding:1.5rem;">
+            <div class="row g-3">
+                {% for key, value in help_texts.items %}
+                <div class="col-md-12">
+                    <label class="form-label" style="font-size:0.8rem; color:#6b7280;">{{ key }}</label>
+                    <input type="text" name="help__{{ key }}" class="form-control" value="{{ value }}" maxlength="500">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Application Form Text</button>
+</form>
+{% endblock %}

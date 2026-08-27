@@ -15,6 +15,8 @@ from django.core import signing
 from django.core.mail import send_mail
 from django.utils import timezone
 
+from . import content_defaults
+
 SEND_TIMEOUT_SECONDS = 25
 
 
@@ -182,8 +184,12 @@ def send_invitation_emails():
     """Email every eligible teacher who hasn't applied yet a secure, personalised application link."""
     eligible = Teacher.objects.filter(eligibility_status='Eligible').exclude(application__isnull=False)
     site_url = getattr(settings, 'GPGD_SITE_URL', 'http://localhost:8000')
-    deadline = ProgrammeSettings.load().submission_deadline
+    programme_settings = ProgrammeSettings.load()
+    deadline = programme_settings.submission_deadline
     deadline_text = deadline.strftime('%d %B %Y') if deadline else 'the closing date'
+
+    subject = programme_settings.invitation_email_subject or content_defaults.DEFAULT_INVITATION_SUBJECT
+    body_template = programme_settings.invitation_email_body or content_defaults.DEFAULT_INVITATION_BODY
 
     sent = 0
     no_email = 0
@@ -196,40 +202,9 @@ def send_invitation_emails():
         token = _make_apply_token(teacher.ic_number)
         apply_url = f"{site_url}/agents/apply/{token}/"
 
-        subject = "Invitation to Apply — Guru Peneraju Generasi Digital (GPGD) Programme"
-        body = f"""Dear {teacher.full_name},
-
-Congratulations! We are pleased to inform you that, based on the selection criteria set by the Ministry of Education Malaysia (MOE), you have been shortlisted as an eligible candidate for the Guru Peneraju Generasi Digital (GPGD) Programme.
-
-Your dedication to integrating digital technology into teaching and learning has been recognised, and we believe you have the potential to become a digital leader who inspires and supports fellow educators.
-
-What is Guru Peneraju Generasi Digital (GPGD)?
-Guru Peneraju Generasi Digital (GPGD) is a Ministry of Education initiative that develops a network of highly competent teachers to lead and promote the effective integration of digital technology in education. GPGD members serve as digital ambassadors who support schools, districts, and states in strengthening digital competencies and transforming teaching and learning practices.
-
-Responsibilities of a GPGD
-As a GPGD, you will be expected to:
-• Participate in professional development and certification programmes organised by MOE and its strategic technology partners.
-• Conduct training, mentoring, coaching, and knowledge-sharing sessions for fellow educators (a minimum of 3 times a year) and record it in the given dashboard.
-• Promote the effective and responsible use of digital technologies in teaching, learning, and school management.
-• Share innovative teaching practices and contribute to the digital education community.
-• Support MOE's digital education initiatives and programmes at the school, district, state, and national levels.
-• Continuously enhance your digital competencies and serve as a role model for other educators.
-
-If you are interested in becoming a Guru Peneraju Generasi Digital (GPGD), kindly complete the online application form using the secure link below on or before {deadline_text}:
-
-Apply here: {apply_url}
-
-Please complete your application before {deadline_text}. Only complete submissions received before the closing date will be considered for the next stage of the selection process.
-
-We look forward to welcoming passionate educators like you into the GPGD community as we continue to empower teachers and transform digital education together.
-
-Thank you.
-
-Yours sincerely,
-Sektor Pengintegrasian Teknologi Pendidikan (SPTP)
-Bahagian Sumber dan Teknologi Pendidikan (BSTP)
-Kementerian Pendidikan Malaysia
-"""
+        body = content_defaults.render_placeholders(
+            body_template, full_name=teacher.full_name, apply_url=apply_url, deadline=deadline_text
+        )
         try:
             _send_mail_with_hard_timeout(subject, body, teacher.email)
             sent += 1

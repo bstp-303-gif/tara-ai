@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods
 
-from . import ai_agent, pipeline_ops, ranking
+from . import ai_agent, content_defaults, pipeline_ops, ranking
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
 from .constants import MALAYSIA_STATES
 from .decorators import moe_officer_required, state_officer_required
@@ -208,6 +208,88 @@ def update_submission_deadline(request):
         messages.success(request, '✅ Submission deadline cleared.')
 
     return redirect('agent1_dashboard')
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_invitation_email(request):
+    """Edit the subject/body of the invitation email sent to eligible teachers."""
+    settings_obj = ProgrammeSettings.load()
+
+    if request.method == 'POST':
+        settings_obj.invitation_email_subject = request.POST.get('subject', '').strip()
+        settings_obj.invitation_email_body = request.POST.get('body', '').strip()
+        settings_obj.save()
+        messages.success(request, '✅ Invitation email template saved.')
+        return redirect('edit_invitation_email')
+
+    context = {
+        'subject': settings_obj.invitation_email_subject or content_defaults.DEFAULT_INVITATION_SUBJECT,
+        'body': settings_obj.invitation_email_body or content_defaults.DEFAULT_INVITATION_BODY,
+        'placeholders': [f'{{{{{p}}}}}' for p in content_defaults.INVITATION_PLACEHOLDERS],
+        'is_default': not settings_obj.invitation_email_subject and not settings_obj.invitation_email_body,
+    }
+    return render(request, 'edit_invitation_email.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_recognition_letter(request):
+    """Edit the subject/body of the recognition letter sent when the MoE Officer approves an application."""
+    settings_obj = ProgrammeSettings.load()
+
+    if request.method == 'POST':
+        settings_obj.recognition_letter_subject = request.POST.get('subject', '').strip()
+        settings_obj.recognition_letter_body = request.POST.get('body', '').strip()
+        settings_obj.save()
+        messages.success(request, '✅ Recognition letter template saved.')
+        return redirect('edit_recognition_letter')
+
+    context = {
+        'subject': settings_obj.recognition_letter_subject or content_defaults.DEFAULT_RECOGNITION_SUBJECT,
+        'body': settings_obj.recognition_letter_body or content_defaults.DEFAULT_RECOGNITION_BODY,
+        'placeholders': [f'{{{{{p}}}}}' for p in content_defaults.RECOGNITION_PLACEHOLDERS],
+        'is_default': not settings_obj.recognition_letter_subject and not settings_obj.recognition_letter_body,
+    }
+    return render(request, 'edit_recognition_letter.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_application_form(request):
+    """Edit the application form's section headings, field labels, and help text (apply.html)."""
+    settings_obj = ProgrammeSettings.load()
+
+    if request.method == 'POST':
+        section_labels = {
+            key: request.POST.get(f'section__{key}', '').strip() or default
+            for key, default in content_defaults.DEFAULT_APPLY_SECTION_LABELS.items()
+        }
+        field_labels = {
+            key: request.POST.get(f'field__{key}', '').strip() or default
+            for key, default in content_defaults.DEFAULT_APPLY_FIELD_LABELS.items()
+        }
+        help_texts = {
+            key: request.POST.get(f'help__{key}', '').strip() or default
+            for key, default in content_defaults.DEFAULT_APPLY_HELP_TEXTS.items()
+        }
+        settings_obj.apply_form_section_labels = section_labels
+        settings_obj.apply_form_field_labels = field_labels
+        settings_obj.apply_form_help_texts = help_texts
+        settings_obj.save()
+        messages.success(request, '✅ Application form text saved.')
+        return redirect('edit_application_form')
+
+    section_labels = {**content_defaults.DEFAULT_APPLY_SECTION_LABELS, **(settings_obj.apply_form_section_labels or {})}
+    field_labels = {**content_defaults.DEFAULT_APPLY_FIELD_LABELS, **(settings_obj.apply_form_field_labels or {})}
+    help_texts = {**content_defaults.DEFAULT_APPLY_HELP_TEXTS, **(settings_obj.apply_form_help_texts or {})}
+
+    context = {
+        'section_labels': section_labels,
+        'field_labels': field_labels,
+        'help_texts': help_texts,
+    }
+    return render(request, 'edit_application_form.html', context)
 
 
 @require_http_methods(["GET"])
@@ -448,7 +530,13 @@ def apply(request, token):
     else:
         form = ApplicationForm(initial=initial)
 
-    return render(request, 'apply.html', {'form': form, 'token': token})
+    settings_obj = ProgrammeSettings.load()
+    section_labels = {**content_defaults.DEFAULT_APPLY_SECTION_LABELS, **(settings_obj.apply_form_section_labels or {})}
+    help_texts = {**content_defaults.DEFAULT_APPLY_HELP_TEXTS, **(settings_obj.apply_form_help_texts or {})}
+
+    return render(request, 'apply.html', {
+        'form': form, 'token': token, 'section_labels': section_labels, 'help_texts': help_texts,
+    })
 
 
 def _send_acknowledgement(application):
@@ -783,22 +871,12 @@ def moe_review(request):
 
 
 def _send_recognition_letter(application):
-    subject = f"Letter of Recognition — Guru Peneraju Generasi Digital (GPGD) Programme"
-    body = f"""Dear {application.full_name},
-
-Congratulations! We are pleased to inform you that your application for the Guru Peneraju Generasi Digital (GPGD) Programme, Reference Number {application.reference_number}, has been approved by the Ministry of Education Malaysia (MOE).
-
-You have been officially recognised as a Guru Peneraju Generasi Digital (GPGD). This recognition reflects your commitment to digital excellence in teaching and learning, and your readiness to lead and support fellow educators in your school, district, and state.
-
-Further details on your responsibilities and upcoming engagements as a GPGD will be communicated to you separately.
-
-Congratulations once again, and thank you for your dedication to digital education.
-
-Yours sincerely,
-Sektor Pengintegrasian Teknologi Pendidikan (SPTP)
-Bahagian Sumber dan Teknologi Pendidikan (BSTP)
-Kementerian Pendidikan Malaysia
-"""
+    programme_settings = ProgrammeSettings.load()
+    subject = programme_settings.recognition_letter_subject or content_defaults.DEFAULT_RECOGNITION_SUBJECT
+    body_template = programme_settings.recognition_letter_body or content_defaults.DEFAULT_RECOGNITION_BODY
+    body = content_defaults.render_placeholders(
+        body_template, full_name=application.full_name, reference_number=application.reference_number
+    )
     pipeline_ops.send_single_email_async(
         subject, body, application.email,
         context_label=f"Recognition letter — {application.full_name} <{application.email}> ({application.reference_number})",

@@ -23,7 +23,7 @@
             <!-- SECTION 1: Personal Information -->
             <div class="card" style="margin-bottom:1.5rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-person-badge"></i> 1. Personal Information
+                    <i class="bi bi-person-badge"></i> {{ section_labels.section_personal }}
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <div class="row g-3">
@@ -69,7 +69,7 @@
             <!-- SECTION 2: Technology Track -->
             <div class="card" style="margin-bottom:1.5rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-cpu"></i> 2. Preferred Technology Track <span style="font-weight:400; font-size:0.875rem;">(Select one only)</span>
+                    <i class="bi bi-cpu"></i> {{ section_labels.section_tech_track }} <span style="font-weight:400; font-size:0.875rem;">(Select one only)</span>
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <label class="form-label fw-semibold">{{ form.tech_track.label }} <span style="color:red">*</span></label>
@@ -81,12 +81,12 @@
             <!-- SECTION 3: Professional Qualifications -->
             <div class="card" style="margin-bottom:1.5rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-award"></i> 3. Professional Qualifications
+                    <i class="bi bi-award"></i> {{ section_labels.section_qualifications }}
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">{{ form.certifications.label }} <span style="color:red">*</span></label>
-                        <small class="d-block text-muted mb-1">List all relevant certifications, including the issuing organisation and year obtained.</small>
+                        <small class="d-block text-muted mb-1">{{ help_texts.certifications_help }}</small>
                         {{ form.certifications }}
                         {% if form.certifications.errors %}<div class="text-danger small">{{ form.certifications.errors }}</div>{% endif %}
                     </div>
@@ -100,7 +100,7 @@
             <!-- SECTION 4: Performance Records -->
             <div class="card" style="margin-bottom:1.5rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-graph-up-arrow"></i> 4. Performance Records
+                    <i class="bi bi-graph-up-arrow"></i> {{ section_labels.section_performance }}
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <div class="row g-3">
@@ -126,7 +126,7 @@
             <!-- SECTION 5: Professional Contributions -->
             <div class="card" style="margin-bottom:1.5rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-briefcase"></i> 5. Professional Contributions
+                    <i class="bi bi-briefcase"></i> {{ section_labels.section_contributions }}
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <div class="mb-3">
@@ -144,7 +144,7 @@
             <!-- SECTION 6: Additional Information -->
             <div class="card" style="margin-bottom:2rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
-                    <i class="bi bi-chat-text"></i> 6. Additional Information
+                    <i class="bi bi-chat-text"></i> {{ section_labels.section_additional }}
                 </div>
                 <div class="card-body" style="padding:1.5rem;">
                     <label class="form-label fw-semibold">{{ form.additional_info.label }}</label>
@@ -153,9 +153,9 @@
             </div>
 
             <div style="text-align:center; margin-bottom:3rem;">
-                <p class="text-muted small mb-3">By submitting this form, you confirm that all information provided is accurate and complete.</p>
+                <p class="text-muted small mb-3">{{ help_texts.submit_note }}</p>
                 <button type="submit" class="btn btn-primary btn-lg" style="padding:0.75rem 3rem; font-size:1rem;">
-                    <i class="bi bi-send-check"></i> Submit Application
+                    <i class="bi bi-send-check"></i> {{ help_texts.submit_button }}
                 </button>
             </div>
 

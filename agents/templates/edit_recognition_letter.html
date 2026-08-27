@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Recognition Letter — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Recognition Letter</h1>
+<p style="color:#6b7280; margin-bottom:2rem;">Sent automatically when the MoE Officer approves an application.</p>
+
+{% if is_default %}
+<div class="alert" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">This is the default template — nothing has been customised yet. Edit and save below to override it.</div>
+{% endif %}
+
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-header" style="background:#f9fafb; padding:1rem;">
+        <h5 style="margin:0; font-weight:600;">Available placeholders</h5>
+    </div>
+    <div class="card-body" style="padding:1.5rem;">
+        <p style="color:#6b7280; margin-bottom:0.5rem;">These get replaced automatically when the letter is sent:</p>
+        <ul style="margin-bottom:0;">
+            {% for p in placeholders %}
+            <li><code>{{ p }}</code></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:1.5rem;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Subject</label>
+                <input type="text" name="subject" class="form-control" value="{{ subject }}" maxlength="255" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Body</label>
+                <textarea name="body" class="form-control" rows="20" style="font-family:monospace; font-size:0.9rem;" required>{{ body }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Template</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

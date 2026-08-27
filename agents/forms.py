@@ -1,8 +1,20 @@
 from django import forms
-from .models import ActivityReport, Application, CertificationRule, Provider, Teacher
+from . import content_defaults
+from .models import ActivityReport, Application, CertificationRule, ProgrammeSettings, Provider, Teacher
 
 
 class ApplicationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Field labels are editable via the "Application Form" settings page — fall back to
+        # the defaults below (which double as Meta.labels for anywhere the form is used
+        # without going through the DB, e.g. the Django admin).
+        settings_obj = ProgrammeSettings.load()
+        labels = {**content_defaults.DEFAULT_APPLY_FIELD_LABELS, **(settings_obj.apply_form_field_labels or {})}
+        for field_name, label in labels.items():
+            if field_name in self.fields:
+                self.fields[field_name].label = label
+
     class Meta:
         model = Application
         fields = [
