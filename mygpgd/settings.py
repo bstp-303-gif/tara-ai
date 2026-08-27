@@ -100,15 +100,34 @@ WSGI_APPLICATION = "mygpgd.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        # Overridable so the db file can live on a mounted volume in Docker
-        # (see docker-compose.yml) instead of the container's writable layer.
-        "NAME": os.environ.get('DJANGO_DB_PATH', str(BASE_DIR / "db.sqlite3")),
+#
+# Defaults to local SQLite. Set DB_HOST (e.g. in .env) to switch to the
+# centralized PostgreSQL database instead — DB_SCHEMA is put first in the
+# connection's search_path so tables land in that schema rather than "public".
+if os.environ.get('DB_HOST'):
+    DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get('DB_NAME', ''),
+            "USER": os.environ.get('DB_USER', ''),
+            "PASSWORD": os.environ.get('DB_PASSWORD', ''),
+            "HOST": os.environ.get('DB_HOST', ''),
+            "PORT": os.environ.get('DB_PORT', '5432'),
+            "OPTIONS": {
+                "options": f"-c search_path={DB_SCHEMA},public",
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            # Overridable so the db file can live on a mounted volume in Docker
+            # (see docker-compose.yml) instead of the container's writable layer.
+            "NAME": os.environ.get('DJANGO_DB_PATH', str(BASE_DIR / "db.sqlite3")),
+        }
+    }
 
 
 # Password validation
