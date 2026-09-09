@@ -66,6 +66,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # First in, last out: wraps every other middleware so it captures the
+    # full time a request takes, including static files. Purely observes
+    # and logs — see agents/middleware.py for details.
+    "agents.middleware.RequestLatencyLoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -254,6 +258,47 @@ else:
 # Base URL used to build the secure application links inside invitation emails.
 # Set GPGD_SITE_URL to your public/staging domain in production.
 GPGD_SITE_URL = os.environ.get('GPGD_SITE_URL', 'http://localhost:8000')
+
+# ---------------------------------------------------------------------------
+# Request latency logging
+#
+# agents.middleware.RequestLatencyLoggingMiddleware times every request and
+# writes the result here. Check logs/latency.log and search for "SLOW " to
+# see which pages are taking too long — this is what tells you whether the
+# app is actually usable for users on weak/rural internet connections.
+# Doesn't change how any request is handled, only records how long it took.
+# ---------------------------------------------------------------------------
+os.makedirs(BASE_DIR / "logs", exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "latency": {
+            "format": "%(asctime)s %(levelname)s %(message)s",
+        },
+    },
+    "handlers": {
+        "latency_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(BASE_DIR / "logs" / "latency.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB per file
+            "backupCount": 3,
+            "formatter": "latency",
+        },
+        "latency_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "latency",
+        },
+    },
+    "loggers": {
+        "agents.latency": {
+            "handlers": ["latency_file", "latency_console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 
 # ---------------------------------------------------------------------------
 # Pipeline agent (Anthropic Claude) — drives the certification-to-compilation

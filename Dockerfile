@@ -13,7 +13,7 @@ RUN chmod +x entrypoint.sh
 
 # SQLite db, uploaded media, and Excel scratch space must survive restarts —
 # mount volumes over these in production (see docker-compose.yml).
-RUN mkdir -p /app/media /app/temp_uploads /app/staticfiles /app/data \
+RUN mkdir -p /app/media /app/temp_uploads /app/staticfiles /app/data /app/logs \
     && adduser --disabled-password --gecos "" appuser \
     && chown -R appuser:appuser /app
 USER appuser

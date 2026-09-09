@@ -1,0 +1,425 @@
+openapi: 3.0.3
+info:
+  title: TARA-AI / MyGPGD J360 — Endpoint Reference
+  description: >
+    This file is documentation only. It describes the web pages/endpoints that
+    already exist in agents/urls.py and mygpgd/urls.py — it does not add,
+    remove, or change any of them. Generated as a reference so the system's
+    request/response shape is written down in a standard format
+    (OpenAPI/Swagger) instead of only living in the source code.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+      description: >
+        Django's built-in session-cookie login (the normal "Officer Login"
+        form). Endpoints marked with this require an officer to be logged in
+        first; the CertificationRule/Application/Teacher management pages
+        also require the officer's role to be Programme Admin/MoE, enforced
+        by agents/middleware.py and agents/decorators.py.
+    tokenAuth:
+      type: apiKey
+      in: path
+      name: token
+      description: >
+        A single-use secure link token e-mailed to a teacher/applicant
+        (not a login — there is no session for these). See
+        agents/eligibility.py / agents/views.py for how tokens are issued
+        and validated.
+tags:
+  - name: Auth
+    description: Officer login/logout (Django's built-in auth views).
+  - name: Public applicant links
+    description: Pages reached only via a one-time tokenised e-mail link — no login involved.
+  - name: Certification upload & processing
+    description: Programme admin uploads provider Excel files and runs the eligibility pipeline.
+  - name: AI agent results
+    description: Read-only views of what the eligibility/compilation pipeline produced.
+  - name: Officer review workflow
+    description: State Officer / MoE Officer review-and-approve screens.
+  - name: Settings
+    description: Editable text templates (invitation email, recognition letter, application form).
+  - name: Manage — providers & rules
+    description: CRUD for certification providers and their eligibility rules.
+  - name: Manage — applications
+    description: CRUD/status updates for submitted applications.
+  - name: Manage — teachers
+    description: CRUD for teacher records.
+  - name: Recognition & activity
+    description: Recognition dashboard and monthly activity-report workflow.
+paths:
+  /agents/login/:
+    get:
+      tags: [Auth]
+      summary: Show the officer login form.
+      responses:
+        "200": { description: "Login page rendered." }
+    post:
+      tags: [Auth]
+      summary: Submit username/password; redirects to the officer's home page on success.
+      responses:
+        "302": { description: "Logged in, redirected." }
+        "200": { description: "Invalid credentials, form re-shown with an error." }
+        "403": { description: "CSRF token missing/expired — reload the login page and try again." }
+  /agents/logout/:
+    get:
+      tags: [Auth]
+      summary: Log the current officer out and redirect to the login page.
+      security: [{ sessionAuth: [] }]
+      responses:
+        "302": { description: "Logged out." }
+
+  /agents/officer/:
+    get:
+      tags: [Officer review workflow]
+      summary: Officer landing page; redirects to the right screen for the officer's role.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" }, "302": { description: "Redirected by role." } }
+
+  /agents/upload-certifications/:
+    get:
+      tags: [Certification upload & processing]
+      summary: Upload page for provider certification Excel files.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Certification upload & processing]
+      summary: Upload one or more provider Excel files for processing.
+      security: [{ sessionAuth: [] }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+      responses: { "200": { description: "OK" }, "302": { description: "Redirected after save." } }
+
+  /agents/process-files/:
+    post:
+      tags: [Certification upload & processing]
+      summary: Run the normalization/dedup/eligibility pipeline over uploaded files.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Processing started/finished, redirected." } }
+
+  /agents/delete-file/{file_id}/:
+    post:
+      tags: [Certification upload & processing]
+      summary: Delete one uploaded file.
+      security: [{ sessionAuth: [] }]
+      parameters:
+        - { name: file_id, in: path, required: true, schema: { type: integer } }
+      responses: { "302": { description: "Deleted, redirected." } }
+
+  /agents/download-file/{file_id}/{file_type}/:
+    get:
+      tags: [Certification upload & processing]
+      summary: Download a specific uploaded/generated Excel file.
+      security: [{ sessionAuth: [] }]
+      parameters:
+        - { name: file_id, in: path, required: true, schema: { type: integer } }
+        - { name: file_type, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "File stream (.xlsx)." }
+
+  /agents/download-combined/:
+    get:
+      tags: [Certification upload & processing]
+      summary: Download the combined/normalized dataset across all providers.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: ".xlsx file stream." } }
+
+  /agents/download-dedup/:
+    get:
+      tags: [Certification upload & processing]
+      summary: Download the de-duplicated candidate list.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: ".xlsx file stream." } }
+
+  /agents/download-eligible/:
+    get:
+      tags: [Certification upload & processing]
+      summary: Download the final eligible-candidates list.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: ".xlsx file stream." } }
+
+  /agents/agent1-results/:
+    get:
+      tags: [AI agent results]
+      summary: Detailed results of the eligibility-screening AI agent's last run.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+
+  /agents/agent1-dashboard/:
+    get:
+      tags: [AI agent results]
+      summary: Summary dashboard for the eligibility-screening AI agent.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+
+  /agents/error-log/:
+    get:
+      tags: [AI agent results]
+      summary: List of errors raised during pipeline processing.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+
+  /agents/send-invitations/:
+    post:
+      tags: [Certification upload & processing]
+      summary: E-mail application invitations (with a tokenised /apply/ link) to eligible teachers.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Queued/sent, redirected." } }
+
+  /agents/update-submission-deadline/:
+    post:
+      tags: [Certification upload & processing]
+      summary: Change the application submission deadline shown to applicants.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Updated, redirected." } }
+
+  /agents/compile-applications/:
+    post:
+      tags: [Officer review workflow]
+      summary: MoE Officer action — compile submitted applications for review.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Compiled, redirected." } }
+
+  /agents/state/review/:
+    get:
+      tags: [Officer review workflow]
+      summary: State Officer's review screen for applications in their state.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Officer review workflow]
+      summary: State Officer submits a review decision.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" }, "302": { description: "Saved, redirected." } }
+
+  /agents/moe/review/:
+    get:
+      tags: [Officer review workflow]
+      summary: MoE Officer's review screen for compiled applications.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Officer review workflow]
+      summary: MoE Officer submits a review/approval decision.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" }, "302": { description: "Saved, redirected." } }
+
+  /agents/settings/invitation-email/:
+    get:
+      tags: [Settings]
+      summary: Edit the invitation e-mail template.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Settings]
+      summary: Save changes to the invitation e-mail template.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Saved, redirected." } }
+
+  /agents/settings/recognition-letter/:
+    get:
+      tags: [Settings]
+      summary: Edit the recognition letter template.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Settings]
+      summary: Save changes to the recognition letter template.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Saved, redirected." } }
+
+  /agents/settings/application-form/:
+    get:
+      tags: [Settings]
+      summary: Edit the applicant-facing application form's text/fields.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Settings]
+      summary: Save changes to the application form template.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Saved, redirected." } }
+
+  /agents/apply/{token}/:
+    get:
+      tags: [Public applicant links]
+      summary: Show the application form for the teacher this token was e-mailed to.
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string }, description: One-time token from the invitation e-mail. }
+      responses:
+        "200": { description: Form shown (or "already applied"/"invalid link" page). }
+    post:
+      tags: [Public applicant links]
+      summary: Submit the completed application.
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      responses: { "302": { description: "Submitted, redirected to the success page." } }
+
+  /agents/apply-success/{ref}/:
+    get:
+      tags: [Public applicant links]
+      summary: Confirmation page shown after a successful application submission.
+      parameters:
+        - { name: ref, in: path, required: true, schema: { type: string }, description: Application reference number. }
+      responses: { "200": { description: "OK" } }
+
+  /agents/report/{token}/:
+    get:
+      tags: [Recognition & activity]
+      summary: Show the monthly activity-report form for the teacher this token was e-mailed to.
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Recognition & activity]
+      summary: Submit a monthly activity report (with optional evidence photos).
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          multipart/form-data:
+            schema: { type: object }
+      responses: { "302": { description: "Submitted, redirected to the success page." } }
+
+  /agents/report-success/{report_id}/:
+    get:
+      tags: [Recognition & activity]
+      summary: Confirmation page shown after a successful activity-report submission.
+      parameters:
+        - { name: report_id, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: "OK" } }
+
+  /agents/recognition-dashboard/:
+    get:
+      tags: [Recognition & activity]
+      summary: Dashboard of recognized teachers and their recognition status.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+
+  /agents/activity-dashboard/:
+    get:
+      tags: [Recognition & activity]
+      summary: Dashboard of monthly activity-report submissions and compliance.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+
+  /agents/send-monthly-reminders/:
+    post:
+      tags: [Recognition & activity]
+      summary: E-mail monthly activity-report reminders to recognized teachers.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Queued/sent, redirected." } }
+
+  /agents/manage/providers/:
+    get:
+      tags: [Manage — providers & rules]
+      summary: List certification providers.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+  /agents/manage/providers/add/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Add a new certification provider.
+      security: [{ sessionAuth: [] }]
+      responses: { "302": { description: "Added, redirected." } }
+  /agents/manage/providers/{provider_id}/edit/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Edit an existing provider.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: provider_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Saved, redirected." } }
+  /agents/manage/providers/{provider_id}/delete/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Delete a provider.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: provider_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Deleted, redirected." } }
+  /agents/manage/providers/{provider_id}/rules/add/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Add a new eligibility rule under a provider.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: provider_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Added, redirected." } }
+  /agents/manage/rules/{rule_id}/edit/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Edit an eligibility rule.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: rule_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Saved, redirected." } }
+  /agents/manage/rules/{rule_id}/delete/:
+    post:
+      tags: [Manage — providers & rules]
+      summary: Delete an eligibility rule.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: rule_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Deleted, redirected." } }
+
+  /agents/manage/applications/:
+    get:
+      tags: [Manage — applications]
+      summary: List submitted applications.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+  /agents/manage/applications/{application_id}/status/:
+    post:
+      tags: [Manage — applications]
+      summary: Update an application's status (e.g. approve/reject).
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: application_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Saved, redirected." } }
+  /agents/manage/applications/{application_id}/delete/:
+    post:
+      tags: [Manage — applications]
+      summary: Delete an application.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: application_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Deleted, redirected." } }
+
+  /agents/manage/teachers/:
+    get:
+      tags: [Manage — teachers]
+      summary: List teacher records.
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
+  /agents/manage/teachers/{teacher_id}/edit/:
+    get:
+      tags: [Manage — teachers]
+      summary: Edit-teacher form.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: teacher_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: "OK" } }
+    post:
+      tags: [Manage — teachers]
+      summary: Save changes to a teacher record.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: teacher_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Saved, redirected." } }
+  /agents/manage/teachers/{teacher_id}/delete/:
+    post:
+      tags: [Manage — teachers]
+      summary: Delete a teacher record.
+      security: [{ sessionAuth: [] }]
+      parameters: [{ name: teacher_id, in: path, required: true, schema: { type: integer } }]
+      responses: { "302": { description: "Deleted, redirected." } }
+
+  /admin/:
+    get:
+      tags: [Auth]
+      summary: Django's built-in admin site (superuser login required).
+      security: [{ sessionAuth: [] }]
+      responses: { "200": { description: "OK" } }
