@@ -10,8 +10,10 @@ from django.core import signing
 from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncMonth
+from django.db import transaction
 from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods
@@ -19,11 +21,11 @@ from django.views.decorators.http import require_http_methods
 from . import ai_agent, content_defaults, pipeline_ops, ranking
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
 from .constants import MALAYSIA_STATES, canonical_state
-from .decorators import moe_officer_required, state_officer_required
+from .decorators import admin_required, moe_officer_required, state_officer_required
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, ErrorLog, FileUpload,
-    MonthlyReminderLog, ProgrammeSettings, Provider, Teacher,
+    InvitationExclusion, MonthlyReminderLog, ProgrammeSettings, Provider, Teacher,
 )
 
 TEMP_DIR = os.path.join(settings.BASE_DIR, 'temp_uploads')
@@ -164,6 +166,10 @@ def agent1_dashboard(request):
         'submission_deadline': deadline,
         'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
         'invitation_block_reason': pipeline_ops.invitation_block_reason(deadline),
+        'awaiting_invitation': Teacher.objects.filter(
+            eligibility_status='Eligible', application__isnull=True
+        ).order_by('state', 'full_name'),
+        'invitation_exclusions': InvitationExclusion.objects.all(),
         'pending_compile_count': Application.objects.filter(
             status__in=ranking.PIPELINE_ENTRY_STATUSES
         ).count(),
@@ -446,7 +452,7 @@ def _send_invitations_background(triggered_by):
     result = pipeline_ops.send_invitation_emails()
     if result.get('skipped_reason'):
         AgentActivityLog.objects.create(
-            trigger_reason=f'Manual: Send Invitation Emails (by {triggered_by})',
+            trigger_reason=f'Admin approved invitations (by {triggered_by})',
             summary='No invitations sent.',
             actions_taken=[{'tool': 'send_invitation_emails', 'input': {}, 'result': result}],
             status='error',
@@ -473,7 +479,7 @@ def _send_invitations_background(triggered_by):
             error_message += f'; and {len(failed) - 5} more (see server logs)'
 
     AgentActivityLog.objects.create(
-        trigger_reason=f'Manual: Send Invitation Emails (by {triggered_by})',
+        trigger_reason=f'Admin approved invitations (by {triggered_by})',
         summary=summary,
         actions_taken=[{'tool': 'send_invitation_emails', 'input': {}, 'result': result}],
         status=status,
@@ -482,9 +488,10 @@ def _send_invitations_background(triggered_by):
 
 
 @require_http_methods(["POST"])
-@login_required
+@admin_required
 def send_invitations(request):
-    """Manual override: normally the pipeline agent sends these automatically once teachers are eligible."""
+    """Admin approval gate: invitations go out only once the Admin has reviewed the deduplicated
+    eligible list and approved sending — the pipeline agent never sends them itself."""
     block_reason = pipeline_ops.invitation_block_reason(ProgrammeSettings.load().submission_deadline)
     if block_reason:
         messages.error(request, f'⚠️ Invitations not sent. {block_reason}')
@@ -502,6 +509,52 @@ def send_invitations(request):
         'how many were sent, skipped, or failed.'
     )
     return redirect('agent1_dashboard')
+
+
+@require_http_methods(["POST"])
+@admin_required
+def remove_from_invitations(request):
+    """Admin: drop one or more teachers (POST teacher_ids) from the eligible list before invitations
+    go out. Recorded as InvitationExclusions so the next pipeline run doesn't bring them back."""
+    teachers = list(Teacher.objects.filter(
+        id__in=request.POST.getlist('teacher_ids'), eligibility_status='Eligible', application__isnull=True
+    ))
+    if not teachers:
+        messages.warning(request, 'No teachers selected.')
+        return redirect(reverse('agent1_dashboard') + '#invitations')
+
+    with transaction.atomic():
+        for teacher in teachers:
+            InvitationExclusion.objects.update_or_create(
+                ic_number=teacher.ic_number,
+                defaults={'full_name': teacher.full_name, 'removed_by': request.user},
+            )
+        Teacher.objects.filter(id__in=[t.id for t in teachers]).delete()
+
+    label = teachers[0].full_name if len(teachers) == 1 else f'{len(teachers)} teachers'
+    messages.success(request, f'🗑️ {label} removed from the eligible list — they will not be invited.')
+    return redirect(reverse('agent1_dashboard') + '#invitations')
+
+
+@require_http_methods(["POST"])
+@admin_required
+def restore_to_invitations(request):
+    """Admin: undo one or more removals (POST exclusion_ids). Re-runs the pipeline so the teachers
+    are rebuilt from the uploaded files."""
+    exclusions = InvitationExclusion.objects.filter(id__in=request.POST.getlist('exclusion_ids'))
+    names = list(exclusions.values_list('full_name', flat=True))
+    if not names:
+        messages.warning(request, 'No teachers selected.')
+        return redirect(reverse('agent1_dashboard') + '#invitations')
+
+    exclusions.delete()
+    result = pipeline_ops.run_certification_pipeline()
+    label = names[0] if len(names) == 1 else f'{len(names)} teachers'
+    if result.get('ran'):
+        messages.success(request, f'↩️ {label} restored to the eligible list.')
+    else:
+        messages.warning(request, f'↩️ {label} restored, but the roster could not be rebuilt: {result.get("reason", "")}')
+    return redirect(reverse('agent1_dashboard') + '#invitations')
 
 
 @require_http_methods(["GET", "POST"])

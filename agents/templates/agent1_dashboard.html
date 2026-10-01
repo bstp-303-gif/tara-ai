@@ -226,31 +226,149 @@
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 2rem; border: 1px solid #bfdbfe;">
+<div class="card" id="invitations" style="margin-bottom: 2rem; border: 1px solid #bfdbfe;">
     <div class="card-header" style="background:#eff6ff; border-bottom:1px solid #bfdbfe; padding:1rem 1.25rem;">
-        <h5 style="margin:0; font-weight:600; color:#1e40af;"><i class="bi bi-envelope-paper"></i> Send Invitations to Eligible Candidates (manual override)</h5>
+        <h5 style="margin:0; font-weight:600; color:#1e40af;"><i class="bi bi-envelope-paper"></i> Review &amp; Approve Invitations</h5>
     </div>
     <div class="card-body" style="padding:1.5rem;">
         <p style="color:#374151; margin-bottom:1rem;">
-            Send a personalised invitation email to all <strong>{{ eligible }}</strong> eligible teacher(s) who have not yet applied.
-            Each email contains a secure, unique application link that stays valid until the submission deadline.
+            Invitations are <strong>not</strong> sent automatically. The files have been normalised and deduplicated —
+            check the <strong>{{ awaiting_invitation|length }}</strong> eligible teacher(s) below who have not yet applied,
+            and delete anyone who should not be invited, then approve sending. Each email contains a secure, unique application link that stays valid until the
+            submission deadline.
         </p>
         <form method="post" action="{% url 'update_submission_deadline' %}" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid #e5e7eb;">
             {% csrf_token %}
             <label for="submission_deadline" style="font-weight:600; color:#1e40af; white-space:nowrap;">Submission deadline:</label>
             <input type="date" id="submission_deadline" name="submission_deadline" value="{{ submission_deadline|date:'Y-m-d' }}" style="padding:0.4rem 0.6rem; border:1.5px solid #bfdbfe; border-radius:7px;">
             <button type="submit" class="btn btn-outline-secondary" style="white-space:nowrap;">Save</button>
-            <span style="color:#71717a; font-size:0.875rem;">Used as the closing date in every invitation email below.</span>
+            <span style="color:#71717a; font-size:0.875rem;">Used as the closing date in every invitation email.</span>
         </form>
-        <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Send invitation emails to all eligible teachers who have not yet applied?');">
+        {% if awaiting_invitation %}
+            <form id="bulk-remove-form" method="post" action="{% url 'remove_from_invitations' %}" onsubmit="return confirmBulk(this, 'teacher-check', 'Remove {n} selected teacher(s) from the eligible list? They will not be invited.');">{% csrf_token %}</form>
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:0.75rem;">
+                <input type="search" id="teacher-filter" placeholder="Filter by name, email, school, state…" oninput="filterTeachers(this.value)" class="form-control form-control-sm" style="max-width:300px;">
+                <button type="submit" form="bulk-remove-form" id="bulk-remove-btn" class="btn btn-sm btn-danger" disabled>
+                    <i class="bi bi-trash"></i> Delete selected (<span id="teacher-selected-count">0</span>)
+                </button>
+                <span style="color:#71717a; font-size:0.85rem;">Tick the box in the header to select every teacher shown.</span>
+            </div>
+            <div style="max-height:320px; overflow:auto; border:1px solid #e5e7eb; border-radius:9px; margin-bottom:1rem;">
+                <table class="table table-sm" style="margin:0;">
+                    <thead style="position:sticky; top:0; background:#f9fafb; z-index:1;">
+                        <tr>
+                            <th style="width:1%; padding:0.6rem 0.75rem;"><input type="checkbox" id="teacher-check-all" title="Select all shown" onchange="toggleAll('teacher-check', this.checked)"></th>
+                            <th style="padding:0.6rem 0.5rem;">Name</th>
+                            <th>Email</th>
+                            <th>School</th>
+                            <th>State</th>
+                            <th>Certification</th>
+                            <th style="width:1%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in awaiting_invitation %}
+                        <tr class="teacher-row">
+                            <td style="padding:0.5rem 0.75rem;"><input type="checkbox" class="teacher-check" name="teacher_ids" value="{{ teacher.id }}" form="bulk-remove-form" onchange="updateCount('teacher-check')"></td>
+                            <td style="padding:0.5rem 0.5rem;">{{ teacher.full_name }}</td>
+                            <td>{% if teacher.email and teacher.email|lower != 'nan' %}{{ teacher.email }}{% else %}<span style="color:#b91c1c;">No email (will be skipped)</span>{% endif %}</td>
+                            <td>{{ teacher.school }}</td>
+                            <td>{{ teacher.state }}</td>
+                            <td>{{ teacher.certification|default:teacher.provider }}</td>
+                            <td>
+                                <form method="post" action="{% url 'remove_from_invitations' %}" onsubmit="return confirm('Remove {{ teacher.full_name|escapejs }} from the eligible list? They will not be invited.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="teacher_ids" value="{{ teacher.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from eligible list"><i class="bi bi-trash"></i> Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color:#6b7280; margin-bottom:1rem;">No eligible teachers are waiting for an invitation.</p>
+        {% endif %}
+        {% if invitation_exclusions %}
+            <details style="margin-bottom:1rem;">
+                <summary style="cursor:pointer; color:#374151; font-weight:600;">Removed by Admin ({{ invitation_exclusions|length }})</summary>
+                <form id="bulk-restore-form" method="post" action="{% url 'restore_to_invitations' %}" onsubmit="return confirmBulk(this, 'exclusion-check', 'Restore {n} selected teacher(s) to the eligible list?');">{% csrf_token %}</form>
+                <div style="margin:0.5rem 0;">
+                    <button type="submit" form="bulk-restore-form" id="bulk-restore-btn" class="btn btn-sm btn-outline-secondary" disabled>
+                        <i class="bi bi-arrow-counterclockwise"></i> Restore selected (<span id="exclusion-selected-count">0</span>)
+                    </button>
+                </div>
+                <table class="table table-sm" style="margin:0;">
+                    <thead>
+                        <tr>
+                            <th style="width:1%; padding:0.5rem 0.75rem;"><input type="checkbox" id="exclusion-check-all" title="Select all" onchange="toggleAll('exclusion-check', this.checked)"></th>
+                            <th style="padding:0.5rem 0.5rem;">Name</th>
+                            <th>Removed</th>
+                            <th style="width:1%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exclusion in invitation_exclusions %}
+                        <tr>
+                            <td style="padding:0.5rem 0.75rem;"><input type="checkbox" class="exclusion-check" name="exclusion_ids" value="{{ exclusion.id }}" form="bulk-restore-form" onchange="updateCount('exclusion-check')"></td>
+                            <td style="padding:0.5rem 0.5rem;">{{ exclusion.full_name }}</td>
+                            <td style="color:#6b7280; font-size:0.85rem;">{{ exclusion.removed_at|date:"d M Y, H:i" }}{% if exclusion.removed_by %} by {{ exclusion.removed_by.get_username }}{% endif %}</td>
+                            <td>
+                                <form method="post" action="{% url 'restore_to_invitations' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="exclusion_ids" value="{{ exclusion.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Restore</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </details>
+        {% endif %}
+        <script>
+            // Bulk select for the invitation review list. Checkboxes live inside the table but
+            // belong to a form outside it (form="…"), so each row can still keep its own Delete form.
+            function visibleChecks(cls) {
+                return Array.from(document.querySelectorAll('.' + cls)).filter(cb => cb.closest('tr').style.display !== 'none');
+            }
+            function updateCount(cls) {
+                const all = Array.from(document.querySelectorAll('.' + cls));
+                const checked = all.filter(cb => cb.checked).length;
+                const prefix = cls.replace('-check', '');
+                document.getElementById(prefix + '-selected-count').textContent = checked;
+                document.getElementById(cls === 'teacher-check' ? 'bulk-remove-btn' : 'bulk-restore-btn').disabled = checked === 0;
+                const visible = visibleChecks(cls);
+                const master = document.getElementById(cls + '-all');
+                master.checked = visible.length > 0 && visible.every(cb => cb.checked);
+                master.indeterminate = !master.checked && visible.some(cb => cb.checked);
+            }
+            function toggleAll(cls, on) {
+                visibleChecks(cls).forEach(cb => { cb.checked = on; });
+                updateCount(cls);
+            }
+            function filterTeachers(query) {
+                const q = query.trim().toLowerCase();
+                document.querySelectorAll('.teacher-row').forEach(row => {
+                    row.style.display = !q || row.textContent.toLowerCase().includes(q) ? '' : 'none';
+                });
+                updateCount('teacher-check');
+            }
+            function confirmBulk(form, cls, message) {
+                const n = document.querySelectorAll('.' + cls + ':checked').length;
+                return n > 0 && confirm(message.replace('{n}', n));
+            }
+        </script>
+        {% if invitation_block_reason %}
+            <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
+                <i class="bi bi-exclamation-triangle"></i> {{ invitation_block_reason }}
+            </p>
+        {% endif %}
+        <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Approve and send invitation emails to {{ awaiting_invitation|length }} eligible teacher(s)?');">
             {% csrf_token %}
-            {% if invitation_block_reason %}
-                <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
-                    <i class="bi bi-exclamation-triangle"></i> {{ invitation_block_reason }}
-                </p>
-            {% endif %}
-            <button type="submit" class="btn btn-primary" {% if not eligible or invitation_block_reason %}disabled{% endif %}>
-                <i class="bi bi-send"></i> Send Invitation Emails
+            <button type="submit" class="btn btn-primary" {% if not awaiting_invitation or invitation_block_reason %}disabled{% endif %}>
+                <i class="bi bi-send-check"></i> Approve &amp; Send Invitations ({{ awaiting_invitation|length }})
             </button>
             <span style="color:#71717a; font-size:0.875rem; margin-left:1rem;">
                 Emails print to the server console in development mode.

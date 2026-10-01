@@ -1,6 +1,6 @@
 import pandas as pd
 from django.db import transaction
-from .models import CertificationRule, Teacher
+from .models import CertificationRule, InvitationExclusion, Teacher
 
 
 def classify_certification(provider, programme, level):
@@ -99,10 +99,13 @@ def save_to_database(deduplicated_df):
     Save deduplicated teachers to Teacher model.
     """
     try:
+        excluded_ics = set(InvitationExclusion.objects.values_list('ic_number', flat=True))
         with transaction.atomic():
             Teacher.objects.all().delete()
 
             for idx, row in deduplicated_df.iterrows():
+                if str(row['ic']).strip() in excluded_ics:
+                    continue  # removed by the Admin from the eligible list
                 Teacher.objects.create(
                     ic_number=str(row['ic']).strip(),
                     full_name=str(row['name']).strip(),

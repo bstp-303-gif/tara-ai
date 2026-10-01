@@ -21,3 +21,15 @@ def _require_role(role):
 
 state_officer_required = _require_role('state_officer')
 moe_officer_required = _require_role('moe_officer')
+
+
+def admin_required(view_func):
+    """The Admin is any logged-in user without an officer role (the dashboard user)."""
+    @wraps(view_func)
+    @login_required
+    def wrapped(request, *args, **kwargs):
+        if getattr(request.user, 'officerprofile', None):
+            messages.error(request, 'Only the Admin can do that.')
+            return redirect('officer_home')
+        return view_func(request, *args, **kwargs)
+    return wrapped

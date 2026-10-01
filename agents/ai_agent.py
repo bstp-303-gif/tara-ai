@@ -1,10 +1,11 @@
 """
 Autonomous pipeline agent for MyGPGD J360.
 
-Everything between "a file was uploaded" / "a teacher applied" and the two
-human approval gates (State Officer, MoE Officer) is this agent's job: run
-the certification pipeline, send invitations, and compile & rank
-applications, deciding via tool use what actually needs doing right now.
+Everything between "a file was uploaded" / "a teacher applied" and the
+human approval gates is this agent's job: run the certification pipeline
+and compile & rank applications, deciding via tool use what actually needs
+doing right now. Invitation emails are deliberately NOT one of its tools —
+the Admin reviews the eligible list and sends them (human in the loop).
 
 Invoked synchronously from agents/views.py right after the two events it
 reacts to (a valid upload, a submitted application). Every run is logged to
@@ -27,10 +28,12 @@ MAX_STEPS = 6
 
 SYSTEM_PROMPT = """You are the autonomous pipeline agent for MyGPGD J360, a Malaysian Ministry of \
 Education programme that certifies teachers as digital leaders (GPGD). Staff upload certification \
-files and human State and MoE Officers make the final approval decisions — those steps are never \
-yours to take. Everything in between is your responsibility: turning uploaded certification files \
-into a deduplicated, eligibility-classified teacher roster, inviting eligible teachers to apply, and \
-compiling and ranking submitted applications so they're ready for State Officer review.
+files and human State and MoE Officers make the approval decisions — those steps are never \
+yours to take. Your responsibility is turning uploaded certification files into a deduplicated, \
+eligibility-classified teacher roster, and compiling and ranking submitted applications so they're \
+ready for State Officer review. You never email teachers: once the roster is ready, the Admin \
+reviews the eligible list and decides when to send invitations, so just mention in your summary \
+that the eligible list is awaiting Admin approval.
 
 You'll be told what just happened. Check status with the read-only tools before acting, only run a \
 step when there's actually new work for it to do, and use log_note for anything worth flagging that \
@@ -53,12 +56,6 @@ TOOLS = [
                        "leaving outdated teachers/eligible-candidates on the dashboard. Call it whenever the "
                        "set of valid files has changed (a new upload, or a delete), even if that set is now "
                        "empty — it never 'erases good data', it only ever reflects what's currently uploaded.",
-        'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False},
-    },
-    {
-        'name': 'send_invitation_emails',
-        'description': "Email every eligible teacher who has not yet applied a secure, personalised "
-                       "link to the GPGD application form.",
         'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False},
     },
     {
@@ -105,10 +102,6 @@ def _tool_run_certification_pipeline(_tool_input):
     return pipeline_ops.run_certification_pipeline()
 
 
-def _tool_send_invitation_emails(_tool_input):
-    return pipeline_ops.send_invitation_emails()
-
-
 def _tool_get_pending_applications(_tool_input):
     return {'pending_count': Application.objects.filter(status__in=ranking.PIPELINE_ENTRY_STATUSES).count()}
 
@@ -146,7 +139,6 @@ def _format_anthropic_error(exc):
 TOOL_IMPLEMENTATIONS = {
     'get_certification_upload_status': _tool_get_certification_upload_status,
     'run_certification_pipeline': _tool_run_certification_pipeline,
-    'send_invitation_emails': _tool_send_invitation_emails,
     'get_pending_applications': _tool_get_pending_applications,
     'compile_and_rank_applications': _tool_compile_and_rank_applications,
     'log_note': _tool_log_note,

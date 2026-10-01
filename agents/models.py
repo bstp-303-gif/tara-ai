@@ -338,3 +338,22 @@ class MonthlyReminderLog(models.Model):
     class Meta:
         ordering = ['-sent_at']
         unique_together = ('application', 'period')
+
+
+class InvitationExclusion(models.Model):
+    """A teacher the Admin removed from the eligible list before invitations were sent.
+
+    The pipeline rebuilds the whole Teacher roster on every upload/delete, so the removal is
+    recorded by IC number here and save_to_database() skips it — otherwise the teacher would
+    reappear (and be invited) the next time any certification file changes.
+    """
+    ic_number = models.CharField(max_length=20, unique=True)
+    full_name = models.CharField(max_length=255)
+    removed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    removed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.ic_number})"
+
+    class Meta:
+        ordering = ['-removed_at']
