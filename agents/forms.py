@@ -11,8 +11,21 @@ class ApplicationForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, allowed_tracks=None, **kwargs):
         super().__init__(*args, **kwargs)
+        # Only offer the tracks the teacher is actually certified for. With more than one
+        # (multi-certified), nothing is preselected so they make a deliberate choice.
+        if allowed_tracks:
+            valid = {value for value, _ in Application.TRACK_CHOICES}
+            choices = [(t, t) for t in allowed_tracks if t in valid]
+            if choices:
+                field = self.fields['tech_track']
+                field.choices = ([('', '— Choose your technology track —')] if len(choices) > 1 else []) + choices
+                if len(choices) > 1:
+                    field.help_text = (
+                        'You are certified in ' + ' and '.join(t for t, _ in choices)
+                        + ' — choose the technology track you want to apply for.'
+                    )
         # Field labels are editable via the "Application Form" settings page — fall back to
         # the defaults below (which double as Meta.labels for anywhere the form is used
         # without going through the DB, e.g. the Django admin).

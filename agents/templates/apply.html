@@ -74,6 +74,7 @@
                 <div class="card-body" style="padding:1.5rem;">
                     <label class="form-label fw-semibold">{{ form.tech_track.label }} <span style="color:red">*</span></label>
                     {{ form.tech_track }}
+                    {% if form.tech_track.help_text %}<div class="form-text" style="color:#1e40af;"><i class="bi bi-info-circle"></i> {{ form.tech_track.help_text }}</div>{% endif %}
                     {% if form.tech_track.errors %}<div class="text-danger small">{{ form.tech_track.errors }}</div>{% endif %}
                 </div>
             </div>

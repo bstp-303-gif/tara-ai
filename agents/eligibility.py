@@ -22,6 +22,24 @@ def classify_certification(provider, programme, level):
     return None
 
 
+def eligible_tracks(teacher):
+    """Technology tracks a teacher can apply for: one per provider they hold a recognised
+    certification from (e.g. Apple Teacher + GCE L2 -> ['Apple', 'Google']).
+
+    Teacher.certification holds the canonical rule names, so each is mapped back to its rule's
+    provider. Falls back to Teacher.provider if none map (e.g. a rule was renamed since).
+    """
+    held = str(teacher.certification or '')
+    tracks = {
+        rule.provider.name
+        for rule in CertificationRule.objects.select_related('provider')
+        if rule.canonical_name and rule.canonical_name in held
+    }
+    if not tracks:
+        tracks = {p.strip() for p in str(teacher.provider or '').split(',') if p.strip()}
+    return sorted(tracks)
+
+
 def normalize_and_deduplicate(dataframes_dict, providers_list):
     """
     Takes multiple dataframes and normalizes + deduplicates them.

@@ -9,8 +9,11 @@ from django.urls import reverse
 from django.utils import timezone
 
 from . import ai_agent, pipeline_ops
-from .eligibility import save_to_database
-from .models import InvitationExclusion, InvitationRecord, OfficerProfile, ProgrammeSettings, Teacher
+from .eligibility import eligible_tracks, save_to_database
+from .forms import ApplicationForm
+from .models import (
+    CertificationRule, InvitationExclusion, InvitationRecord, OfficerProfile, ProgrammeSettings, Provider, Teacher,
+)
 
 
 @override_settings(STORAGES={
@@ -157,3 +160,45 @@ class InvitationApprovalGateTests(TestCase):
         response = self.client.get(reverse('agent1_dashboard'))
         self.assertContains(response, 'Not sent yet')
         self.assertNotContains(response, 'location.reload()')
+
+
+class TechTrackChoiceTests(TestCase):
+    """A multi-certified teacher chooses between the tracks they hold recognised certifications for."""
+
+    def setUp(self):
+        for provider_name, cert in [('Apple', 'Apple Teacher (test)'), ('Google', 'Google Educator L2 (test)')]:
+            provider, _ = Provider.objects.get_or_create(name=provider_name, defaults={'display_name': provider_name})
+            CertificationRule.objects.create(provider=provider, canonical_name=cert, required_keywords=['x'])
+        settings_obj = ProgrammeSettings.load()
+        settings_obj.submission_deadline = timezone.localdate() + timedelta(days=14)
+        settings_obj.save()
+
+    def _teacher(self, certification, provider):
+        return Teacher.objects.create(
+            ic_number='850610-01-6124', full_name='Jayanthi', email='j@example.com', school='BSTP', state='Johor',
+            provider=provider, certification=certification, cert_level='Level 2', cert_year=2026,
+            eligibility_status='Eligible',
+        )
+
+    def _apply_url(self, teacher):
+        return reverse('apply', args=[pipeline_ops._make_apply_token(teacher.ic_number)])
+
+    def test_multi_certified_must_choose_between_their_tracks(self):
+        teacher = self._teacher('Apple Teacher (test), Google Educator L2 (test)', 'Apple, Google')
+        self.assertEqual(eligible_tracks(teacher), ['Apple', 'Google'])
+        form = self.client.get(self._apply_url(teacher)).context['form']
+        self.assertEqual([v for v, _ in form.fields['tech_track'].choices], ['', 'Apple', 'Google'])
+        self.assertEqual(form.initial['tech_track'], '')
+        self.assertIn('Apple Teacher (test)', form.initial['certifications'])
+        self.assertIn('Google Educator L2 (test)', form.initial['certifications'])
+
+    def test_single_track_is_preselected(self):
+        teacher = self._teacher('Apple Teacher (test)', 'Apple, Google')
+        form = self.client.get(self._apply_url(teacher)).context['form']
+        self.assertEqual([v for v, _ in form.fields['tech_track'].choices], ['Apple'])
+        self.assertEqual(form.initial['tech_track'], 'Apple')
+
+    def test_track_outside_certifications_is_rejected(self):
+        form = ApplicationForm(data={'tech_track': 'Microsoft'}, allowed_tracks=['Apple', 'Google'])
+        form.is_valid()
+        self.assertIn('tech_track', form.errors)

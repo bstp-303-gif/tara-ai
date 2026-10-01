@@ -23,6 +23,7 @@ from . import ai_agent, content_defaults, pipeline_ops, ranking
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
 from .constants import MALAYSIA_STATES, canonical_state
 from .decorators import admin_required, moe_officer_required, state_officer_required
+from .eligibility import eligible_tracks
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, ErrorLog, FileUpload,
@@ -596,18 +597,22 @@ def apply(request, token):
         return render(request, 'apply_closed.html', {'deadline': deadline})
 
     initial = {}
+    allowed_tracks = None
     if teacher:
+        allowed_tracks = eligible_tracks(teacher)
         initial = {
-            'full_name':   teacher.full_name,
-            'ic_number':   teacher.ic_number,
-            'email':       teacher.email if teacher.email.lower() != 'nan' else '',
-            'school_name': teacher.school,
-            'state':       canonical_state(teacher.state),
-            'tech_track':  teacher.provider.split(',')[0].strip() if teacher.provider else '',
+            'full_name':      teacher.full_name,
+            'ic_number':      teacher.ic_number,
+            'email':          teacher.email if teacher.email.lower() != 'nan' else '',
+            'school_name':    teacher.school,
+            'state':          canonical_state(teacher.state),
+            # Single-track teachers get it preselected; multi-certified teachers must choose.
+            'tech_track':     allowed_tracks[0] if len(allowed_tracks) == 1 else '',
+            'certifications': ', '.join(c.strip() for c in str(teacher.certification or '').split(',') if c.strip()),
         }
 
     if request.method == 'POST':
-        form = ApplicationForm(request.POST)
+        form = ApplicationForm(request.POST, allowed_tracks=allowed_tracks)
         if form.is_valid():
             application = form.save(commit=False)
             if teacher:
@@ -625,7 +630,7 @@ def apply(request, token):
 
             return redirect('apply_success', ref=application.reference_number)
     else:
-        form = ApplicationForm(initial=initial)
+        form = ApplicationForm(initial=initial, allowed_tracks=allowed_tracks)
 
     settings_obj = ProgrammeSettings.load()
     section_labels = {**content_defaults.DEFAULT_APPLY_SECTION_LABELS, **(settings_obj.apply_form_section_labels or {})}
