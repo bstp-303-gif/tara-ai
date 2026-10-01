@@ -8,9 +8,9 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from . import ai_agent
+from . import ai_agent, pipeline_ops
 from .eligibility import save_to_database
-from .models import InvitationExclusion, OfficerProfile, ProgrammeSettings, Teacher
+from .models import InvitationExclusion, InvitationRecord, OfficerProfile, ProgrammeSettings, Teacher
 
 
 @override_settings(STORAGES={
@@ -110,3 +110,50 @@ class InvitationApprovalGateTests(TestCase):
         self.client.post(reverse('remove_from_invitations'), {'teacher_ids': [a.id, b.id]})
         self.assertEqual(list(Teacher.objects.values_list('full_name', flat=True)), [keep.full_name])
         self.assertEqual(InvitationExclusion.objects.count(), 2)
+
+    @mock.patch('agents.pipeline_ops._send_mail_with_hard_timeout')
+    def test_sent_invitation_is_recorded_and_not_resent(self, send):
+        teacher = self._make_teacher()
+        result = pipeline_ops.send_invitation_emails(sent_by='admin')
+        self.assertEqual(result['sent'], 1)
+        record = InvitationRecord.objects.get(ic_number=teacher.ic_number)
+        self.assertEqual((record.status, record.sent_by), ('sent', 'admin'))
+
+        result = pipeline_ops.send_invitation_emails(sent_by='admin')
+        self.assertEqual(result['sent'], 0)
+        self.assertEqual(send.call_count, 1)
+
+    @mock.patch('agents.pipeline_ops._send_mail_with_hard_timeout', side_effect=OSError('SMTP down'))
+    def test_failed_invitation_is_recorded(self, send):
+        teacher = self._make_teacher()
+        pipeline_ops.send_invitation_emails()
+        record = InvitationRecord.objects.get(ic_number=teacher.ic_number)
+        self.assertEqual(record.status, 'failed')
+        self.assertIn('SMTP down', record.error_message)
+
+    def test_dashboard_shows_email_sent_by_name(self):
+        self._login()
+        teacher = self._make_teacher()
+        InvitationRecord.objects.create(ic_number=teacher.ic_number, email=teacher.email, status='sent')
+        response = self.client.get(reverse('agent1_dashboard'))
+        self.assertContains(response, 'Email sent')
+        self.assertContains(response, '0 not yet sent')
+
+    @mock.patch('agents.views.threading.Thread')
+    def test_send_marks_teachers_sending_immediately(self, thread):
+        self._login()
+        teacher = self._make_teacher()
+        self.client.post(reverse('send_invitations'))
+        self.assertEqual(InvitationRecord.objects.get(ic_number=teacher.ic_number).status, 'sending')
+        response = self.client.get(reverse('agent1_dashboard'))
+        self.assertContains(response, 'Sending…')
+        self.assertContains(response, 'location.reload()')
+
+    def test_stale_sending_shows_not_sent(self):
+        self._login()
+        teacher = self._make_teacher()
+        InvitationRecord.objects.create(ic_number=teacher.ic_number, email=teacher.email, status='sending')
+        InvitationRecord.objects.filter(ic_number=teacher.ic_number).update(attempted_at=timezone.now() - timedelta(minutes=10))
+        response = self.client.get(reverse('agent1_dashboard'))
+        self.assertContains(response, 'Not sent yet')
+        self.assertNotContains(response, 'location.reload()')

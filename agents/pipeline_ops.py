@@ -87,7 +87,9 @@ def _send_mail_with_hard_timeout(subject, body, to_email):
 
 from .collector import normalize_dataframe
 from .eligibility import normalize_and_deduplicate, save_dataframe_to_excel, save_to_database
-from .models import Application, ErrorLog, FileUpload, MonthlyReminderLog, ProgrammeSettings, Teacher
+from .models import (
+    Application, ErrorLog, FileUpload, InvitationRecord, MonthlyReminderLog, ProgrammeSettings, Teacher,
+)
 
 PROVIDERS = ['Google', 'Microsoft', 'Apple']
 
@@ -195,9 +197,30 @@ def invitation_block_reason(deadline):
     return ''
 
 
-def send_invitation_emails():
-    """Email every eligible teacher who hasn't applied yet a secure, personalised application link."""
-    eligible = Teacher.objects.filter(eligibility_status='Eligible').exclude(application__isnull=False)
+def invitation_targets():
+    """Eligible teachers who haven't applied and haven't already been sent an invitation."""
+    already_sent = InvitationRecord.objects.filter(status='sent').values_list('ic_number', flat=True)
+    return (Teacher.objects.filter(eligibility_status='Eligible')
+            .exclude(application__isnull=False)
+            .exclude(ic_number__in=list(already_sent)))
+
+
+def mark_invitations_sending(sent_by=''):
+    """Flag every pending target as "sending" before the background send starts, so the dashboard
+    shows progress immediately instead of a stale "Not sent yet" until the thread finishes."""
+    for teacher in invitation_targets():
+        if teacher.email and teacher.email.lower() != 'nan':
+            InvitationRecord.objects.update_or_create(
+                ic_number=teacher.ic_number,
+                defaults={'email': teacher.email, 'status': 'sending', 'error_message': '', 'sent_by': sent_by},
+            )
+
+
+def send_invitation_emails(sent_by=''):
+    """Email a secure, personalised application link to every eligible teacher who hasn't applied
+    and hasn't already been sent one. Each attempt is recorded in InvitationRecord so the dashboard
+    can show "Sent"/"Failed" next to the teacher's name; failed sends are retried next time."""
+    eligible = invitation_targets()
     site_url = getattr(settings, 'GPGD_SITE_URL', 'http://localhost:8000')
     programme_settings = ProgrammeSettings.load()
     deadline = programme_settings.submission_deadline
@@ -228,8 +251,16 @@ def send_invitation_emails():
         try:
             _send_mail_with_hard_timeout(subject, body, teacher.email)
             sent += 1
+            InvitationRecord.objects.update_or_create(
+                ic_number=teacher.ic_number,
+                defaults={'email': teacher.email, 'status': 'sent', 'error_message': '', 'sent_by': sent_by},
+            )
         except Exception as e:
             failed.append({'teacher': teacher.full_name, 'email': teacher.email, 'error': str(e)})
+            InvitationRecord.objects.update_or_create(
+                ic_number=teacher.ic_number,
+                defaults={'email': teacher.email, 'status': 'failed', 'error_message': str(e), 'sent_by': sent_by},
+            )
             category, suggested_action = _classify_email_error(e)
             ErrorLog.objects.create(
                 category=category,

@@ -2,6 +2,7 @@ import json
 import os
 import threading
 import uuid
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -25,7 +26,7 @@ from .decorators import admin_required, moe_officer_required, state_officer_requ
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, ErrorLog, FileUpload,
-    InvitationExclusion, MonthlyReminderLog, ProgrammeSettings, Provider, Teacher,
+    InvitationExclusion, InvitationRecord, MonthlyReminderLog, ProgrammeSettings, Provider, Teacher,
 )
 
 TEMP_DIR = os.path.join(settings.BASE_DIR, 'temp_uploads')
@@ -155,6 +156,25 @@ def agent1_dashboard(request):
 
     deadline = ProgrammeSettings.load().submission_deadline
 
+    # Attach each teacher's latest invitation attempt (by IC) so the list can show Sent/Failed by the name.
+    awaiting_invitation = list(Teacher.objects.filter(
+        eligibility_status='Eligible', application__isnull=True
+    ).order_by('state', 'full_name'))
+    records = InvitationRecord.objects.in_bulk([t.ic_number for t in awaiting_invitation], field_name='ic_number')
+    stale_before = timezone.now() - timedelta(minutes=5)
+    for teacher in awaiting_invitation:
+        record = records.get(teacher.ic_number)
+        # A "sending" flag older than 5 minutes means the background send was interrupted
+        # (e.g. server restart) — show it as not sent so it's retried and the page stops auto-refreshing.
+        if record and record.status == 'sending' and record.attempted_at < stale_before:
+            record = None
+        teacher.invitation = record
+    invite_sending_count = sum(1 for t in awaiting_invitation if t.invitation and t.invitation.status == 'sending')
+    invite_pending_count = sum(
+        1 for t in awaiting_invitation
+        if not (t.invitation and t.invitation.status == 'sent') and t.email and t.email.lower() != 'nan'
+    )
+
     context = {
         'files': files,
         'teachers': teachers,
@@ -166,9 +186,10 @@ def agent1_dashboard(request):
         'submission_deadline': deadline,
         'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
         'invitation_block_reason': pipeline_ops.invitation_block_reason(deadline),
-        'awaiting_invitation': Teacher.objects.filter(
-            eligibility_status='Eligible', application__isnull=True
-        ).order_by('state', 'full_name'),
+        'awaiting_invitation': awaiting_invitation,
+        'invite_pending_count': invite_pending_count,
+        'invite_sending_count': invite_sending_count,
+        'invite_sent_count': sum(1 for t in awaiting_invitation if t.invitation and t.invitation.status == 'sent'),
         'invitation_exclusions': InvitationExclusion.objects.all(),
         'pending_compile_count': Application.objects.filter(
             status__in=ranking.PIPELINE_ENTRY_STATUSES
@@ -449,7 +470,7 @@ def _send_invitations_background(triggered_by):
     teachers that adds up fast, so this runs off-thread instead of blocking the
     request (same reasoning as ai_agent.run_pipeline_agent_async).
     """
-    result = pipeline_ops.send_invitation_emails()
+    result = pipeline_ops.send_invitation_emails(sent_by=triggered_by)
     if result.get('skipped_reason'):
         AgentActivityLog.objects.create(
             trigger_reason=f'Admin approved invitations (by {triggered_by})',
@@ -497,6 +518,7 @@ def send_invitations(request):
         messages.error(request, f'⚠️ Invitations not sent. {block_reason}')
         return redirect('agent1_dashboard')
 
+    pipeline_ops.mark_invitations_sending(sent_by=request.user.get_username())
     threading.Thread(
         target=_send_invitations_background,
         args=(request.user.get_username(),),
@@ -504,9 +526,8 @@ def send_invitations(request):
     ).start()
     messages.info(
         request,
-        '📨 Sending invitation emails now — this runs in the background. Check the '
-        '"Agent Activity" panel below in a few moments for confirmation of exactly '
-        'how many were sent, skipped, or failed.'
+        '📨 Sending invitation emails now. Each teacher shows "Sending…" and the page refreshes '
+        'by itself until it changes to "Email sent" (or "Failed").'
     )
     return redirect('agent1_dashboard')
 
@@ -532,7 +553,7 @@ def remove_from_invitations(request):
         Teacher.objects.filter(id__in=[t.id for t in teachers]).delete()
 
     label = teachers[0].full_name if len(teachers) == 1 else f'{len(teachers)} teachers'
-    messages.success(request, f'🗑️ {label} removed from the eligible list — they will not be invited.')
+    messages.success(request, f'🗑️ {label} removed from the eligible list — they will not be invited. Removed by mistake? Click Undo in the red "Removed by Admin" box.')
     return redirect(reverse('agent1_dashboard') + '#invitations')
 
 

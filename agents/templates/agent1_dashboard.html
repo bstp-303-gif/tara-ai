@@ -270,7 +270,26 @@
                         {% for teacher in awaiting_invitation %}
                         <tr class="teacher-row">
                             <td style="padding:0.5rem 0.75rem;"><input type="checkbox" class="teacher-check" name="teacher_ids" value="{{ teacher.id }}" form="bulk-remove-form" onchange="updateCount('teacher-check')"></td>
-                            <td style="padding:0.5rem 0.5rem;">{{ teacher.full_name }}</td>
+                            <td style="padding:0.5rem 0.5rem;">
+                                {{ teacher.full_name }}<br>
+                                {% if teacher.invitation.status == 'sent' %}
+                                    <span class="status-badge" style="background:#d1fae5; color:#065f46; font-size:0.75rem; white-space:nowrap;" title="Sent to {{ teacher.invitation.email }}{% if teacher.invitation.sent_by %} by {{ teacher.invitation.sent_by }}{% endif %}">
+                                        <i class="bi bi-envelope-check-fill"></i> Email sent {{ teacher.invitation.attempted_at|date:"d M Y, H:i" }}
+                                    </span>
+                                {% elif teacher.invitation.status == 'sending' %}
+                                    <span class="status-badge" style="background:#dbeafe; color:#1e40af; font-size:0.75rem; white-space:nowrap;">
+                                        <i class="bi bi-hourglass-split"></i> Sending…
+                                    </span>
+                                {% elif teacher.invitation.status == 'failed' %}
+                                    <span class="status-badge" style="background:#fee2e2; color:#991b1b; font-size:0.75rem; white-space:nowrap;" title="{{ teacher.invitation.error_message }}">
+                                        <i class="bi bi-envelope-x-fill"></i> Failed {{ teacher.invitation.attempted_at|date:"d M Y, H:i" }} — will retry
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge" style="background:#f3f4f6; color:#4b5563; font-size:0.75rem; white-space:nowrap;">
+                                        <i class="bi bi-envelope"></i> Not sent yet
+                                    </span>
+                                {% endif %}
+                            </td>
                             <td>{% if teacher.email and teacher.email|lower != 'nan' %}{{ teacher.email }}{% else %}<span style="color:#b91c1c;">No email (will be skipped)</span>{% endif %}</td>
                             <td>{{ teacher.school }}</td>
                             <td>{{ teacher.state }}</td>
@@ -291,15 +310,18 @@
             <p style="color:#6b7280; margin-bottom:1rem;">No eligible teachers are waiting for an invitation.</p>
         {% endif %}
         {% if invitation_exclusions %}
-            <details style="margin-bottom:1rem;">
-                <summary style="cursor:pointer; color:#374151; font-weight:600;">Removed by Admin ({{ invitation_exclusions|length }})</summary>
-                <form id="bulk-restore-form" method="post" action="{% url 'restore_to_invitations' %}" onsubmit="return confirmBulk(this, 'exclusion-check', 'Restore {n} selected teacher(s) to the eligible list?');">{% csrf_token %}</form>
+            <div style="margin-bottom:1rem; border:1px solid #fecaca; background:#fef2f2; border-radius:9px; padding:0.75rem 1rem;">
+                <div style="font-weight:600; color:#991b1b;">
+                    <i class="bi bi-person-x"></i> Removed by Admin ({{ invitation_exclusions|length }}) — will not be invited
+                </div>
+                <div style="color:#7f1d1d; font-size:0.85rem;">Removed by mistake? Click <strong>Undo</strong> to put a teacher back on the eligible list.</div>
+                <form id="bulk-restore-form" method="post" action="{% url 'restore_to_invitations' %}" onsubmit="return confirmBulk(this, 'exclusion-check', 'Undo removal and put {n} selected teacher(s) back on the eligible list?');">{% csrf_token %}</form>
                 <div style="margin:0.5rem 0;">
-                    <button type="submit" form="bulk-restore-form" id="bulk-restore-btn" class="btn btn-sm btn-outline-secondary" disabled>
-                        <i class="bi bi-arrow-counterclockwise"></i> Restore selected (<span id="exclusion-selected-count">0</span>)
+                    <button type="submit" form="bulk-restore-form" id="bulk-restore-btn" class="btn btn-sm btn-success" disabled>
+                        <i class="bi bi-arrow-counterclockwise"></i> Undo selected (<span id="exclusion-selected-count">0</span>)
                     </button>
                 </div>
-                <table class="table table-sm" style="margin:0;">
+                <table class="table table-sm" style="margin:0; background:#fff; border-radius:7px;">
                     <thead>
                         <tr>
                             <th style="width:1%; padding:0.5rem 0.75rem;"><input type="checkbox" id="exclusion-check-all" title="Select all" onchange="toggleAll('exclusion-check', this.checked)"></th>
@@ -318,14 +340,20 @@
                                 <form method="post" action="{% url 'restore_to_invitations' %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="exclusion_ids" value="{{ exclusion.id }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Restore</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-success" style="white-space:nowrap;"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
                                 </form>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </details>
+            </div>
+        {% endif %}
+        {% if invite_sending_count %}
+            <script>
+                // Invitations are going out in the background: refresh until every "Sending…" badge resolves.
+                setTimeout(() => location.reload(), 4000);
+            </script>
         {% endif %}
         <script>
             // Bulk select for the invitation review list. Checkboxes live inside the table but
@@ -365,11 +393,14 @@
                 <i class="bi bi-exclamation-triangle"></i> {{ invitation_block_reason }}
             </p>
         {% endif %}
-        <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Approve and send invitation emails to {{ awaiting_invitation|length }} eligible teacher(s)?');">
+        <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Approve and send invitation emails to {{ invite_pending_count }} eligible teacher(s) not yet invited?');">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary" {% if not awaiting_invitation or invitation_block_reason %}disabled{% endif %}>
-                <i class="bi bi-send-check"></i> Approve &amp; Send Invitations ({{ awaiting_invitation|length }})
+            <button type="submit" class="btn btn-primary" {% if not invite_pending_count or invitation_block_reason %}disabled{% endif %}>
+                <i class="bi bi-send-check"></i> Approve &amp; Send Invitations ({{ invite_pending_count }} not yet sent)
             </button>
+            {% if invite_sent_count %}
+                <span style="color:#065f46; font-size:0.875rem; margin-left:0.75rem;"><i class="bi bi-envelope-check-fill"></i> {{ invite_sent_count }} already sent — they won't be emailed again.</span>
+            {% endif %}
             <span style="color:#71717a; font-size:0.875rem; margin-left:1rem;">
                 Emails print to the server console in development mode.
             </span>

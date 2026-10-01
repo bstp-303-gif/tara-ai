@@ -357,3 +357,22 @@ class InvitationExclusion(models.Model):
 
     class Meta:
         ordering = ['-removed_at']
+
+
+class InvitationRecord(models.Model):
+    """The latest invitation email attempt for a teacher, shown next to their name on the dashboard.
+
+    Keyed by IC number (not a Teacher FK) for the same reason as InvitationExclusion: the
+    pipeline rebuilds the Teacher roster on every upload, and the record must survive that.
+    """
+    STATUS_CHOICES = [('sending', 'Sending'), ('sent', 'Sent'), ('failed', 'Failed')]
+
+    ic_number = models.CharField(max_length=20, unique=True)
+    email = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    error_message = models.TextField(blank=True)
+    sent_by = models.CharField(max_length=150, blank=True)
+    attempted_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.ic_number} — {self.get_status_display()} ({self.attempted_at:%d %b %Y %H:%M})"
