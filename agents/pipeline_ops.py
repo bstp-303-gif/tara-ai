@@ -180,13 +180,33 @@ def _make_apply_token(ic_number):
     return signing.dumps(ic_number, salt='gpgd-apply')
 
 
+def submissions_closed(deadline):
+    """Applications are accepted up to and including the deadline day."""
+    return bool(deadline) and timezone.localdate() > deadline
+
+
+def invitation_block_reason(deadline):
+    """Why invitations can't be sent right now, or '' if they can."""
+    if not deadline:
+        return 'No submission deadline is set. Set the deadline on the dashboard before sending invitations.'
+    if submissions_closed(deadline):
+        return (f"The submission deadline ({deadline.strftime('%d %B %Y')}) has already passed. "
+                "Set a new deadline before sending invitations.")
+    return ''
+
+
 def send_invitation_emails():
     """Email every eligible teacher who hasn't applied yet a secure, personalised application link."""
     eligible = Teacher.objects.filter(eligibility_status='Eligible').exclude(application__isnull=False)
     site_url = getattr(settings, 'GPGD_SITE_URL', 'http://localhost:8000')
     programme_settings = ProgrammeSettings.load()
     deadline = programme_settings.submission_deadline
-    deadline_text = deadline.strftime('%d %B %Y') if deadline else 'the closing date'
+
+    block_reason = invitation_block_reason(deadline)
+    if block_reason:
+        return {'sent': 0, 'no_email': 0, 'failed': [], 'eligible_total': eligible.count(), 'skipped_reason': block_reason}
+
+    deadline_text = deadline.strftime('%d %B %Y')
 
     subject = programme_settings.invitation_email_subject or content_defaults.DEFAULT_INVITATION_SUBJECT
     body_template = programme_settings.invitation_email_body or content_defaults.DEFAULT_INVITATION_BODY

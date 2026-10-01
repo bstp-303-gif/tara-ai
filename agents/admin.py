@@ -1,12 +1,29 @@
+from django import forms
 from django.contrib import admin
+from .constants import STATE_CHOICES
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, FileUpload,
     MonthlyReminderLog, OfficerProfile, ProgrammeSettings, Provider, Teacher,
 )
 
 
+class OfficerProfileAdminForm(forms.ModelForm):
+    state = forms.ChoiceField(choices=[('', '— None (MoE Officer) —')] + STATE_CHOICES, required=False)
+
+    class Meta:
+        model = OfficerProfile
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('role') == 'state_officer' and not cleaned_data.get('state'):
+            self.add_error('state', 'A State Officer must be assigned a state.')
+        return cleaned_data
+
+
 @admin.register(OfficerProfile)
 class OfficerProfileAdmin(admin.ModelAdmin):
+    form = OfficerProfileAdminForm
     list_display = ('user', 'role', 'state')
     list_filter = ('role', 'state')
     search_fields = ('user__username', 'user__email', 'state')

@@ -18,7 +18,7 @@ from django.views.decorators.http import require_http_methods
 
 from . import ai_agent, content_defaults, pipeline_ops, ranking
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
-from .constants import MALAYSIA_STATES
+from .constants import MALAYSIA_STATES, canonical_state
 from .decorators import moe_officer_required, state_officer_required
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
@@ -163,6 +163,7 @@ def agent1_dashboard(request):
         'not_eligible': not_eligible,
         'submission_deadline': deadline,
         'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
+        'invitation_block_reason': pipeline_ops.invitation_block_reason(deadline),
         'pending_compile_count': Application.objects.filter(
             status__in=ranking.PIPELINE_ENTRY_STATUSES
         ).count(),
@@ -425,8 +426,11 @@ def download_eligible_candidates(request):
 # ---------------------------------------------------------------------------
 
 def _read_apply_token(token):
+    # With a deadline set, the link stays valid until the form closes (see apply());
+    # without one, fall back to the original 30-day expiry.
+    max_age = None if ProgrammeSettings.load().submission_deadline else 60 * 60 * 24 * 30
     try:
-        return signing.loads(token, salt='gpgd-apply', max_age=60 * 60 * 24 * 30)  # 30 days
+        return signing.loads(token, salt='gpgd-apply', max_age=max_age)
     except signing.BadSignature:
         return None
 
@@ -440,6 +444,16 @@ def _send_invitations_background(triggered_by):
     request (same reasoning as ai_agent.run_pipeline_agent_async).
     """
     result = pipeline_ops.send_invitation_emails()
+    if result.get('skipped_reason'):
+        AgentActivityLog.objects.create(
+            trigger_reason=f'Manual: Send Invitation Emails (by {triggered_by})',
+            summary='No invitations sent.',
+            actions_taken=[{'tool': 'send_invitation_emails', 'input': {}, 'result': result}],
+            status='error',
+            error_message=result['skipped_reason'],
+        )
+        return
+
     failed = result['failed']
     status = 'error' if failed else 'success'
 
@@ -471,6 +485,11 @@ def _send_invitations_background(triggered_by):
 @login_required
 def send_invitations(request):
     """Manual override: normally the pipeline agent sends these automatically once teachers are eligible."""
+    block_reason = pipeline_ops.invitation_block_reason(ProgrammeSettings.load().submission_deadline)
+    if block_reason:
+        messages.error(request, f'⚠️ Invitations not sent. {block_reason}')
+        return redirect('agent1_dashboard')
+
     threading.Thread(
         target=_send_invitations_background,
         args=(request.user.get_username(),),
@@ -498,6 +517,10 @@ def apply(request, token):
     if teacher and hasattr(teacher, 'application'):
         return render(request, 'apply_already.html', {'application': teacher.application})
 
+    deadline = ProgrammeSettings.load().submission_deadline
+    if pipeline_ops.submissions_closed(deadline):
+        return render(request, 'apply_closed.html', {'deadline': deadline})
+
     initial = {}
     if teacher:
         initial = {
@@ -505,7 +528,7 @@ def apply(request, token):
             'ic_number':   teacher.ic_number,
             'email':       teacher.email if teacher.email.lower() != 'nan' else '',
             'school_name': teacher.school,
-            'state':       teacher.state,
+            'state':       canonical_state(teacher.state),
             'tech_track':  teacher.provider.split(',')[0].strip() if teacher.provider else '',
         }
 
@@ -797,7 +820,7 @@ def compile_applications(request):
         ]
         messages.warning(request, f"⚠️ {len(shortfalls)} quota shortfall(s) — not enough applicants: " + '; '.join(lines))
 
-    return redirect('agent1_dashboard')
+    return redirect('moe_review')
 
 
 @require_http_methods(["GET", "POST"])
@@ -866,7 +889,13 @@ def moe_review(request):
         return redirect('moe_review')
 
     applications = Application.objects.filter(status='State Approved').order_by('state', 'rank_in_state')
-    context = {'applications': applications}
+    deadline = ProgrammeSettings.load().submission_deadline
+    context = {
+        'applications': applications,
+        'pending_compile_count': Application.objects.filter(status__in=ranking.PIPELINE_ENTRY_STATUSES).count(),
+        'submission_deadline': deadline,
+        'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
+    }
     return render(request, 'moe_review.html', context)
 
 

@@ -1,9 +1,16 @@
 from django import forms
 from . import content_defaults
+from .constants import STATE_CHOICES
 from .models import ActivityReport, Application, CertificationRule, ProgrammeSettings, Provider, Teacher
 
 
 class ApplicationForm(forms.ModelForm):
+    # A fixed dropdown (not free text) so every application's state matches exactly one State Officer.
+    state = forms.ChoiceField(
+        choices=[('', '— Select state —')] + STATE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Field labels are editable via the "Application Form" settings page — fall back to
@@ -31,7 +38,6 @@ class ApplicationForm(forms.ModelForm):
             'current_grade':       forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. DG48'}),
             'school_name':         forms.TextInput(attrs={'class': 'form-control'}),
             'district':            forms.TextInput(attrs={'class': 'form-control'}),
-            'state':               forms.TextInput(attrs={'class': 'form-control'}),
             'tech_track':          forms.Select(attrs={'class': 'form-select'}),
             'certifications':      forms.Textarea(attrs={'class': 'form-control', 'rows': 4,
                                        'placeholder': 'e.g. Microsoft Innovative Educator Expert (MIEE) — Microsoft, 2023'}),

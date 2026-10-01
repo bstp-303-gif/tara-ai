@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Applications Closed — GPGD{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3" style="text-align:center; padding:3rem 0;">
+        <div style="font-size:3rem; margin-bottom:1rem;">⏰</div>
+        <h2 style="font-weight:700; margin-bottom:1rem;">Applications are closed</h2>
+        <p style="color:#6b7280;">The submission deadline for the GPGD Programme was {{ deadline|date:"d F Y" }}. New applications are no longer accepted.</p>
+        <p style="color:#6b7280;">Please contact BSTP at <a href="mailto:sptp@moe.gov.my">sptp@moe.gov.my</a> for assistance.</p>
+    </div>
+</div>
+{% endblock %}

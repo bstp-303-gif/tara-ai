@@ -18,7 +18,7 @@ WEIGHTS = {
 
 # States with no district subdivisions use a state-wide minimum instead of a
 # per-district one.
-NO_DISTRICT_STATES = {'Perlis', 'WP Putrajaya', 'WP Labuan'}
+NO_DISTRICT_STATES = {'Perlis', 'W.P. Putrajaya', 'W.P. Labuan'}
 DISTRICT_MINIMUM_PER_TECH = 2
 NO_DISTRICT_STATE_MINIMUM_PER_TECH = 5
 

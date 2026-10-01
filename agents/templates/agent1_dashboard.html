@@ -233,7 +233,7 @@
     <div class="card-body" style="padding:1.5rem;">
         <p style="color:#374151; margin-bottom:1rem;">
             Send a personalised invitation email to all <strong>{{ eligible }}</strong> eligible teacher(s) who have not yet applied.
-            Each email contains a secure, unique application link valid for 30 days.
+            Each email contains a secure, unique application link that stays valid until the submission deadline.
         </p>
         <form method="post" action="{% url 'update_submission_deadline' %}" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid #e5e7eb;">
             {% csrf_token %}
@@ -244,7 +244,12 @@
         </form>
         <form method="post" action="{% url 'send_invitations' %}" onsubmit="return confirm('Send invitation emails to all eligible teachers who have not yet applied?');">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary" {% if not eligible %}disabled{% endif %}>
+            {% if invitation_block_reason %}
+                <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
+                    <i class="bi bi-exclamation-triangle"></i> {{ invitation_block_reason }}
+                </p>
+            {% endif %}
+            <button type="submit" class="btn btn-primary" {% if not eligible or invitation_block_reason %}disabled{% endif %}>
                 <i class="bi bi-send"></i> Send Invitation Emails
             </button>
             <span style="color:#71717a; font-size:0.875rem; margin-left:1rem;">

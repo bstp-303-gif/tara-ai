@@ -9,8 +9,8 @@ from django.shortcuts import redirect
 # back to their own review page — they only ever need that one screen.
 STATE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/state/review')
 
-# Same idea for MoE Officers: they only ever need their own review page.
-MOE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/moe/review')
+# Same idea for MoE Officers: their own review page, plus the Compile & Rank action on it.
+MOE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/moe/review', '/agents/compile-applications')
 
 
 class StateOfficerRestrictMiddleware:
