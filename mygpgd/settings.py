@@ -158,7 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+# Malaysia time: dates/times are shown in MYT, and "today" (e.g. whether the submission
+# deadline has passed) rolls over at midnight in Malaysia. Datetimes are still stored in UTC.
+TIME_ZONE = "Asia/Kuala_Lumpur"
 
 USE_I18N = True
 
