@@ -12,74 +12,140 @@
     <div class="card-body">
         <h2 style="font-size:1.15rem; font-weight:700; color:#1e3a5f; margin-bottom:0.5rem;">Send Applications to State Officers</h2>
         <p style="color:#374151; margin-bottom:1rem;">
-            Scores and ranks every submitted application within its state, and flags the top-ranked candidates
-            needed to fill each district's minimum quota. Once compiled, each state's ranked shortlist appears
-            on that State Officer's review page for approval.
+            Once the submission deadline has passed, compile all applications in one go: each one is scored, ranked
+            against everyone else who applied in the same state, and the top-ranked candidates needed to fill each
+            district's minimum quota are flagged as Recommended. Each state's ranked shortlist then appears on that
+            State Officer's review page for approval.
         </p>
-        {% if not deadline_passed %}
+        {% if compile_block_reason %}
             <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
-                <i class="bi bi-exclamation-triangle"></i> The submission deadline{% if submission_deadline %} ({{ submission_deadline|date:"d M Y" }}){% endif %} hasn't passed yet. You can still compile now if needed.
+                <i class="bi bi-hourglass-split"></i> {{ compile_block_reason }}
             </p>
         {% endif %}
         <form method="post" action="{% url 'compile_applications' %}" onsubmit="return confirm('Compile and rank {{ pending_compile_count }} pending application(s)? This sends them to their State Officers for review.');">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success" {% if not pending_compile_count %}disabled{% endif %}>
+            <button type="submit" class="btn btn-success" {% if compile_block_reason or not pending_compile_count %}disabled{% endif %}>
                 <i class="bi bi-list-check"></i> Compile &amp; Rank ({{ pending_compile_count }} pending)
             </button>
         </form>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body" style="padding:0;">
-        <table class="table table-hover" style="margin:0;">
-            <thead>
-                <tr>
-                    <th style="padding:1rem;">State</th>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>District</th>
-                    <th>Tech Track</th>
-                    <th>Score</th>
-                    <th>Recommended</th>
-                    <th style="min-width:260px;">Decision</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for application in applications %}
-                <tr>
-                    <td style="padding:1rem;">{{ application.state }}</td>
-                    <td><strong>#{{ application.rank_in_state }}</strong></td>
-                    <td>
-                        {{ application.full_name }}<br>
-                        <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }}</span>
-                    </td>
-                    <td>{{ application.district }}</td>
-                    <td>{{ application.tech_track }}</td>
-                    <td>{{ application.score }}</td>
-                    <td>
-                        {% if application.is_recommended %}
-                            <span class="status-badge" style="background-color:#d1fae5; color:#065f46;">✅ Recommended</span>
-                        {% else %}
-                            <span style="color:#9ca3af;">—</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form method="post" style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
-                            {% csrf_token %}
-                            <input type="hidden" name="application_id" value="{{ application.id }}">
-                            <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Remarks (optional)" value="{{ application.moe_remarks }}" style="max-width:160px;">
-                            <input type="text" name="award_category" class="form-control form-control-sm" placeholder="Award category (optional)" value="{{ application.award_category }}" style="max-width:160px;">
-                            <button type="submit" name="decision" value="approve" class="btn btn-sm btn-outline-success">Approve</button>
-                            <button type="submit" name="decision" value="decline" class="btn btn-sm btn-outline-danger" onclick="return confirm('Decline {{ application.full_name|escapejs }}?');">Decline</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="8" style="text-align:center; color:#6b7280; padding:2rem;">No state-approved candidates awaiting final review yet.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<form method="get" class="card" style="padding:0.9rem 1.1rem; margin-bottom:1.25rem; display:flex; flex-direction:row; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;">
+    <div>
+        <label for="state" class="form-label small fw-semibold mb-1">State</label>
+        <select id="state" name="state" class="form-select form-select-sm" style="min-width:230px;"
+                onchange="this.form.district && (this.form.district.value = ''); this.form.submit()">
+            <option value="">All states ({{ waiting_total }} waiting)</option>
+            {% for s, count in state_choices %}<option value="{{ s }}" {% if state_filter == s %}selected{% endif %}>{{ s }} ({{ count }} waiting)</option>{% endfor %}
+        </select>
     </div>
+    {% if state_filter and district_choices|length and district_choices.0.0 %}
+    <div>
+        <label for="district" class="form-label small fw-semibold mb-1">District</label>
+        <select id="district" name="district" class="form-select form-select-sm" style="min-width:230px;" onchange="this.form.submit()">
+            <option value="">All districts</option>
+            {% for district, count in district_choices %}<option value="{{ district|default:'' }}" {% if district_filter == district %}selected{% endif %}>{{ district|default:state_filter }} ({{ count }} waiting)</option>{% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    <div>
+        <label for="track" class="form-label small fw-semibold mb-1">Technology track</label>
+        <select id="track" name="track" class="form-select form-select-sm" style="min-width:160px;" onchange="this.form.submit()">
+            <option value="">All tracks</option>
+            {% for t in tracks %}<option value="{{ t }}" {% if track_filter == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+    </div>
+    <noscript><button type="submit" class="btn btn-sm btn-primary">Show</button></noscript>
+    {% if state_filter or district_filter or track_filter %}<a href="{% url 'moe_review' %}" class="btn btn-sm btn-outline-secondary">Show all</a>{% endif %}
+    <div style="margin-left:auto; color:#6b7280; font-size:0.85rem;">{{ groups|length }} group{{ groups|length|pluralize }} shown</div>
+</form>
+
+{% if recommended_shown %}
+<div style="display:flex; justify-content:flex-end; margin:-0.5rem 0 1rem;">
+    <button type="button" id="approve-all-recommended" class="btn btn-success btn-sm">
+        <i class="bi bi-check2-all"></i> Approve all Recommended ({{ recommended_shown }})
+    </button>
 </div>
+{% endif %}
+
+{% regroup groups by state as by_state %}
+{% for state_group in by_state %}
+<h2 style="font-size:1.25rem; font-weight:700; color:#1e3a5f; margin:1.5rem 0 0.75rem;">{{ state_group.grouper }}</h2>
+{% for group in state_group.list %}
+<div class="card" id="{{ group.anchor }}" style="margin-bottom:1.25rem; scroll-margin-top:4rem;">
+    <div style="padding:0.85rem 1.1rem; border-bottom:1px solid #ececf3; display:flex; flex-wrap:wrap; gap:0.75rem 1.5rem; align-items:center; background:#f9fafb; border-radius:14px 14px 0 0;">
+        <div style="font-size:1.05rem; font-weight:700; color:#1e3a5f;">
+            {{ group.district|default:group.state }} <span style="color:#9ca3af; font-weight:400;">·</span> {{ group.track }}
+        </div>
+        <div style="font-size:0.85rem; color:#374151;">{{ group.applications|length }} waiting · {{ group.recommended }} Recommended{% if group.recommended %} · <button type="button" class="btn btn-link btn-sm p-0 align-baseline tick-recommended" data-group="{{ group.anchor }}">Tick Recommended</button>{% endif %}</div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-left:auto; font-size:0.85rem;">
+            <div style="width:110px; height:8px; background:#eef0f4; border-radius:999px; overflow:hidden;" role="img" aria-label="{{ group.approved }} of {{ group.need }} approved by the MoE">
+                <span style="display:block; height:100%; width:{{ group.percent }}%; background:{% if group.remaining %}#4f46e5{% else %}#059669{% endif %};"></span>
+            </div>
+            <span>Minimum {{ group.need }}: <strong>{{ group.approved }}</strong> approved by MoE{% if group.remaining %}, {{ group.remaining }} more needed{% else %} <i class="bi bi-check-circle-fill" style="color:#059669;"></i>{% endif %}</span>
+        </div>
+    </div>
+    <table class="table table-hover" style="margin:0;">
+        <thead>
+            <tr style="font-size:0.8rem; color:#6b7280;">
+                <th style="padding:0.6rem 0 0.6rem 1.1rem; width:36px;"><input type="checkbox" class="form-check-input pick-group" data-group="{{ group.anchor }}" aria-label="Tick everyone in this group"></th>
+                <th style="padding:0.6rem 1.1rem 0.6rem 0.5rem; width:90px;">Place</th>
+                <th>Name</th>
+                <th style="width:80px;">Score</th>
+                <th style="width:170px;">Recommended</th>
+                <th style="min-width:340px;">Decision</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in group.applications %}
+            <tr>
+                <td style="padding:0.85rem 0 0.85rem 1.1rem; width:36px;">
+                    <input type="checkbox" class="form-check-input pick" form="bulk-form" name="application_ids" value="{{ application.id }}"
+                           data-group="{{ group.anchor }}" data-recommended="{{ application.is_recommended|yesno:'1,0' }}"
+                           aria-label="Tick {{ application.full_name }}">
+                </td>
+                <td style="padding:0.85rem 1.1rem 0.85rem 0.5rem;">
+                    <strong>{{ forloop.counter }}{% if forloop.counter == 1 %}st{% elif forloop.counter == 2 %}nd{% elif forloop.counter == 3 %}rd{% else %}th{% endif %}</strong>
+                    <div style="font-size:0.72rem; color:#9ca3af;" title="Rank among all applicants in {{ group.state }}">#{{ application.rank_in_state }} in state</div>
+                </td>
+                <td>
+                    {{ application.full_name }}<br>
+                    <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }} · {{ application.school_name }}</span>
+                    <div>{% include 'partials/recognition_badge.html' %}</div>
+                    {% include 'partials/contact.html' %}
+                    {% if application.state_remarks %}<div style="font-size:0.75rem; color:#374151; margin-top:0.2rem;"><i class="bi bi-chat-left-text"></i> State: {{ application.state_remarks }}</div>{% endif %}
+                </td>
+                <td>{{ application.score }}</td>
+                <td>
+                    {% if application.is_recommended %}
+                        <span class="status-badge" style="background-color:#d1fae5; color:#065f46;">✅ Recommended</span>
+                        {% if application.reserved_place %}<div style="font-size:0.72rem; color:#3730a3; margin-top:0.2rem;" title="One Recommended place per district and track is kept for the best-scoring teacher who has never been recognised.">Reserved place: never recognised</div>{% endif %}
+                    {% else %}
+                        <span style="color:#9ca3af;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="post" style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+                        {% csrf_token %}
+                        <input type="hidden" name="application_id" value="{{ application.id }}">
+                        <input type="hidden" name="filters" value="{{ filters }}">
+                        <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Remarks (optional)" value="{{ application.moe_remarks }}" style="max-width:160px;" aria-label="Remarks for {{ application.full_name }}">
+                        <input type="text" name="award_category" class="form-control form-control-sm" placeholder="Award category (optional)" value="{{ application.award_category }}" style="max-width:160px;" aria-label="Award category for {{ application.full_name }}">
+                        <button type="submit" name="decision" value="approve" class="btn btn-sm btn-outline-success">Approve</button>
+                        <button type="submit" name="decision" value="decline" class="btn btn-sm btn-outline-danger" onclick="return confirm('Decline {{ application.full_name|escapejs }}?');">Decline</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% empty %}
+<div class="card" style="padding:2rem; text-align:center; color:#6b7280;">
+    {% if state_filter or district_filter or track_filter %}Nothing waiting for a final decision here. <a href="{% url 'moe_review' %}">Show all</a>{% else %}No state-approved candidates awaiting final review yet.{% endif %}
+</div>
+{% endfor %}
+{% include 'partials/bulk_actions.html' with show_award=True %}
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block sidebar %}{% endblock %}
 {% block title %}Already Applied — GPGD{% endblock %}
 {% block content %}
 <div class="row">
@@ -9,7 +10,6 @@
         <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:1rem 2rem; display:inline-block; margin:1rem 0;">
             <div style="font-size:0.875rem; color:#6b7280;">Reference Number</div>
             <div style="font-size:1.5rem; font-weight:700; color:#15803d;">{{ application.reference_number }}</div>
-            <div style="font-size:0.875rem; color:#6b7280; margin-top:0.25rem;">Status: {{ application.status }}</div>
         </div>
         <p style="color:#6b7280; font-size:0.875rem; margin-top:1rem;">
             For enquiries, contact BSTP at <a href="mailto:sptp@moe.gov.my">sptp@moe.gov.my</a>

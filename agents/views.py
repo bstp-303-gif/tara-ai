@@ -1,5 +1,7 @@
+import io
 import json
 import os
+import re
 import threading
 import uuid
 from datetime import timedelta
@@ -19,21 +21,32 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods
 
-from . import ai_agent, content_defaults, pipeline_ops, ranking
+import pandas as pd
+
+from . import ai_agent, content_defaults, monthly_reports, pipeline_ops, ranking
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
-from .constants import MALAYSIA_STATES, canonical_state
-from .decorators import admin_required, moe_officer_required, state_officer_required
+from .constants import MALAYSIA_STATES, PPD_BY_STATE, canonical_state
+from .decorators import admin_or_moe_officer_required, admin_required, moe_officer_required, state_officer_required
 from .eligibility import eligible_tracks
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, ErrorLog, FileUpload,
-    InvitationExclusion, InvitationRecord, MonthlyReminderLog, ProgrammeSettings, Provider, Teacher,
+    InvitationExclusion, InvitationRecord, MonthlyReminderLog, MonthlyReportLog, ProgrammeSettings, Provider,
+    ReportRecipient, Teacher, TrackLimit,
 )
 
-TEMP_DIR = os.path.join(settings.BASE_DIR, 'temp_uploads')
+TEMP_DIR = getattr(settings, 'GPGD_UPLOAD_DIR', os.path.join(settings.BASE_DIR, 'temp_uploads'))
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 PROVIDERS = ['Google', 'Microsoft', 'Apple']
+
+
+def csrf_failure(request, reason=''):
+    """A stale form (an old tab, or Back after logging in) carries an expired CSRF token. Send the
+    user back to that page to reload it instead of showing Django's bare 403 page."""
+    if request.user.is_authenticated:  # the login page doesn't render messages
+        messages.warning(request, 'That page had expired, so it was reloaded. Please try again.')
+    return redirect(request.get_full_path())
 
 
 @require_http_methods(["GET", "POST"])
@@ -152,7 +165,10 @@ def agent1_dashboard(request):
 
     total_unique = teachers.count()
     multi_certified = teachers.filter(multi_certified=True).count()
-    eligible = teachers.filter(eligibility_status='Eligible').count()
+    # Teachers who have applied are still eligible: their status just moves on to 'Application Submitted'.
+    eligible = teachers.exclude(eligibility_status='Not Eligible').count()
+    # A preview only: with a national roster the full list is thousands of rows (it's in the Excel download).
+    eligible_preview = teachers.exclude(eligibility_status='Not Eligible')[:50]
     not_eligible = teachers.filter(eligibility_status='Not Eligible').count()
 
     deadline = ProgrammeSettings.load().submission_deadline
@@ -184,8 +200,8 @@ def agent1_dashboard(request):
         'multi_certified': multi_certified,
         'eligible': eligible,
         'not_eligible': not_eligible,
+        'eligible_preview': eligible_preview,
         'submission_deadline': deadline,
-        'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
         'invitation_block_reason': pipeline_ops.invitation_block_reason(deadline),
         'awaiting_invitation': awaiting_invitation,
         'invite_pending_count': invite_pending_count,
@@ -195,6 +211,7 @@ def agent1_dashboard(request):
         'pending_compile_count': Application.objects.filter(
             status__in=ranking.PIPELINE_ENTRY_STATUSES
         ).count(),
+        'compile_block_reason': pipeline_ops.compile_block_reason(deadline),
         'agent_logs': AgentActivityLog.objects.all()[:10],
         'ANTHROPIC_API_KEY_SET': bool(getattr(settings, 'ANTHROPIC_API_KEY', '')),
     }
@@ -402,7 +419,11 @@ def delete_file(request, file_id):
         provider = file_record.provider
         file_name = file_record.file_name
         file_record.delete()
-        messages.success(request, f'🗑️ File "{file_name}" deleted.')
+        cleared = pipeline_ops.prune_stale_exclusions()
+        if cleared:
+            messages.success(request, f'🗑️ File "{file_name}" deleted. {cleared} teacher(s) removed by Admin were also forgotten, since they are no longer in any uploaded file.')
+        else:
+            messages.success(request, f'🗑️ File "{file_name}" deleted.')
 
         ai_agent.run_pipeline_agent_async(f"{provider} certification file deleted — roster may need recomputing.")
     except FileUpload.DoesNotExist:
@@ -624,10 +645,7 @@ def apply(request, token):
             # Send acknowledgement email
             _send_acknowledgement(application)
 
-            ai_agent.run_pipeline_agent_async(
-                f"Teacher application submitted (reference {application.reference_number})."
-            )
-
+            # Not compiled here: the MoE Officer compiles every application once, after the deadline.
             return redirect('apply_success', ref=application.reference_number)
     else:
         form = ApplicationForm(initial=initial, allowed_tracks=allowed_tracks)
@@ -878,9 +896,16 @@ def officer_home(request):
 
 
 @require_http_methods(["POST"])
-@moe_officer_required
+@admin_or_moe_officer_required
 def compile_applications(request):
     """Score, rank, and quota-flag every pending application, ready for State Officer review."""
+    # Back to whichever page the button was on: the MoE Review page or the Admin dashboard.
+    back = 'moe_review' if getattr(request.user, 'officerprofile', None) else 'agent1_dashboard'
+    block_reason = pipeline_ops.compile_block_reason(ProgrammeSettings.load().submission_deadline)
+    if block_reason:
+        messages.error(request, block_reason)
+        return redirect(back)
+
     stats, shortfalls = ranking.compile_and_rank()
 
     if stats['total_compiled'] == 0:
@@ -893,13 +918,15 @@ def compile_applications(request):
         )
 
     if shortfalls:
-        lines = [
-            f"{s['state']}{' / ' + s['district'] if s['district'] else ''} ({s['tech_track']}): {s['have']}/{s['need']}"
-            for s in shortfalls
-        ]
-        messages.warning(request, f"⚠️ {len(shortfalls)} quota shortfall(s) — not enough applicants: " + '; '.join(lines))
+        empty = sum(1 for s in shortfalls if not s['have'])
+        states = len({s['state'] for s in shortfalls})
+        messages.warning(
+            request,
+            f"⚠️ {len(shortfalls)} district/track group(s) in {states} state(s) have fewer applicants than the minimum "
+            f"of 2 ({empty} with no applicants at all). See By District for where they are.",
+        )
 
-    return redirect('moe_review')
+    return redirect(back)
 
 
 @require_http_methods(["GET", "POST"])
@@ -908,72 +935,568 @@ def state_review(request):
     """State Officer: approve/decline the compiled, ranked shortlist for their own state."""
     profile = request.user.officerprofile
 
+    if request.method == 'POST' and request.POST.get('bulk'):
+        # Ticked candidates, still waiting, in this officer's state; best-ranked first, so if a maximum
+        # runs out, the higher-ranked candidates get the places.
+        chosen = Application.objects.filter(
+            id__in=request.POST.getlist('application_ids'), state=profile.state, status='Compiled').order_by('rank_in_state')
+        _bulk_decide(request, chosen, request.POST.get('bulk'),
+                     lambda a, d: _state_decide(a, d, request.user, request.POST.get('remarks', '')))
+        return redirect(f"{reverse('state_review')}?{request.POST.get('filters', '')}")
+
     if request.method == 'POST':
-        application = get_object_or_404(Application, id=request.POST.get('application_id'), state=profile.state)
-        decision = request.POST.get('decision')
-        if decision == 'approve':
-            application.status = 'State Approved'
-        elif decision == 'decline':
-            application.status = 'State Declined'
-        else:
-            messages.error(request, 'Invalid decision.')
-            return redirect('state_review')
-
-        application.state_decision_by = request.user
-        application.state_decision_at = timezone.now()
-        application.state_remarks = request.POST.get('remarks', '').strip()
-        application.save()
+        # Only while the MoE hasn't acted yet — after that the State decision is locked.
+        application = get_object_or_404(
+            Application, id=request.POST.get('application_id'), state=profile.state,
+            status__in=ranking.COMPILED_PIPELINE_STATUSES,
+        )
+        back = 'state_decisions' if request.POST.get('next') == 'state_decisions' else 'state_review'
+        problem = _state_decide(application, request.POST.get('decision'), request.user, request.POST.get('remarks', ''))
+        if problem:
+            messages.error(request, problem)
+            return redirect(back)
         messages.success(request, f'✅ {application.full_name} ({application.reference_number}) marked as "{application.status}".')
-        return redirect('state_review')
+        if back == 'state_review':
+            district, track, _ = ranking.quota_group(application)
+            return redirect(f"{reverse('state_review')}?{request.POST.get('filters', '')}#{_group_anchor(district, track)}")
+        return redirect(back)
 
-    applications = Application.objects.filter(
-        state=profile.state,
-        status__in=ranking.COMPILED_PIPELINE_STATUSES,
-    ).order_by('rank_in_state')
+    # Waiting applications, grouped by district and technology track: the State Officer decides one
+    # group at a time, against that group's minimum of 2 (5 state-wide where there are no districts).
+    district_filter, track_filter = request.GET.get('district', ''), request.GET.get('track', '')
+    progress = {(row['district'], row['tech_track']): row for row in ranking.state_progress(profile.state)}
+    grouped = {}
+    for application in Application.objects.filter(state=profile.state, status='Compiled').order_by('rank_in_state'):
+        district, track, minimum = ranking.quota_group(application)
+        grouped.setdefault((district, track), []).append(application)
+    waiting_by_district = {}
+    for (district, _), group in grouped.items():
+        waiting_by_district[district] = waiting_by_district.get(district, 0) + len(group)
+
+    groups = []
+    for (district, track), group in sorted(grouped.items(), key=lambda kv: (kv[0][0] or '', kv[0][1])):
+        if (district_filter and (district or '') != district_filter) or (track_filter and track != track_filter):
+            continue
+        row = progress.get((district, track), {})
+        groups.append({
+            'district': district, 'track': track, 'applications': group, 'anchor': _group_anchor(district, track),
+            'need': row.get('need'), 'approved': row.get('approved', 0), 'remaining': row.get('remaining'),
+            'percent': row.get('percent', 0), 'recommended': sum(a.is_recommended for a in group),
+        })
 
     context = {
-        'applications': applications,
+        'groups': groups,
+        'recommended_shown': sum(g['recommended'] for g in groups),
+        'waiting_total': sum(len(g) for g in grouped.values()),
+        'district_choices': sorted(waiting_by_district.items(), key=lambda kv: kv[0] or ''),
+        'tracks': [t for t, _ in Application.TRACK_CHOICES],
+        'district_filter': district_filter,
+        'track_filter': track_filter,
+        'filters': request.GET.urlencode(),
         'state': profile.state,
         'shortfalls': ranking.shortfalls_for_state(profile.state),
+        'decided_count': _state_decided_applications(profile.state).count(),
+        'limit_usage': ranking.limit_usage(profile.state),
+        'district_limits': [
+            {'district': d, 'cells': ranking.limit_usage(profile.state, d)}
+            for d in TrackLimit.objects.filter(state=profile.state).exclude(district='')
+                     .values_list('district', flat=True).distinct().order_by('district')
+        ],
     }
     return render(request, 'state_review.html', context)
 
 
 @require_http_methods(["GET", "POST"])
 @moe_officer_required
+def moe_decisions(request):
+    """MoE Officer: everyone they have recognised or rejected this year, and whether each recognised
+    GPGD's Letter of Recognition was emailed."""
+    if request.method == 'POST':  # resend a Letter of Recognition
+        application = get_object_or_404(Application, id=request.POST.get('application_id'), status='Approved')
+        _send_recognition_letter(application)
+        messages.success(request, f'📨 Letter of Recognition is being emailed again to {application.full_name} <{application.email}>.')
+        return redirect(f"{reverse('moe_decisions')}?{request.POST.get('filters', '')}")
+
+    decided = ranking.this_years_applications().filter(status__in=['Approved', 'Rejected'], moe_decision_at__isnull=False)
+    show, state, track = request.GET.get('show', 'all'), request.GET.get('state', ''), request.GET.get('track', '')
+    search = request.GET.get('q', '').strip()
+    counts = {'all': decided.count(), 'approved': decided.filter(status='Approved').count(),
+              'rejected': decided.filter(status='Rejected').count()}
+    applications = decided.filter(status={'approved': 'Approved', 'rejected': 'Rejected'}[show]) if show in ('approved', 'rejected') else decided
+    if state in MALAYSIA_STATES:
+        applications = applications.filter(state=state)
+    if track:
+        applications = applications.filter(tech_track=track)
+    if search:
+        applications = applications.filter(Q(full_name__icontains=search) | Q(ic_number__icontains=search)
+                                           | Q(reference_number__icontains=search) | Q(school_name__icontains=search))
+    applications = applications.order_by('-moe_decision_at', 'full_name')
+
+    if request.GET.get('download'):
+        return _excel_response(pd.DataFrame([{
+            'Decision': 'Recognised' if a.status == 'Approved' else 'Rejected', 'Decided': timezone.localtime(a.moe_decision_at).strftime('%Y-%m-%d %H:%M'),
+            'Name': a.full_name, 'IC Number': a.ic_number, 'Reference': a.reference_number, 'Email': a.email,
+            'WhatsApp': a.whatsapp_number, 'State': a.state, 'District': a.district, 'School': a.school_name,
+            'Track': a.tech_track, 'Award Category': a.award_category, 'State Remarks': a.state_remarks,
+            'MoE Remarks': a.moe_remarks,
+            'Letter Emailed': timezone.localtime(a.recognition_letter_sent_at).strftime('%Y-%m-%d %H:%M') if a.recognition_letter_sent_at else '',
+        } for a in applications]), 'GPGD_MoE_Decisions.xlsx', 'Decisions')
+
+    page = Paginator(applications, 50).get_page(request.GET.get('page'))
+    recently = timezone.now() - timedelta(minutes=10)
+    for application in page:
+        # No result yet: still sending if just approved; otherwise approved before letters were tracked.
+        application.letter_pending = bool(application.moe_decision_at and application.moe_decision_at > recently)
+    context = {
+        'page': page, 'counts': counts, 'show': show if show in ('approved', 'rejected') else 'all',
+        'state_filter': state, 'track_filter': track, 'q': search,
+        'states': MALAYSIA_STATES, 'tracks': [t for t, _ in Application.TRACK_CHOICES],
+        'filters': request.GET.urlencode(), 'year': timezone.localdate().year,
+        'reminder_day': ProgrammeSettings.load().reminder_day,
+    }
+    return render(request, 'moe_decisions.html', context)
+
+
+def _state_decide(application, decision, user, remarks):
+    """A State Officer's approve/decline. Returns None when done, or why it couldn't be."""
+    if decision == 'approve':
+        full = ranking.limit_reached(application, ranking.QUOTA_FILLING_STATUSES)
+        if full:
+            return _limit_message(application, *full)
+        application.status = 'State Approved'
+    elif decision == 'decline':
+        application.status = 'State Declined'
+    else:
+        return 'Invalid decision.'
+    application.state_decision_by = user
+    application.state_decision_at = timezone.now()
+    application.state_remarks = (remarks or '').strip()
+    application.save()
+    return None
+
+
+def _moe_decide(application, decision, user, remarks, award_category=''):
+    """The MoE Officer's final approve/reject; approval sends the Letter of Recognition. Returns None
+    when done, or why it couldn't be."""
+    if decision == 'approve':
+        full = ranking.limit_reached(application, ['Approved'])
+        if full:
+            return _limit_message(application, *full)
+        application.status = 'Approved'
+        application.recognized_year = timezone.now().year
+        application.award_category = (award_category or '').strip()
+    elif decision == 'decline':
+        application.status = 'Rejected'
+    else:
+        return 'Invalid decision.'
+    application.moe_decision_by = user
+    application.moe_decision_at = timezone.now()
+    application.moe_remarks = (remarks or '').strip()
+    application.save()
+    if application.status == 'Approved':
+        _send_recognition_letter(application)
+    return None
+
+
+def _bulk_decide(request, applications, decision, decide):
+    """Applies `decide(application, decision)` to each ticked application and reports what happened."""
+    if decision not in ('approve', 'decline'):
+        messages.error(request, 'Invalid decision.')
+        return
+    done, skipped = 0, []
+    for application in applications:
+        problem = decide(application, decision)
+        if problem:
+            skipped.append(f'{application.full_name}: {problem}')
+        else:
+            done += 1
+    if done:
+        messages.success(request, f"✅ {done} candidate(s) {'approved' if decision == 'approve' else 'declined'}."
+                                  + (" Each is now a recognised GPGD and their Letter of Recognition is being emailed."
+                                     if decision == 'approve' and request.resolver_match.url_name == 'moe_review' else ''))
+    elif not skipped:
+        messages.warning(request, 'Nothing was ticked, or the ticked candidates were already decided.')
+    if skipped:
+        messages.error(request, f'{len(skipped)} not changed. ' + ' '.join(skipped[:5]) + (' …' if len(skipped) > 5 else ''))
+
+
+def _moe_back(request, application):
+    """Back to MoE Review with the same filters, at the decided candidate's group."""
+    district, track, _ = ranking.quota_group(application)
+    anchor = _group_anchor(f"{application.state} {district or ''}", track)
+    return f"{reverse('moe_review')}?{request.POST.get('filters', '')}#{anchor}"
+
+
+def _group_anchor(district, track):
+    """An HTML id for a district/track group on State Review, e.g. "ppd-kulai-google"."""
+    return re.sub(r'[^a-z0-9]+', '-', f"{district or 'state'} {track}".lower()).strip('-')
+
+
+def _limit_message(application, where, used, maximum):
+    return (f"Not approved: {where} has reached its maximum of {maximum} {application.tech_track} "
+            f"GPGD(s) this year ({used} already approved). Decline another {application.tech_track} candidate "
+            f"in {where} first, or ask the MoE to raise the maximum.")
+
+
+@require_http_methods(["GET", "POST"])
+@admin_or_moe_officer_required
+def track_limits(request):
+    """Admin / MoE Officer: the maximum number of GPGDs per technology track (blank = no limit), for every
+    state, or with ?state= for each district (PPD) of that state."""
+    tracks = [t for t, _ in Application.TRACK_CHOICES]
+    state = request.GET.get('state') or request.POST.get('state') or ''
+    if not PPD_BY_STATE.get(state):
+        state = ''  # states without PPDs only have a state-wide maximum
+    # Each row is a state (district '') or, on a state's page, one of its districts.
+    rows_for = [(state, d) for d in PPD_BY_STATE[state]] if state else [(s, '') for s in MALAYSIA_STATES]
+
+    if request.method == 'POST':
+        errors = []
+        for row_state, district in rows_for:
+            for track in tracks:
+                raw = request.POST.get(f'max__{district or row_state}__{track}', '').strip()
+                where = dict(state=row_state, district=district, tech_track=track)
+                if not raw:
+                    TrackLimit.objects.filter(**where).delete()
+                elif raw.isdigit():
+                    TrackLimit.objects.update_or_create(**where, defaults={'maximum': int(raw), 'updated_by': request.user})
+                else:
+                    errors.append(f'{district or row_state} / {track}: "{raw}" is not a whole number')
+        if errors:
+            messages.error(request, 'Not saved: ' + '; '.join(errors) + '. The other values were saved.')
+        else:
+            messages.success(request, '✅ Maximums saved.')
+        return redirect(f"{reverse('track_limits')}?state={state}" if state else 'track_limits')
+
+    rows = []
+    totals = {t: {'maximum': 0, 'used': 0, 'all_set': True} for t in tracks}
+    for row_state, district in rows_for:
+        usage = ranking.limit_usage(row_state, district)
+        for cell in usage:
+            total = totals[cell['track']]
+            total['used'] += cell['used']
+            if cell['maximum'] is None:
+                total['all_set'] = False
+            else:
+                total['maximum'] += cell['maximum']
+        rows.append({'name': district or row_state, 'cells': usage,
+                     'has_districts': not state and bool(PPD_BY_STATE.get(row_state))})
+    context = {
+        'tracks': tracks, 'rows': rows, 'totals': [{'track': t, **totals[t]} for t in tracks],
+        'state': state, 'state_usage': ranking.limit_usage(state) if state else None,
+    }
+    return render(request, 'track_limits.html', context)
+
+
+@require_http_methods(["GET"])
+@state_officer_required
+def state_statistics(request):
+    """State Officer: an overview of where every candidate in their state is in the process."""
+    state = request.user.officerprofile.state
+    applications = ranking.this_years_applications().filter(state=state)
+    status_counts = dict(applications.values_list('status').annotate(n=Count('id')))
+
+    def count(*statuses):
+        return sum(status_counts.get(s, 0) for s in statuses)
+
+    eligible = sum(
+        1 for teacher_state, status in Teacher.objects.values_list('state', 'eligibility_status')
+        if canonical_state(teacher_state) == state and status != 'Not Eligible'
+    )
+    applied = applications.count()
+    quota_rows = ranking.state_progress(state)
+    quota_need = sum(r['need'] for r in quota_rows)
+    quota_filled = sum(r['filled'] for r in quota_rows)
+
+    funnel = {
+        'eligible': eligible,
+        'applied': applied,
+        'awaiting_compile': count(*ranking.PIPELINE_ENTRY_STATUSES),
+        'awaiting_you': count('Compiled'),
+        'approved': count('State Approved', 'Approved', 'Rejected'),
+        'declined': count('State Declined'),
+        'awaiting_moe': count('State Approved'),
+        'moe_approved': count('Approved'),
+        'moe_rejected': count('Rejected'),
+    }
+    by_track = [
+        {
+            'track': track,
+            'applied': applications.filter(tech_track=track).count(),
+            'approved': applications.filter(tech_track=track, status__in=['State Approved', 'Approved', 'Rejected']).count(),
+            'declined': applications.filter(tech_track=track, status='State Declined').count(),
+        }
+        for track, _ in Application.TRACK_CHOICES
+    ]
+
+    context = {
+        'state': state,
+        'funnel': funnel,
+        'application_rate': round(100 * applied / eligible) if eligible else None,
+        'decided_percent': round(100 * (funnel['approved'] + funnel['declined']) / applied) if applied else 0,
+        'quota_rows': quota_rows,
+        'quota_need': quota_need,
+        'quota_filled': quota_filled,
+        'quota_remaining': quota_need - quota_filled,
+        'quota_percent': round(100 * quota_filled / quota_need) if quota_need else 0,
+        'by_track': by_track,
+        'deadline': ProgrammeSettings.load().submission_deadline,
+        # Until the MoE compiles, nothing has reached the State Officer yet.
+        'compiled_yet': applied > funnel['awaiting_compile'],
+        'district_min': ranking.DISTRICT_MINIMUM_PER_TECH,
+        'no_district_min': ranking.NO_DISTRICT_STATE_MINIMUM_PER_TECH,
+    }
+    return render(request, 'state_statistics.html', context)
+
+
+# Plain-language stage of an application, per viewer. State Officers see their own decisions as "you".
+_STAGES = {
+    'state_officer': {
+        'Application Submitted': 'Waiting for MoE to compile',
+        'Under Review': 'Waiting for MoE to compile',
+        'Compiled': 'Waiting for your decision',
+        'State Approved': 'Approved by you',
+        'State Declined': 'Declined by you',
+        'Approved': 'Approved by MoE',
+        'Rejected': 'Rejected by MoE',
+    },
+    'moe_officer': {
+        'Application Submitted': 'Waiting for you to compile',
+        'Under Review': 'Waiting for you to compile',
+        'Compiled': 'Waiting for State decision',
+        'State Approved': 'Waiting for your final decision',
+        'State Declined': 'Declined by State',
+        'Approved': 'Approved by you',
+        'Rejected': 'Rejected by you',
+    },
+}
+
+
+def _grid_counts(group):
+    return {
+        'total': len(group),
+        'approved': sum(1 for a in group if a.status in ('State Approved', 'Approved', 'Rejected')),
+        'declined': sum(1 for a in group if a.status == 'State Declined'),
+        'pending': sum(1 for a in group if a.status in ('Application Submitted', 'Under Review', 'Compiled')),
+    }
+
+
+def _grid_minimum(state):
+    """The minimum per district and track in `state` (5 state-wide where there are no districts)."""
+    no_districts = state in ranking.NO_DISTRICT_STATES or not PPD_BY_STATE.get(state)
+    return ranking.NO_DISTRICT_STATE_MINIMUM_PER_TECH if no_districts else ranking.DISTRICT_MINIMUM_PER_TECH
+
+
+def _application_grid(request, applications, row_of, viewer, fixed_rows=(), minimum=None):
+    """Builds a rows x technology-track grid of application counts, plus the applicant list for the
+    cell picked via ?row=<key>&track=<track>. row_of(application) returns (key, display name);
+    fixed_rows are (key, name) pairs always shown, even with no applications. With `minimum`, cells
+    with fewer applications than that are flagged as below the minimum."""
+    tracks = [track for track, _ in Application.TRACK_CHOICES]
+    names = dict(fixed_rows)
+    keyed = []
+    for application in applications:
+        key, name = row_of(application)
+        names.setdefault(key, name)
+        keyed.append((key, application))
+
+    rows = []
+    fixed_keys = {key for key, _ in fixed_rows}
+    ordered = list(fixed_rows) + sorted(((k, n) for k, n in names.items() if k not in fixed_keys), key=lambda kv: kv[1])
+    for key, name in ordered:
+        in_row = [a for k, a in keyed if k == key]
+        cells = [{'track': t, **_grid_counts([a for a in in_row if a.tech_track == t])} for t in tracks]
+        for cell in cells:
+            cell['below_min'] = minimum is not None and cell['total'] < minimum
+        rows.append({'key': key, 'name': name, 'cells': cells, 'total': _grid_counts(in_row)})
+
+    selected_row, selected_track = request.GET.get('row'), request.GET.get('track')
+    selected = None
+    if selected_row in names:
+        listed = [a for k, a in keyed if k == selected_row]
+        if selected_track in tracks:
+            listed = [a for a in listed if a.tech_track == selected_track]
+        for a in listed:
+            a.stage = _STAGES[viewer].get(a.status, a.status)
+        selected = {'name': names[selected_row], 'track': selected_track if selected_track in tracks else None,
+                    'applications': listed}
+
+    return {
+        'tracks': tracks,
+        'rows': rows,
+        'totals': [{'track': t, **_grid_counts([a for a in applications if a.tech_track == t])} for t in tracks],
+        'grand_total': _grid_counts(applications),
+        'selected': selected,
+        'selected_row': selected_row,
+        'selected_track': selected_track,
+        'minimum': minimum,
+        'below_min_count': sum(c['below_min'] for r in rows for c in r['cells']),
+    }
+
+
+def _district_of(application):
+    """Groups districts by their official PPD name, case-insensitively ("ppd kulai" is "PPD Kulai")."""
+    district = ranking.canonical_district(application.state, application.district)
+    return district.lower(), district or 'Not stated'
+
+
+def _ppd_rows(state):
+    """Every district of `state` as fixed grid rows, so districts nobody applied from still show (with 0)."""
+    return [(d.lower(), d) for d in PPD_BY_STATE.get(state, [])]
+
+
+@require_http_methods(["GET"])
+@state_officer_required
+def state_by_district(request):
+    """State Officer: a district x technology-track grid of how many applications came in."""
+    state = request.user.officerprofile.state
+    applications = list(ranking.this_years_applications().filter(state=state).order_by('full_name'))
+    context = _application_grid(request, applications, _district_of, 'state_officer', fixed_rows=_ppd_rows(state),
+                                minimum=_grid_minimum(state))
+    context.update({
+        'title': f'Applications by District — {state}',
+        'intro': 'How many teachers have applied in each district, per technology track. Click a number to see who applied.',
+        'row_label': 'District',
+        'empty_message': f'No teachers from {state} have applied yet.',
+        'legend_by': 'you',
+        'page_url': reverse('state_by_district'),
+    })
+    return render(request, 'application_grid.html', context)
+
+
+@require_http_methods(["GET"])
+@moe_officer_required
+def moe_by_district(request):
+    """MoE Officer: the same grid nationwide — states as rows, or one state's districts via ?state=."""
+    state = request.GET.get('state', '')
+    if state not in MALAYSIA_STATES:
+        state = ''
+    applications = ranking.this_years_applications().order_by('full_name')
+    if state:
+        applications = list(applications.filter(state=state))
+        context = _application_grid(request, applications, _district_of, 'moe_officer', fixed_rows=_ppd_rows(state),
+                                    minimum=_grid_minimum(state))
+        title, row_label, empty = f'Applications by District — {state}', 'District', f'No teachers from {state} have applied yet.'
+    else:
+        applications = list(applications)
+        context = _application_grid(
+            request, applications, lambda a: (a.state, a.state), 'moe_officer',
+            fixed_rows=[(s, s) for s in MALAYSIA_STATES],
+        )
+        title, row_label, empty = 'Applications by State', 'State', 'No applications yet.'
+    context.update({
+        'title': title,
+        'intro': 'How many teachers have applied, per technology track. Pick a state to see its districts; click a number to see who applied.',
+        'row_label': row_label,
+        'empty_message': empty,
+        'legend_by': 'the State Officer',
+        'page_url': reverse('moe_by_district'),
+        'states': MALAYSIA_STATES,
+        'selected_state': state,
+        'drill_into_states': not state,
+    })
+    return render(request, 'application_grid.html', context)
+
+
+def _state_decided_applications(state):
+    """Applications the State Officer has approved or declined, including ones the MoE has since decided."""
+    return Application.objects.filter(state=state, state_decision_at__isnull=False).exclude(status='Compiled')
+
+
+@require_http_methods(["GET"])
+@state_officer_required
+def state_decisions(request):
+    """State Officer: the applications already approved or declined, filterable by decision."""
+    state = request.user.officerprofile.state
+    decided = _state_decided_applications(state)
+    approved = decided.exclude(status='State Declined')  # State Approved, plus MoE Approved/Rejected after it
+    declined = decided.filter(status='State Declined')
+
+    show = request.GET.get('show', 'all')
+    applications = {'approved': approved, 'declined': declined}.get(show, decided)
+
+    context = {
+        'applications': applications.order_by('-state_decision_at'),
+        'state': state,
+        'show': show if show in ('approved', 'declined') else 'all',
+        'counts': {'all': decided.count(), 'approved': approved.count(), 'declined': declined.count()},
+        'editable_statuses': ranking.COMPILED_PIPELINE_STATUSES,
+    }
+    return render(request, 'state_decisions.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+@moe_officer_required
 def moe_review(request):
     """MoE Officer: final approve/decline of state-approved candidates; triggers the recognition letter."""
+    if request.method == 'POST' and request.POST.get('bulk'):
+        chosen = Application.objects.filter(
+            id__in=request.POST.getlist('application_ids'), status='State Approved').order_by('state', 'rank_in_state')
+        _bulk_decide(request, chosen, request.POST.get('bulk'),
+                     lambda a, d: _moe_decide(a, d, request.user, request.POST.get('remarks', ''),
+                                              request.POST.get('award_category', '')))
+        return redirect(f"{reverse('moe_review')}?{request.POST.get('filters', '')}")
+
     if request.method == 'POST':
         application = get_object_or_404(Application, id=request.POST.get('application_id'), status='State Approved')
-        decision = request.POST.get('decision')
-        if decision == 'approve':
-            application.status = 'Approved'
-            application.recognized_year = timezone.now().year
-            application.award_category = request.POST.get('award_category', '').strip()
-        elif decision == 'decline':
-            application.status = 'Rejected'
-        else:
-            messages.error(request, 'Invalid decision.')
-            return redirect('moe_review')
-
-        application.moe_decision_by = request.user
-        application.moe_decision_at = timezone.now()
-        application.moe_remarks = request.POST.get('remarks', '').strip()
-        application.save()
+        problem = _moe_decide(application, request.POST.get('decision'), request.user,
+                              request.POST.get('remarks', ''), request.POST.get('award_category', ''))
+        if problem:
+            messages.error(request, problem)
+            return redirect(_moe_back(request, application))
 
         if application.status == 'Approved':
-            _send_recognition_letter(application)
+            messages.success(request, f'✅ {application.full_name} is now a recognised GPGD ({application.recognized_year}). '
+                                      f'Their Letter of Recognition is being emailed to {application.email}. '
+                                      f'See them under Recognised & Rejected.')
+        else:
+            messages.success(request, f'{application.full_name} ({application.reference_number}) was rejected.')
+        return redirect(_moe_back(request, application))
 
-        messages.success(request, f'✅ {application.full_name} ({application.reference_number}) marked as "{application.status}".')
-        return redirect('moe_review')
+    # State-approved candidates, grouped by state, then district, then technology track, like State Review.
+    state_filter = request.GET.get('state', '')
+    district_filter, track_filter = request.GET.get('district', ''), request.GET.get('track', '')
+    moe_approved = {}
+    for application in ranking.this_years_applications().filter(status='Approved'):
+        district, track, _ = ranking.quota_group(application)
+        key = (application.state, district, track)
+        moe_approved[key] = moe_approved.get(key, 0) + 1
 
-    applications = Application.objects.filter(status='State Approved').order_by('state', 'rank_in_state')
+    grouped, waiting_by_state, waiting_by_district = {}, {}, {}
+    for application in Application.objects.filter(status='State Approved').order_by('rank_in_state'):
+        district, track, minimum = ranking.quota_group(application)
+        grouped.setdefault((application.state, district, track, minimum), []).append(application)
+        waiting_by_state[application.state] = waiting_by_state.get(application.state, 0) + 1
+        if application.state == state_filter:
+            waiting_by_district[district] = waiting_by_district.get(district, 0) + 1
+
+    groups = []
+    for (state, district, track, minimum), group in sorted(grouped.items(), key=lambda kv: (kv[0][0], kv[0][1] or '', kv[0][2])):
+        if ((state_filter and state != state_filter) or (district_filter and (district or '') != district_filter)
+                or (track_filter and track != track_filter)):
+            continue
+        approved = moe_approved.get((state, district, track), 0)
+        groups.append({
+            'state': state, 'district': district, 'track': track, 'applications': group,
+            'anchor': _group_anchor(f'{state} {district or ""}', track), 'recommended': sum(a.is_recommended for a in group),
+            'need': minimum, 'approved': approved, 'remaining': max(minimum - approved, 0),
+            'percent': min(100, round(100 * approved / minimum)) if minimum else 100,
+        })
+
     deadline = ProgrammeSettings.load().submission_deadline
     context = {
-        'applications': applications,
+        'groups': groups,
+        'recommended_shown': sum(g['recommended'] for g in groups),
+        'waiting_total': sum(waiting_by_state.values()),
+        'state_choices': [(s, waiting_by_state.get(s, 0)) for s in MALAYSIA_STATES],
+        'district_choices': sorted(waiting_by_district.items(), key=lambda kv: kv[0] or ''),
+        'tracks': [t for t, _ in Application.TRACK_CHOICES],
+        'state_filter': state_filter,
+        'district_filter': district_filter,
+        'track_filter': track_filter,
+        'filters': request.GET.urlencode(),
         'pending_compile_count': Application.objects.filter(status__in=ranking.PIPELINE_ENTRY_STATUSES).count(),
-        'submission_deadline': deadline,
-        'deadline_passed': bool(deadline) and timezone.localdate() > deadline,
+        'compile_block_reason': pipeline_ops.compile_block_reason(deadline),
     }
     return render(request, 'moe_review.html', context)
 
@@ -985,9 +1508,14 @@ def _send_recognition_letter(application):
     body = content_defaults.render_placeholders(
         body_template, full_name=application.full_name, reference_number=application.reference_number
     )
+    # Record the outcome on the application, so the MoE can see whether each letter went out.
+    sent = Application.objects.filter(pk=application.pk)
+    sent.update(recognition_letter_sent_at=None, recognition_letter_error='')
     pipeline_ops.send_single_email_async(
         subject, body, application.email,
         context_label=f"Recognition letter — {application.full_name} <{application.email}> ({application.reference_number})",
+        on_sent=lambda: sent.update(recognition_letter_sent_at=timezone.now(), recognition_letter_error=''),
+        on_failed=lambda error: sent.update(recognition_letter_error=error),
     )
 
 
@@ -1021,6 +1549,15 @@ def recognition_dashboard(request):
         recognized = recognized.filter(recognized_year=year)
     if category:
         recognized = recognized.filter(award_category=category)
+
+    if request.GET.get('download'):
+        return _excel_response(pd.DataFrame([{
+            'Recognised': a.recognized_year, 'Name': a.full_name, 'IC Number': a.ic_number, 'Reference': a.reference_number,
+            'Email': a.email, 'WhatsApp': a.whatsapp_number, 'State': a.state, 'District': a.district,
+            'School': a.school_name, "School Leader": a.school_leader_name, "School Leader's Email": a.school_leader_email,
+            'Track': a.tech_track, 'Award Category': a.award_category, 'Activities Reported': a.activity_reports.count(),
+        } for a in recognized.order_by('-recognized_year', 'state', 'full_name')]),
+            f"GPGD_Recognised_{year or 'all_years'}.xlsx", 'GPGDs')
 
     search_result = None
     if search:
@@ -1088,6 +1625,13 @@ def activity_dashboard(request):
     """Page 2 — professional development activity/training reports from every recognized GPGD."""
     reports = ActivityReport.objects.select_related('gpgd')
 
+    # One recognition year (group of GPGDs) at a time: the current one unless another year is picked.
+    years = list(Application.objects.filter(status='Approved', recognized_year__isnull=False)
+                 .values_list('recognized_year', flat=True).distinct().order_by('-recognized_year'))
+    year = request.GET.get('year', '')
+    year = int(year) if year.isdigit() and int(year) in years else pipeline_ops.current_cohort_year()
+    reports = reports.filter(gpgd__recognized_year=year)
+
     tech_track = request.GET.get('tech_track', '')
     state = request.GET.get('state', '')
     district = request.GET.get('district', '')
@@ -1112,18 +1656,20 @@ def activity_dashboard(request):
     total_trainings = reports.count()
     total_hours = reports.aggregate(total=Sum('hours'))['total'] or 0
 
-    # Best-effort: the form captures one participant total plus a multi-select audience,
-    # not a per-audience breakdown, so a report targeting both teachers and students counts
-    # toward both totals. Computed in Python rather than a JSONField `contains` lookup, which
-    # isn't reliably supported across every backend (notably SQLite).
-    total_teachers_trained = 0
-    total_students_trained = 0
-    for audience, n in reports.values_list('target_audience', 'num_participants'):
-        audience = audience or []
-        if 'teachers' in audience:
-            total_teachers_trained += n
-        if 'students' in audience:
-            total_students_trained += n
+    counts = reports.aggregate(teachers=Sum('num_teachers'), students=Sum('num_students'))
+    total_teachers_trained = counts['teachers'] or 0
+    total_students_trained = counts['students'] or 0
+
+    if request.GET.get('download'):
+        return _excel_response(pd.DataFrame([{
+            'Recognised': r.gpgd.recognized_year, 'GPGD': r.gpgd.full_name, 'IC Number': r.gpgd.ic_number,
+            'State': r.gpgd.state, 'District': r.gpgd.district, 'School': r.gpgd.school_name,
+            'Track': r.gpgd.tech_track, 'Activity': r.training_title, 'Date': r.training_date,
+            'Hours': float(r.hours), 'Mode': r.get_training_mode_display(), 'Venue / Platform': r.venue_platform,
+            'Teachers': r.num_teachers, 'Students': r.num_students, 'School Leaders': r.num_school_leaders,
+            'Others': r.num_others, 'Total': r.num_participants, 'Description': r.description,
+        } for r in reports.order_by('training_date', 'gpgd__full_name')]),
+            f'GPGD_Activity_Reports_{year or "all"}.xlsx', 'Activities')
 
     by_month = list(
         reports.annotate(month=TruncMonth('training_date'))
@@ -1133,7 +1679,7 @@ def activity_dashboard(request):
     by_tech_track = list(reports.values('gpgd__tech_track').annotate(count=Count('id')).order_by('-count'))
 
     top_active = (
-        Application.objects.filter(status='Approved')
+        Application.objects.filter(status='Approved', recognized_year=year)
         .annotate(report_count=Count('activity_reports'))
         .filter(report_count__gt=0)
         .order_by('-report_count')[:10]
@@ -1156,6 +1702,10 @@ def activity_dashboard(request):
         'tech_tracks': [choice[0] for choice in Application.TRACK_CHOICES],
         'malaysia_states': MALAYSIA_STATES,
         'filters': {'tech_track': tech_track, 'state': state, 'district': district, 'month': month, 'q': search},
+        'years': years,
+        'year': year,
+        'current_year': pipeline_ops.current_cohort_year(),
+        'download_query': request.GET.urlencode(),
     }
     return render(request, 'activity_dashboard.html', context)
 
@@ -1230,3 +1780,195 @@ def send_monthly_reminders(request):
         '"Agent Activity" panel in a few moments for confirmation of exactly how many were sent, skipped, or failed.'
     )
     return redirect('activity_dashboard')
+
+
+# ---------------------------------------------------------------------------
+# Monthly reminder, report recipients and monthly statistics reports
+# ---------------------------------------------------------------------------
+
+def _excel_response(dataframe, filename, sheet='Sheet1'):
+    """An .xlsx download of `dataframe`."""
+    buffer = io.BytesIO()
+    dataframe.to_excel(buffer, index=False, sheet_name=sheet)
+    buffer.seek(0)
+    response = FileResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_monthly_reminder(request):
+    """Edit the monthly reminder sent to GPGDs, and the days the reminder and the leaders' reports go out."""
+    settings_obj = ProgrammeSettings.load()
+
+    if request.method == 'POST':
+        days = {}
+        for field in ('reminder_day', 'report_day'):
+            raw = request.POST.get(field, '').strip()
+            if not raw.isdigit() or not 1 <= int(raw) <= 28:
+                messages.error(request, 'Days must be a number from 1 to 28 (every month has those days).')
+                return redirect('edit_monthly_reminder')
+            days[field] = int(raw)
+        settings_obj.monthly_reminder_subject = request.POST.get('subject', '').strip()
+        settings_obj.monthly_reminder_body = request.POST.get('body', '').strip()
+        settings_obj.reminder_day, settings_obj.report_day = days['reminder_day'], days['report_day']
+        settings_obj.save()
+        messages.success(request, '✅ Monthly reminder saved.')
+        return redirect('edit_monthly_reminder')
+
+    context = {
+        'subject': settings_obj.monthly_reminder_subject or content_defaults.DEFAULT_MONTHLY_REMINDER_SUBJECT,
+        'body': settings_obj.monthly_reminder_body or content_defaults.DEFAULT_MONTHLY_REMINDER_BODY,
+        'placeholders': [f'{{{{{p}}}}}' for p in content_defaults.MONTHLY_REMINDER_PLACEHOLDERS],
+        'is_default': not settings_obj.monthly_reminder_subject and not settings_obj.monthly_reminder_body,
+        'reminder_day': settings_obj.reminder_day,
+        'report_day': settings_obj.report_day,
+        'cohort_year': pipeline_ops.current_cohort_year(),
+        'gpgd_count': pipeline_ops.current_gpgds().count(),
+    }
+    return render(request, 'edit_monthly_reminder.html', context)
+
+
+def _recipient_rows(state):
+    """(level, state, district, label) for the recipient rows shown: the BSTP Director and every State
+    Director, or with `state`, that state's District Education Leads."""
+    if state:
+        return [('district', state, d, d) for d in PPD_BY_STATE[state]]
+    return [('bstp', '', '', 'BSTP Director')] + [('state', s, '', f'State Director, {s}') for s in MALAYSIA_STATES]
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def report_recipients(request):
+    """Who receives the monthly statistics: BSTP Director, State Directors, District Education Leads."""
+    state = request.GET.get('state') or request.POST.get('state') or ''
+    if not PPD_BY_STATE.get(state):
+        state = ''
+
+    if request.method == 'POST' and request.FILES.get('upload'):
+        return _upload_recipients(request)
+
+    if request.method == 'POST':
+        errors = []
+        for i, (level, row_state, district, label) in enumerate(_recipient_rows(state)):
+            name = request.POST.get(f'name_{i}', '').strip()
+            email = request.POST.get(f'email_{i}', '').strip()
+            where = dict(level=level, state=row_state, district=district)
+            if not email:
+                ReportRecipient.objects.filter(**where).delete()
+            elif '@' not in email or ' ' in email:
+                errors.append(f'{label}: "{email}" is not an email address')
+            else:
+                ReportRecipient.objects.update_or_create(**where, defaults={'name': name, 'email': email})
+        if errors:
+            messages.error(request, 'Not saved: ' + '; '.join(errors) + '. The other rows were saved.')
+        else:
+            messages.success(request, '✅ Recipients saved.')
+        return redirect(f"{reverse('report_recipients')}?state={state}" if state else 'report_recipients')
+
+    existing = {(r.level, r.state, r.district): r for r in ReportRecipient.objects.all()}
+
+    if request.GET.get('download'):
+        rows = _recipient_rows('') + [row for s in MALAYSIA_STATES if PPD_BY_STATE.get(s) for row in _recipient_rows(s)]
+        level_names = dict(ReportRecipient.LEVEL_CHOICES)
+        data = [{'Level': level_names[level], 'State': row_state, 'District': district,
+                 'Name': getattr(existing.get((level, row_state, district)), 'name', ''),
+                 'Email': getattr(existing.get((level, row_state, district)), 'email', '')}
+                for level, row_state, district, _ in rows]
+        return _excel_response(pd.DataFrame(data), 'GPGD_Report_Recipients.xlsx', 'Recipients')
+
+    rows = [{'index': i, 'label': label, 'recipient': existing.get((level, row_state, district)), 'state': row_state,
+             'has_districts': level == 'state' and bool(PPD_BY_STATE.get(row_state)),
+             'district_count': sum(1 for key in existing if key[0] == 'district' and key[1] == row_state),
+             'district_total': len(PPD_BY_STATE.get(row_state, []))}
+            for i, (level, row_state, district, label) in enumerate(_recipient_rows(state))]
+    return render(request, 'report_recipients.html', {'rows': rows, 'state': state})
+
+
+def _upload_recipients(request):
+    """Fills recipients from an Excel file with columns Level, State, District, Name, Email (the same
+    layout as the download). Blank emails are skipped; nothing already saved is removed."""
+    levels = {label.lower(): level for level, label in ReportRecipient.LEVEL_CHOICES}
+    try:
+        df = pd.read_excel(request.FILES['upload']).fillna('')
+    except Exception as e:
+        messages.error(request, f'Could not read that file as Excel: {e}')
+        return redirect('report_recipients')
+    saved, problems = 0, []
+    for number, row in enumerate(df.to_dict('records'), start=2):
+        email = str(row.get('Email', '')).strip()
+        if not email:
+            continue
+        level = levels.get(str(row.get('Level', '')).strip().lower())
+        state = canonical_state(row.get('State', '')) if level in ('state', 'district') else ''
+        district = ranking.canonical_district(state, str(row.get('District', ''))) if level == 'district' else ''
+        if (not level or (level != 'bstp' and not state) or '@' not in email
+                or (level == 'district' and district not in PPD_BY_STATE.get(state, []))):
+            problems.append(f'row {number}')
+            continue
+        ReportRecipient.objects.update_or_create(
+            level=level, state=state, district=district,
+            defaults={'name': str(row.get('Name', '')).strip(), 'email': email})
+        saved += 1
+    messages.success(request, f'✅ {saved} recipient(s) saved from the file.')
+    if problems:
+        messages.warning(request, f"Skipped {len(problems)} row(s) with an unknown level, state, district or email: "
+                                  + ', '.join(problems[:20]) + ('…' if len(problems) > 20 else ''))
+    return redirect('report_recipients')
+
+
+def _send_monthly_reports_background(period, triggered_by):
+    result = monthly_reports.send_monthly_reports(period)
+    AgentActivityLog.objects.create(
+        trigger_reason=f'Monthly statistics sent manually (by {triggered_by})',
+        summary=f"Monthly statistics for {pipeline_ops.month_label(period)}: {result['sent']} sent, "
+                f"{result['already_sent']} already sent earlier, {len(result['failed'])} failed.",
+        actions_taken=[{'tool': 'send_monthly_reports', 'input': {'period': period}, 'result': result}],
+        status='error' if result['failed'] else 'success',
+    )
+
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def monthly_reports_page(request):
+    """Preview and send the monthly training statistics for one month (default: last month)."""
+    period = request.GET.get('period') or request.POST.get('period') or monthly_reports.previous_period()
+    if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', period):
+        period = monthly_reports.previous_period()
+
+    if request.method == 'POST':
+        threading.Thread(target=_send_monthly_reports_background,
+                         args=(period, request.user.get_username()), daemon=True).start()
+        messages.success(request, f"📨 Sending the {pipeline_ops.month_label(period)} reports now, in the background. "
+                                  "Anyone who already received this month's report is skipped.")
+        return redirect(f"{reverse('monthly_reports')}?period={period}")
+
+    emails = monthly_reports.build_reports(period)
+    logs = {(log.level, log.scope, log.email): log for log in MonthlyReportLog.objects.filter(period=period)}
+    for email in emails:
+        email['log'] = logs.get((email['level'], email['scope'][:255], email['email']))
+    try:
+        chosen = int(request.GET.get('preview', 0))
+    except ValueError:
+        chosen = 0
+    gpgds, reports = monthly_reports.collect(period)
+    programme = ProgrammeSettings.load()
+    this_month = timezone.localdate().replace(day=1)
+    periods = []
+    for _ in range(13):  # this month and the 12 before it
+        periods.append(this_month.strftime('%Y-%m'))
+        this_month = (this_month - timedelta(days=1)).replace(day=1)
+    context = {
+        'period': period,
+        'month': pipeline_ops.month_label(period),
+        'periods': [(p, pipeline_ops.month_label(p)) for p in periods],
+        'emails': emails,
+        'preview': emails[chosen] if 0 <= chosen < len(emails) else None,
+        'chosen': chosen,
+        'totals': monthly_reports._totals(reports, gpgds),
+        'missing': monthly_reports.missing_recipients(),
+        'cohort_year': pipeline_ops.current_cohort_year(),
+        'report_day': programme.report_day,
+    }
+    return render(request, 'monthly_reports.html', context)

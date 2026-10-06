@@ -7,3 +7,5 @@ staticfiles/
 media/
 temp_uploads/
 logs/
+demo/*
+!demo/README.md

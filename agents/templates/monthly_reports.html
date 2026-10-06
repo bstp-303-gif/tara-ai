@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Monthly Reports — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Monthly Reports</h1>
+<p style="color:#6b7280; margin-bottom:1rem;">
+    Training statistics emailed to programme leaders for the activities the current GPGDs{% if cohort_year %} (recognised in {{ cohort_year }}){% endif %}
+    reported in a month. They go out <strong>automatically on day {{ report_day }} of each month</strong> for the month before;
+    use this page to check them first or to send them now. Nobody gets the same month's report twice.
+</p>
+
+<form method="get" style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1.25rem;">
+    <label for="period" class="fw-semibold">Month:</label>
+    <select id="period" name="period" class="form-select form-select-sm" style="max-width:220px;" onchange="this.form.submit()">
+        {% for value, label in periods %}<option value="{{ value }}" {% if value == period %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn btn-sm btn-outline-secondary">Show</button></noscript>
+</form>
+
+<div class="row g-3" style="margin-bottom:1.25rem;">
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">Teachers trained</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.num_teachers|intcomma }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">Students trained</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.num_students|intcomma }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">School leaders</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.num_school_leaders|intcomma }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">Activities</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.activities|intcomma }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">Hours</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.hours|floatformat:"-1" }}</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card" style="padding:0.9rem 1rem;"><div style="font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600;">GPGDs reporting</div><div style="font-size:1.6rem; font-weight:700;">{{ totals.gpgds_reporting }} <span style="font-size:0.9rem; color:#6b7280; font-weight:500;">of {{ totals.gpgds }}</span></div></div></div>
+</div>
+
+{% if missing.bstp or missing.states or missing.districts or missing.gpgds_without_school_leader %}
+<div class="alert alert-warning">
+    <strong>Some leaders have no email set, so they won't get a report:</strong>
+    <ul style="margin:0.4rem 0 0 1.1rem;">
+        {% if missing.bstp %}<li>BSTP Director</li>{% endif %}
+        {% if missing.states %}<li>{{ missing.states|length }} State Director(s): {{ missing.states|join:", " }}</li>{% endif %}
+        {% if missing.districts %}<li>{{ missing.districts }} of 143 District Education Leads</li>{% endif %}
+        {% if missing.gpgds_without_school_leader %}<li>{{ missing.gpgds_without_school_leader }} GPGD(s) without a school leader's email (applied before it was asked)</li>{% endif %}
+    </ul>
+    <a href="{% url 'report_recipients' %}">Set recipients →</a>
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header" style="background:#f9fafb; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+                <strong>{{ emails|length }} report{{ emails|length|pluralize }} for {{ month }}</strong>
+                <form method="post" onsubmit="return confirm('Send the {{ month|escapejs }} reports to everyone who has not had theirs yet?');">
+                    {% csrf_token %}<input type="hidden" name="period" value="{{ period }}">
+                    <button type="submit" class="btn btn-sm btn-primary" {% if not emails %}disabled{% endif %}><i class="bi bi-send"></i> Send now</button>
+                </form>
+            </div>
+            <div style="max-height:620px; overflow-y:auto;">
+                <table class="table table-sm table-hover" style="margin:0; font-size:0.85rem;">
+                    <tbody>
+                    {% for email in emails %}
+                    <tr style="{% if forloop.counter0 == chosen %}background:#eef2ff;{% endif %}">
+                        <td style="padding:0.5rem 0.75rem;">
+                            <a href="?period={{ period }}&amp;preview={{ forloop.counter0 }}" style="font-weight:600;">{{ email.scope }}</a>
+                            <div style="color:#6b7280;">
+                                {% if email.level == 'bstp' %}BSTP Director{% elif email.level == 'state' %}State Director{% elif email.level == 'district' %}District Education Lead{% else %}School leader{% endif %}
+                                · {{ email.email }}
+                            </div>
+                        </td>
+                        <td style="padding:0.5rem 0.75rem; text-align:right; white-space:nowrap;">
+                            {% if email.log.success %}<span style="color:#059669;"><i class="bi bi-check-circle-fill"></i> Sent {{ email.log.sent_at|date:"d M" }}</span>
+                            {% elif email.log %}<span style="color:#b91c1c;" title="{{ email.log.error_message }}"><i class="bi bi-x-circle-fill"></i> Failed</span>
+                            {% else %}<span style="color:#9ca3af;">Not sent</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td style="padding:1.5rem; color:#6b7280; text-align:center;">No recipients set yet. <a href="{% url 'report_recipients' %}">Add them →</a></td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        {% if preview %}
+        <div class="card">
+            <div class="card-header" style="background:#f9fafb; padding:0.85rem 1rem;">
+                <div style="font-size:0.8rem; color:#6b7280;">Preview: to {{ preview.email }}</div>
+                <strong>{{ preview.subject }}</strong>
+            </div>
+            <iframe srcdoc="{{ preview.html|force_escape }}" title="Email preview" style="width:100%; height:620px; border:0;"></iframe>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

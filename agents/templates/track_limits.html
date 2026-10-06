@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Maximum per State — MyGPGD J360{% endblock %}
+
+{% block content %}
+{% if state %}
+<p style="margin-bottom:0.5rem;"><a href="{% url 'track_limits' %}"><i class="bi bi-arrow-left"></i> All states</a></p>
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Maximum GPGDs per District — {{ state }}</h1>
+<p style="color:#6b7280; margin-bottom:1rem;">
+    The most teachers that may be recognised in each district (PPD) of {{ state }} for each technology track this year.
+    Leave a box <strong>blank for no limit</strong>. An approval must fit both the district's maximum and {{ state }}'s
+    overall maximum. A declined or rejected candidate frees their place.
+</p>
+<div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem;">
+    {% for cell in state_usage %}
+    <div style="background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:0.6rem 0.9rem; min-width:170px;">
+        <div style="font-size:0.75rem; color:#6b7280; font-weight:600; text-transform:uppercase;">{{ state }} overall — {{ cell.track }}</div>
+        <div style="font-weight:600;">{% if cell.maximum is None %}No limit{% else %}{{ cell.used }} of {{ cell.maximum }} used{% endif %}</div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Maximum GPGDs per State</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    <strong>Optional.</strong> Only needed if there must be a ceiling, for example a limit set by a provider. The main rule
+    is the <strong>minimum of 2 GPGDs per track in each district</strong>, which applies whatever is set here.
+    Leave a box <strong>blank for no limit</strong>; with every box blank, nothing is capped. Click a state's name to set maximums for
+    each of its districts (PPD) as well. Once a maximum is reached, neither the State Officer nor the MoE Officer can
+    approve more candidates for that track there. A declined or rejected candidate frees their place. "Used" counts
+    candidates approved by the State Officer or the MoE this year.
+</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {% if state %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
+    <div class="card">
+        <div class="card-body" style="padding:0; overflow-x:auto;">
+            <table class="table" style="margin:0;">
+                <thead>
+                    <tr>
+                        <th style="padding:1rem;">{% if state %}District (PPD){% else %}State{% endif %}</th>
+                        {% for track in tracks %}<th style="min-width:150px;">{{ track }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td style="padding:0.75rem 1rem; font-weight:600;">
+                            {% if row.has_districts %}<a href="?state={{ row.name|urlencode }}" title="Set maximums for each district">{{ row.name }} <i class="bi bi-chevron-right" style="font-size:0.75rem;"></i></a>{% else %}{{ row.name }}{% endif %}
+                        </td>
+                        {% for cell in row.cells %}
+                        <td style="padding:0.5rem;">
+                            <input type="number" min="0" step="1" name="max__{{ row.name }}__{{ cell.track }}"
+                                   value="{{ cell.maximum|default_if_none:'' }}" placeholder="No limit"
+                                   class="form-control form-control-sm" style="max-width:110px;"
+                                   aria-label="Maximum for {{ row.name }}, {{ cell.track }}">
+                            <div style="font-size:0.75rem; margin-top:0.2rem; {% if cell.maximum is not None and cell.used >= cell.maximum %}color:#b91c1c; font-weight:600;{% else %}color:#6b7280;{% endif %}">
+                                {{ cell.used }} used{% if cell.maximum is not None %} of {{ cell.maximum }}{% if cell.used >= cell.maximum %} (full){% endif %}{% endif %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background:#f9fafb;">
+                        <td style="padding:0.75rem 1rem; font-weight:700;">{% if state %}All districts{% else %}Malaysia{% endif %}</td>
+                        {% for total in totals %}
+                        <td style="padding:0.75rem 0.5rem; font-weight:600;">
+                            {% if total.all_set %}{{ total.used }} of {{ total.maximum }}{% else %}{{ total.used }} used{% if total.maximum %}<div style="font-size:0.75rem; color:#6b7280; font-weight:400;">{{ total.maximum }} where a limit is set</div>{% endif %}{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div style="margin-top:1rem;">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save maximums</button>
+    </div>
+</form>
+{% endblock %}

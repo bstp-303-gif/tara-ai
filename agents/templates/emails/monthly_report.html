@@ -1,0 +1,73 @@
+{% load humanize %}<!doctype html>
+<html><body style="margin:0; padding:24px; background:#f4f5f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:720px; margin:0 auto; background:#ffffff; border-radius:10px; overflow:hidden;">
+<tr><td style="background:#1e3a5f; color:#ffffff; padding:20px 24px;">
+    <div style="font-size:13px; opacity:0.85;">Guru Peneraju Generasi Digital (GPGD)</div>
+    <div style="font-size:20px; font-weight:bold; margin-top:4px;">Monthly Training Report — {{ month }}</div>
+    <div style="font-size:15px; margin-top:2px;">{{ title }}</div>
+</td></tr>
+<tr><td style="padding:20px 24px;">
+    <p style="margin:0 0 12px;">Dear {{ name|default:"Sir/Madam" }},</p>
+    <p style="margin:0 0 16px;">{% if level == 'school_leader' %}Below are the trainings your school's GPGD(s) reported for {{ month }}.{% else %}Below are the trainings reported by GPGDs for {{ month }}.{% endif %}</p>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate; border-spacing:6px; margin:0 -6px 12px;">
+    <tr>
+        <td style="background:#eef2ff; border-radius:8px; padding:10px 12px; width:25%;"><div style="font-size:11px; color:#4b5563; text-transform:uppercase;">Teachers trained</div><div style="font-size:22px; font-weight:bold;">{{ totals.num_teachers|intcomma }}</div></td>
+        <td style="background:#ecfdf5; border-radius:8px; padding:10px 12px; width:25%;"><div style="font-size:11px; color:#4b5563; text-transform:uppercase;">Students trained</div><div style="font-size:22px; font-weight:bold;">{{ totals.num_students|intcomma }}</div></td>
+        <td style="background:#fff7ed; border-radius:8px; padding:10px 12px; width:25%;"><div style="font-size:11px; color:#4b5563; text-transform:uppercase;">Activities</div><div style="font-size:22px; font-weight:bold;">{{ totals.activities|intcomma }}</div></td>
+        <td style="background:#f5f3ff; border-radius:8px; padding:10px 12px; width:25%;"><div style="font-size:11px; color:#4b5563; text-transform:uppercase;">Hours</div><div style="font-size:22px; font-weight:bold;">{{ totals.hours|floatformat:"-1" }}</div></td>
+    </tr>
+    </table>
+    <p style="margin:0 0 18px; font-size:13px; color:#4b5563;">
+        Also trained: {{ totals.num_school_leaders|intcomma }} school leader(s) and {{ totals.num_others|intcomma }} other participant(s).
+        {{ totals.gpgds_reporting }} of {{ totals.gpgds }} GPGD(s) reported at least one activity.
+    </p>
+
+    {% if rows %}
+    <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; font-size:13px;">
+        <tr style="background:#f3f4f6; text-align:left;">
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb;">{{ row_label }}</th>
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right;">Teachers</th>
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right;">Students</th>
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right;">Activities</th>
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right;">Hours</th>
+            <th style="padding:8px; border-bottom:1px solid #e5e7eb; text-align:right;">GPGDs reporting</th>
+        </tr>
+        {% for row in rows %}
+        <tr style="{% if not row.activities %}color:#9ca3af;{% endif %}">
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6;">{{ row.name }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; text-align:right;">{{ row.num_teachers|intcomma }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; text-align:right;">{{ row.num_students|intcomma }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; text-align:right;">{{ row.activities }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; text-align:right;">{{ row.hours|floatformat:"-1" }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; text-align:right;">{{ row.gpgds_reporting }} of {{ row.gpgds }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if activities %}
+    <h3 style="font-size:15px; margin:22px 0 8px;">Activities reported</h3>
+    <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; font-size:13px;">
+        <tr style="background:#f3f4f6; text-align:left;">
+            <th style="padding:8px;">Date</th><th style="padding:8px;">GPGD</th><th style="padding:8px;">Activity</th><th style="padding:8px;">Participants</th>
+        </tr>
+        {% for a in activities %}
+        <tr>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6; white-space:nowrap;">{{ a.training_date|date:"d M" }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6;">{{ a.gpgd.full_name }}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6;">{{ a.training_title }} ({{ a.get_training_mode_display }}, {{ a.hours|floatformat:"-1" }} h)</td>
+            <td style="padding:7px 8px; border-bottom:1px solid #f3f4f6;">{{ a.audience_display }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <p style="margin:22px 0 0; font-size:13px;">Yours sincerely,<br>
+    Sektor Pengintegrasian Teknologi Pendidikan (SPTP)<br>
+    Bahagian Sumber dan Teknologi Pendidikan (BSTP)<br>
+    Kementerian Pendidikan Malaysia</p>
+</td></tr>
+</table>
+<p style="text-align:center; font-size:11px; color:#9ca3af; margin:12px 0 0;">Sent automatically by MyGPGD J360 each month.</p>
+</body></html>

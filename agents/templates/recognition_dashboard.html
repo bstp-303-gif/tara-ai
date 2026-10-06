@@ -97,6 +97,9 @@
             <div class="filter-field">
                 <a href="{% url 'recognition_dashboard' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
             </div>
+            <div class="filter-field">
+                <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&amp;{% endif %}download=1" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Download Excel</a>
+            </div>
         </form>
     </div>
 </div>

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Report Recipients — MyGPGD J360{% endblock %}
+
+{% block content %}
+{% if state %}
+<p style="margin-bottom:0.5rem;"><a href="{% url 'report_recipients' %}"><i class="bi bi-arrow-left"></i> BSTP and State Directors</a></p>
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">District Education Leads — {{ state }}</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">Each receives a monthly summary of the trainings GPGDs in their district reported, by school. Leave the email blank for no report.</p>
+{% else %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Report Recipients</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Who receives the monthly training statistics, sent at the end of the first week of each month for the month before:
+    the <strong>BSTP Director</strong> (whole country, by state), each <strong>State Director</strong> (their state, by district)
+    and each <strong>District Education Lead</strong> (their district, by school; click a state to enter them).
+    <strong>School leaders</strong> come from each GPGD's application form. Leave an email blank for no report.
+</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {% if state %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
+    <div class="card">
+        <div class="card-body" style="padding:0; overflow-x:auto;">
+            <table class="table" style="margin:0;">
+                <thead><tr>
+                    <th style="padding:1rem;">{% if state %}District (PPD){% else %}Role{% endif %}</th>
+                    <th>Name</th><th>Email</th>
+                    {% if not state %}<th>District Leads</th>{% endif %}
+                </tr></thead>
+                <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td style="padding:0.75rem 1rem; font-weight:600;">{{ row.label }}</td>
+                    <td style="padding:0.5rem;"><input type="text" name="name_{{ row.index }}" value="{{ row.recipient.name|default:'' }}" class="form-control form-control-sm" placeholder="Name" aria-label="Name for {{ row.label }}"></td>
+                    <td style="padding:0.5rem;"><input type="email" name="email_{{ row.index }}" value="{{ row.recipient.email|default:'' }}" class="form-control form-control-sm" placeholder="email@moe.gov.my" aria-label="Email for {{ row.label }}"></td>
+                    {% if not state %}
+                    <td style="padding:0.75rem 0.5rem; white-space:nowrap;">
+                        {% if row.has_districts %}<a href="?state={{ row.state|urlencode }}">{{ row.district_count }} of {{ row.district_total }} set <i class="bi bi-chevron-right" style="font-size:0.75rem;"></i></a>{% elif row.state %}<span style="color:#9ca3af;">No districts</span>{% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save</button></div>
+</form>
+
+{% if not state %}
+<div class="card" style="margin-top:2rem;">
+    <div class="card-header" style="background:#f9fafb; padding:1rem;"><h5 style="margin:0; font-weight:600;"><i class="bi bi-file-earmark-excel"></i> Fill everyone in from Excel</h5></div>
+    <div class="card-body" style="padding:1.5rem;">
+        <p style="color:#374151;">
+            <a href="?download=1">Download the list</a>: every role and all 143 districts, with anything already saved.
+            Fill in the Name and Email columns, then upload it here. Rows with a blank email are skipped, and nothing already saved is removed.
+        </p>
+        <form method="post" enctype="multipart/form-data" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+            {% csrf_token %}
+            <input type="file" name="upload" accept=".xlsx,.xls" class="form-control" style="max-width:360px;" required>
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-upload"></i> Upload</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

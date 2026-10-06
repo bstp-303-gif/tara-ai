@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Recognised &amp; Rejected — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Recognised &amp; Rejected</h1>
+<p style="color:#6b7280; margin-bottom:1rem;">Everyone you have given a final decision on this year.</p>
+
+<div class="card" style="padding:1rem 1.25rem; margin-bottom:1.25rem; background:#f0fdf4; border:1px solid #bbf7d0;">
+    <div style="font-weight:700; color:#166534; margin-bottom:0.4rem;"><i class="bi bi-signpost-split"></i> What happens after you approve</div>
+    <ol style="margin:0; padding-left:1.2rem; color:#14532d; font-size:0.92rem;">
+        <li>The teacher becomes a <strong>recognised GPGD for {{ year }}</strong>.</li>
+        <li>Their <strong>Letter of Recognition</strong> is emailed straight away. Its status is shown below; use <em>Resend letter</em> if it failed.</li>
+        <li>They appear on the <a href="{% url 'recognition_dashboard' %}">Recognition Dashboard</a> (by state, district, school and track).</li>
+        <li>Every month (day {{ reminder_day }}) they are reminded to report the trainings they run, and their activities go into the
+            monthly statistics sent to the BSTP Director, State Directors, District Education Leads and their school leader.</li>
+    </ol>
+</div>
+
+<form method="get" class="card" style="padding:0.9rem 1.1rem; margin-bottom:1rem; display:flex; flex-direction:row; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;">
+    <input type="hidden" name="show" value="{{ show }}">
+    <div>
+        <label for="state" class="form-label small fw-semibold mb-1">State</label>
+        <select id="state" name="state" class="form-select form-select-sm" style="min-width:200px;" onchange="this.form.submit()">
+            <option value="">All states</option>
+            {% for s in states %}<option value="{{ s }}" {% if state_filter == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="track" class="form-label small fw-semibold mb-1">Technology track</label>
+        <select id="track" name="track" class="form-select form-select-sm" style="min-width:150px;" onchange="this.form.submit()">
+            <option value="">All tracks</option>
+            {% for t in tracks %}<option value="{{ t }}" {% if track_filter == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+    </div>
+    <div style="flex:1; min-width:200px;">
+        <label for="q" class="form-label small fw-semibold mb-1">Search</label>
+        <input id="q" type="search" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Name, IC, reference or school">
+    </div>
+    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+    <a href="?{{ filters }}{% if filters %}&amp;{% endif %}download=1" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Download Excel</a>
+</form>
+
+<div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+    <a href="?show=all&amp;state={{ state_filter|urlencode }}&amp;track={{ track_filter|urlencode }}&amp;q={{ q|urlencode }}" class="btn btn-sm {% if show == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All ({{ counts.all }})</a>
+    <a href="?show=approved&amp;state={{ state_filter|urlencode }}&amp;track={{ track_filter|urlencode }}&amp;q={{ q|urlencode }}" class="btn btn-sm {% if show == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">Recognised ({{ counts.approved }})</a>
+    <a href="?show=rejected&amp;state={{ state_filter|urlencode }}&amp;track={{ track_filter|urlencode }}&amp;q={{ q|urlencode }}" class="btn btn-sm {% if show == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">Rejected ({{ counts.rejected }})</a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:0; overflow-x:auto;">
+        <table class="table table-hover" style="margin:0;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem;">Name</th>
+                    <th>State / District</th>
+                    <th>Track</th>
+                    <th>Your decision</th>
+                    <th>Remarks</th>
+                    <th style="min-width:180px;">Letter of Recognition</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in page %}
+                <tr>
+                    <td style="padding:1rem;">
+                        {{ application.full_name }}<br>
+                        <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }} · {{ application.school_name }}</span>
+                        <div>{% include 'partials/recognition_badge.html' %}</div>
+                        {% include 'partials/contact.html' %}
+                    </td>
+                    <td>{{ application.state }}<br><span style="color:#6b7280; font-size:0.85rem;">{{ application.district }}</span></td>
+                    <td>{{ application.tech_track }}</td>
+                    <td>
+                        {% if application.status == 'Approved' %}
+                            <span class="status-badge status-valid">✅ Recognised {{ application.recognized_year }}</span>
+                            {% if application.award_category %}<div style="font-size:0.8rem; color:#374151; margin-top:0.2rem;"><i class="bi bi-award"></i> {{ application.award_category }}</div>{% endif %}
+                        {% else %}
+                            <span class="status-badge status-invalid">Rejected</span>
+                        {% endif %}
+                        <div style="color:#6b7280; font-size:0.8rem;">{{ application.moe_decision_at|date:"d M Y, H:i" }}</div>
+                    </td>
+                    <td style="font-size:0.85rem;">
+                        {% if application.state_remarks %}<div><span style="color:#6b7280;">State:</span> {{ application.state_remarks }}</div>{% endif %}
+                        {% if application.moe_remarks %}<div><span style="color:#6b7280;">MoE:</span> {{ application.moe_remarks }}</div>{% endif %}
+                        {% if not application.state_remarks and not application.moe_remarks %}<span style="color:#9ca3af;">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if application.status == 'Approved' %}
+                            {% if application.recognition_letter_sent_at %}
+                                <span style="color:#15803d;"><i class="bi bi-envelope-check-fill"></i> Emailed {{ application.recognition_letter_sent_at|date:"d M, H:i" }}</span>
+                            {% elif application.recognition_letter_error %}
+                                <span style="color:#b91c1c;" title="{{ application.recognition_letter_error }}"><i class="bi bi-exclamation-triangle-fill"></i> Failed to send</span>
+                            {% elif application.letter_pending %}
+                                <span style="color:#6b7280;"><i class="bi bi-hourglass-split"></i> Sending…</span>
+                            {% else %}
+                                <span style="color:#6b7280;" title="Approved before letter sending was recorded. Resend to be sure it was received."><i class="bi bi-question-circle"></i> Not recorded</span>
+                            {% endif %}
+                            <form method="post" style="margin-top:0.35rem;" onsubmit="return confirm('Email the Letter of Recognition to {{ application.full_name|escapejs }} again?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="application_id" value="{{ application.id }}">
+                                <input type="hidden" name="filters" value="{{ filters }}">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i> Resend letter</button>
+                            </form>
+                        {% else %}
+                            <span style="color:#9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding:2rem;">
+                    {% if counts.all %}No one matches these filters.{% else %}No final decisions yet. Approve candidates on <a href="{% url 'moe_review' %}">MoE Review</a>.{% endif %}
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page.has_other_pages %}
+<nav style="display:flex; gap:0.5rem; align-items:center; margin-top:1rem;">
+    {% if page.has_previous %}<a class="btn btn-sm btn-outline-secondary" href="?{{ filters }}&amp;page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+    <span style="color:#6b7280; font-size:0.85rem;">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="btn btn-sm btn-outline-secondary" href="?{{ filters }}&amp;page={{ page.next_page_number }}">Next →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

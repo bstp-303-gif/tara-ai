@@ -1,0 +1,6 @@
+{% if GPGD_DEMO %}
+<div style="position:sticky; top:0; z-index:2000; background:#f59e0b; color:#1f2937; text-align:center; font-weight:700; padding:0.4rem 1rem; font-size:0.9rem;">
+    DEMO: synthetic data on its own database. Nothing here affects the real system, and no emails are sent.
+    <a href="{% url 'demo_inbox' %}" style="color:#1f2937; text-decoration:underline; margin-left:0.75rem;"><i class="bi bi-inbox"></i> Open the Demo Inbox</a>
+</div>
+{% endif %}

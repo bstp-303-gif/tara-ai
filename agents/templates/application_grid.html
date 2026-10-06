@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}By District — MyGPGD J360{% endblock %}
+
+{% block extra_head %}
+<style>
+    .grid-table { margin:0; font-size:0.9rem; }
+    .grid-table th, .grid-table td { vertical-align:middle; }
+    .grid-table td.num, .grid-table th.num { text-align:center; }
+    .grid-cell { display:block; padding:0.45rem 0.25rem; border-radius:9px; text-decoration:none; color:#18181b; }
+    a.grid-cell:hover { background:#f4f4fd; }
+    .grid-cell.selected { background:#eef2ff; box-shadow:inset 0 0 0 1.5px #4f46e5; }
+    .grid-cell .total { font-family:'Lexend',sans-serif; font-size:1.25rem; font-weight:700; line-height:1.2; }
+    .grid-cell .split { font-size:0.75rem; color:#6b7280; white-space:nowrap; }
+    .grid-cell.zero .total { color:#d4d4d8; font-weight:500; }
+    .grid-cell.short { background:#fef3c7; }
+    .grid-cell.short .total { color:#b45309; }
+    .grid-table tr.totals td { background:#fafafc; border-top:2px solid #e4e4ec; font-weight:600; }
+    .legend { font-size:0.8rem; color:#6b7280; display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">{{ title }}</h1>
+<p style="color:#6b7280; margin-bottom:1.25rem;">{{ intro }}</p>
+
+{% if states %}
+<form method="get" action="{{ page_url }}" style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1rem;">
+    <label for="state-pick" style="font-size:0.9rem; color:#374151; font-weight:600;">State</label>
+    <select id="state-pick" name="state" class="form-select form-select-sm" style="max-width:240px;" onchange="this.form.submit()">
+        <option value="">All states</option>
+        {% for s in states %}<option value="{{ s }}" {% if s == selected_state %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn btn-sm btn-outline-secondary">Show</button></noscript>
+</form>
+{% endif %}
+
+<div class="legend">
+    <span><i class="bi bi-check-circle-fill" style="color:#059669;"></i> approved by {{ legend_by }}</span>
+    <span><i class="bi bi-x-circle-fill" style="color:#dc2626;"></i> declined by {{ legend_by }}</span>
+    <span><i class="bi bi-hourglass-split" style="color:#6b7280;"></i> not decided yet</span>
+    {% if minimum %}<span><span style="display:inline-block; width:0.9rem; height:0.9rem; background:#fef3c7; border-radius:3px; vertical-align:middle;"></span> fewer than {{ minimum }} applicants (below the minimum)</span>{% endif %}
+</div>
+{% if below_min_count %}
+<div class="alert alert-warning" style="margin-bottom:1rem;">
+    <i class="bi bi-exclamation-triangle-fill"></i> <strong>{{ below_min_count }}</strong> district/track group(s) have fewer than
+    {{ minimum }} applicants, so the minimum of {{ minimum }} GPGDs per track cannot be reached there yet. They are highlighted below.
+</div>
+{% endif %}
+
+{% if rows %}
+<div class="card">
+    <div class="card-body" style="padding:0; overflow-x:auto;">
+        <table class="table grid-table">
+            <thead>
+                <tr>
+                    <th style="padding:0.9rem 1rem;">{{ row_label }}</th>
+                    {% for track in tracks %}<th class="num">{{ track }}</th>{% endfor %}
+                    <th class="num">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td style="padding-left:1rem; font-weight:600;">
+                        {% if drill_into_states %}
+                            <a href="{{ page_url }}?state={{ row.key|urlencode }}" title="See {{ row.name }}'s districts">{{ row.name }} <i class="bi bi-chevron-right" style="font-size:0.75rem;"></i></a>
+                        {% else %}{{ row.name }}{% endif %}
+                    </td>
+                    {% for c in row.cells %}
+                    <td class="num">{% include 'partials/district_cell.html' with c=c row_key=row.key track=c.track %}</td>
+                    {% endfor %}
+                    <td class="num">{% include 'partials/district_cell.html' with c=row.total row_key=row.key track='' %}</td>
+                </tr>
+                {% endfor %}
+                <tr class="totals">
+                    <td style="padding-left:1rem;">All {{ row_label|lower }}s</td>
+                    {% for c in totals %}
+                    <td class="num">{% include 'partials/district_cell.html' with c=c row_key=None track=None %}</td>
+                    {% endfor %}
+                    <td class="num">{% include 'partials/district_cell.html' with c=grand_total row_key=None track=None %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card" style="padding:2rem; text-align:center; color:#6b7280;">{{ empty_message }}</div>
+{% endif %}
+
+{% if selected %}
+<h2 id="list" style="font-size:1.1rem; font-weight:700; color:#1e3a5f; margin:2rem 0 0.75rem;">
+    {{ selected.name }}{% if selected.track %} · {{ selected.track }}{% else %} · all tracks{% endif %}
+    <span style="color:#6b7280; font-weight:500;">({{ selected.applications|length }})</span>
+    <a href="{{ page_url }}{% if selected_state %}?state={{ selected_state|urlencode }}{% endif %}" style="font-size:0.85rem; font-weight:500; margin-left:0.5rem;">Clear</a>
+</h2>
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="table table-hover" style="margin:0; font-size:0.9rem;">
+            <thead>
+                <tr>
+                    <th style="padding:0.9rem 1rem;">Name</th>
+                    <th>School</th>
+                    {% if drill_into_states %}<th>District</th>{% endif %}
+                    <th>Tech Track</th>
+                    <th>Submitted</th>
+                    <th>Stage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in selected.applications %}
+                <tr>
+                    <td style="padding-left:1rem;">{{ a.full_name }}<br><span style="color:#6b7280; font-size:0.8rem;">{{ a.reference_number }}</span>{% with application=a %}<div>{% include 'partials/recognition_badge.html' %}</div>{% include 'partials/contact.html' %}{% endwith %}</td>
+                    <td>{{ a.school_name }}</td>
+                    {% if drill_into_states %}<td>{{ a.district|title }}</td>{% endif %}
+                    <td>{{ a.tech_track }}</td>
+                    <td>{{ a.submitted_at|date:"d M Y" }}</td>
+                    <td>{{ a.stage }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding:1.5rem;">No applications here.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

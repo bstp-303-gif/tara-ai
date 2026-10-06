@@ -39,3 +39,52 @@ def canonical_state(value):
     """Returns the canonical state name for `value`, or '' if it isn't recognised."""
     key = _key(value)
     return _CANONICAL_BY_KEY.get(key) or _STATE_ALIASES.get(key, '')
+
+
+# Annual national-level recognitions asked about on the application form. Unlike awards (one-time,
+# they stay), these are given for a particular year, so a teacher may hold one this year and not
+# the next. Teachers who have never held any get a reserved Recommended place (agents/ranking.py).
+ANNUAL_RECOGNITIONS = ['Edufluencer KPM', 'Pakar Jauhari Digital', 'Cikgu Juara Digital', 'GPGD']
+
+
+# The 143 official district education offices (PPD), per state. District on the application form is a
+# dropdown of these, and district quotas and maximums are keyed by these exact names. Perlis,
+# W.P. Labuan and W.P. Putrajaya have no PPD, so their quotas are state-wide (agents/ranking.py).
+PPD_BY_STATE = {
+    'Johor': ['PPD Batu Pahat', 'PPD Johor Bahru', 'PPD Kluang', 'PPD Kota Tinggi', 'PPD Kulai', 'PPD Mersing', 'PPD Muar',
+              'PPD Pasir Gudang', 'PPD Pontian', 'PPD Segamat', 'PPD Tangkak'],
+    'Kedah': ['PPD Baling', 'PPD Kota Setar', 'PPD Kuala Muda', 'PPD Kubang Pasu', 'PPD Kulim Bandar Baharu', 'PPD Langkawi',
+              'PPD Padang Terap', 'PPD Pendang', 'PPD Sik', 'PPD Yan'],
+    'Kelantan': ['PPD Bachok', 'PPD Gua Musang', 'PPD Jeli', 'PPD Kota Bharu', 'PPD Kuala Krai', 'PPD Machang', 'PPD Pasir Mas',
+                 'PPD Pasir Puteh', 'PPD Tanah Merah', 'PPD Tumpat'],
+    'Melaka': ['PPD Alor Gajah', 'PPD Jasin', 'PPD Melaka Tengah'],
+    'Negeri Sembilan': ['PPD Jempol dan Jelebu', 'PPD Kuala Pilah', 'PPD Port Dickson', 'PPD Rembau', 'PPD Seremban', 'PPD Tampin'],
+    'Pahang': ['PPD Bentong', 'PPD Bera', 'PPD Cameron Highlands', 'PPD Jerantut', 'PPD Kuantan', 'PPD Lipis', 'PPD Maran',
+               'PPD Pekan', 'PPD Raub', 'PPD Rompin', 'PPD Temerloh'],
+    'Perak': ['PPD Bagan Datuk', 'PPD Batang Padang', 'PPD Hilir Perak', 'PPD Hulu Perak', 'PPD Kerian', 'PPD Kinta Selatan',
+              'PPD Kinta Utara', 'PPD Kuala Kangsar', 'PPD Larut Matang & Selama', 'PPD Manjung', 'PPD Muallim', 'PPD Perak Tengah'],
+    'Perlis': [],
+    'Pulau Pinang': ['PPD Barat Daya', 'PPD Seberang Perai Selatan', 'PPD Seberang Perai Tengah', 'PPD Seberang Perai Utara',
+                     'PPD Timur Laut'],
+    'Sabah': ['PPD Beaufort', 'PPD Beluran', 'PPD Keningau', 'PPD Kinabatangan', 'PPD Kota Belud', 'PPD Kota Kinabalu',
+              'PPD Kota Marudu', 'PPD Kuala Penyu', 'PPD Kudat', 'PPD Kunak', 'PPD Lahad Datu', 'PPD Papar', 'PPD Penampang',
+              'PPD Pensiangan Nabawan', 'PPD Pitas', 'PPD Ranau', 'PPD Sandakan', 'PPD Semporna', 'PPD Sipitang', 'PPD Tambunan',
+              'PPD Tawau', 'PPD Telupid', 'PPD Tenom', 'PPD Tuaran'],
+    'Sarawak': ['PPD Baram', 'PPD Bau', 'PPD Belaga', 'PPD Betong', 'PPD Bintulu', 'PPD Dalat', 'PPD Daro', 'PPD Julau',
+                'PPD Kanowit', 'PPD Kapit', 'PPD Kuching', 'PPD Lawas', 'PPD Limbang', 'PPD Lubok Antu', 'PPD Lundu',
+                'PPD Meradong', 'PPD Miri', 'PPD Mukah', 'PPD Padawan', 'PPD Samarahan', 'PPD Saratok', 'PPD Sarikei',
+                'PPD Selangau', 'PPD Serian', 'PPD Sibu', 'PPD Simunjan', 'PPD Song', 'PPD Sri Aman', 'PPD Subis',
+                'PPD Tatau/Sebauh'],
+    'Selangor': ['PPD Gombak', 'PPD Hulu Langat', 'PPD Hulu Selangor', 'PPD Klang', 'PPD Kuala Langat', 'PPD Kuala Selangor',
+                 'PPD Petaling Perdana', 'PPD Petaling Utama', 'PPD Sabak Bernam', 'PPD Sepang'],
+    'Terengganu': ['PPD Besut', 'PPD Dungun', 'PPD Hulu Terengganu', 'PPD Kemaman', 'PPD Kuala Nerus', 'PPD Kuala Terengganu',
+                   'PPD Marang', 'PPD Setiu'],
+    'W.P. Kuala Lumpur': ['PPD Bangsar / Pudu', 'PPD Keramat', 'PPD Sentul'],
+    'W.P. Labuan': [],
+    'W.P. Putrajaya': [],
+}
+
+
+def districts_for(state):
+    """The district choices for `state`: its PPDs, or the state itself when it has none (Perlis, Labuan, Putrajaya)."""
+    return PPD_BY_STATE.get(state) or ([state] if state in PPD_BY_STATE else [])

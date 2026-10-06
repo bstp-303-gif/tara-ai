@@ -64,6 +64,30 @@ Kementerian Pendidikan Malaysia
 
 RECOGNITION_PLACEHOLDERS = ['full_name', 'reference_number']
 
+DEFAULT_MONTHLY_REMINDER_SUBJECT = "Reminder: Report Your GPGD Activities for {{month}}"
+
+DEFAULT_MONTHLY_REMINDER_BODY = """Dear {{full_name}},
+
+This is your monthly reminder to report the activities you have conducted this month ({{month}}) as a Guru Peneraju Generasi Digital (GPGD): training, mentoring, coaching, or knowledge-sharing sessions.
+
+Please submit one report for each activity using your secure link below, before the end of the month:
+
+Report here: {{report_url}}
+
+For each activity you will need: the title, date, time, number of hours, the number of teachers, students, school leaders and others who attended, the training mode and venue, a brief description, and two evidence photos (a supporting document is optional).
+
+Your reports are summarised every month for the BSTP Director, your State Education Department, your District Education Office and your school leader, so please report every activity.
+
+Thank you for your continued contribution to digital education in Malaysia.
+
+Yours sincerely,
+Sektor Pengintegrasian Teknologi Pendidikan (SPTP)
+Bahagian Sumber dan Teknologi Pendidikan (BSTP)
+Kementerian Pendidikan Malaysia
+"""
+
+MONTHLY_REMINDER_PLACEHOLDERS = ['full_name', 'month', 'report_url']
+
 # Ordered so the settings page renders sections/fields in the same order as the form.
 DEFAULT_APPLY_SECTION_LABELS = {
     'section_personal': '1. Personal Information',
@@ -71,13 +95,17 @@ DEFAULT_APPLY_SECTION_LABELS = {
     'section_qualifications': '3. Professional Qualifications',
     'section_performance': '4. Performance Records',
     'section_contributions': '5. Professional Contributions',
-    'section_additional': '6. Additional Information',
+    'section_recognitions': '6. Annual National Recognitions',
+    'section_additional': '7. Additional Information',
 }
 
 DEFAULT_APPLY_FIELD_LABELS = {
     'full_name': 'Full Name',
     'ic_number': 'Identity Card (IC) Number',
     'email': 'Email Address',
+    'whatsapp_number': 'WhatsApp Number',
+    'school_leader_name': "School Leader's Name",
+    'school_leader_email': "School Leader's Email",
     'current_grade': 'Current Grade',
     'school_name': 'School Name',
     'district': 'District',
@@ -89,7 +117,7 @@ DEFAULT_APPLY_FIELD_LABELS = {
     'lnpt_previous': 'LNPT Score (Previous Year)',
     'lnpt_two_years': 'LNPT Score (Two Years Ago)',
     'training_experience': 'Training / Coaching / Mentoring Experience',
-    'awards': 'Awards & Recognitions',
+    'awards': 'Awards (one-time achievements)',
     'additional_info': 'Additional Information (Optional)',
 }
 

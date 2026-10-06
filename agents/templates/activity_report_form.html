@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block sidebar %}{% endblock %}
 {% block title %}GPGD Monthly Activity Report{% endblock %}
 
 {% block content %}
@@ -68,24 +69,23 @@
                             {{ form.hours }}
                             {% if form.hours.errors %}<div class="text-danger small">{{ form.hours.errors }}</div>{% endif %}
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">{{ form.num_participants.label }} <span style="color:red">*</span></label>
-                            {{ form.num_participants }}
-                            {% if form.num_participants.errors %}<div class="text-danger small">{{ form.num_participants.errors }}</div>{% endif %}
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                             <label class="form-label fw-semibold">{{ form.training_mode.label }} <span style="color:red">*</span></label>
                             {{ form.training_mode }}
                             {% if form.training_mode.errors %}<div class="text-danger small">{{ form.training_mode.errors }}</div>{% endif %}
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label fw-semibold">{{ form.target_audience.label }} <span style="color:red">*</span></label>
-                            <div style="display:flex; gap:1.25rem; flex-wrap:wrap; padding:0.5rem 0;">
-                                {% for checkbox in form.target_audience %}
-                                    <label style="display:flex; align-items:center; gap:0.4rem; font-weight:500;">{{ checkbox.tag }} {{ checkbox.choice_label }}</label>
-                                {% endfor %}
+                            <label class="form-label fw-semibold">Number of participants <span style="color:red">*</span></label>
+                            <p class="text-muted small mb-2">How many of each attended. Enter 0 for a group that didn't attend.</p>
+                            <div class="row g-2">
+                                {% for field in form %}{% if field.name in form.COUNT_FIELDS %}
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                                {% endif %}{% endfor %}
                             </div>
-                            {% if form.target_audience.errors %}<div class="text-danger small">{{ form.target_audience.errors }}</div>{% endif %}
+                            {% if form.num_teachers.errors %}<div class="text-danger small">{{ form.num_teachers.errors }}</div>{% endif %}
                         </div>
                         <div class="col-md-12">
                             <label class="form-label fw-semibold">{{ form.venue_platform.label }} <span style="color:red">*</span></label>

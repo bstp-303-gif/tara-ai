@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Statistics — MyGPGD J360{% endblock %}
+
+{% block extra_head %}
+<style>
+    .stat-tile { background:#fff; border:1px solid #ececf3; border-radius:14px; padding:1.1rem 1.25rem; height:100%; }
+    .stat-tile .label { font-size:0.75rem; font-weight:600; color:#71717a; text-transform:uppercase; letter-spacing:0.05em; }
+    .stat-tile .value { font-family:'Lexend',sans-serif; font-size:2rem; font-weight:700; color:#18181b; line-height:1.2; margin:0.2rem 0; }
+    .stat-tile .sub { font-size:0.82rem; color:#6b7280; }
+    .stat-tile .bi { font-size:1rem; margin-right:0.3rem; }
+    .meter { height:10px; background:#eef0f4; border-radius:999px; overflow:hidden; }
+    .meter > span { display:block; height:100%; border-radius:999px; background:#4f46e5; }
+    .meter.full > span { background:#059669; }
+    .meter-lg { height:16px; }
+    .section-title { font-size:1.1rem; font-weight:700; color:#1e3a5f; margin:2rem 0 0.75rem; }
+    .step-row { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 1rem; border-bottom:1px solid #f1f1f6; }
+    .step-row:last-child { border-bottom:none; }
+    .step-row .n { font-family:'Lexend',sans-serif; font-weight:700; font-size:1.15rem; min-width:2.5rem; text-align:right; color:#18181b; }
+    .step-row .what { flex:1; color:#374151; }
+    .step-row .hint { font-size:0.8rem; color:#9ca3af; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Statistics — {{ state }}</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Where every GPGD candidate in {{ state }} is in the selection process.
+    {% if deadline %}Application deadline: <strong>{{ deadline|date:"d M Y" }}</strong>.{% endif %}
+</p>
+
+{% if not compiled_yet %}
+<div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem;">
+    <div style="font-weight:700; margin-bottom:0.35rem;"><i class="bi bi-info-circle-fill"></i> Applications are still with the MoE</div>
+    <ol style="margin:0; padding-left:1.25rem;">
+        <li><strong>Now:</strong> teachers apply{% if deadline %} until <strong>{{ deadline|date:"d M Y" }}</strong>{% endif %}.</li>
+        <li><strong>After the deadline:</strong> the MoE Officer compiles and ranks every application.</li>
+        <li><strong>Then you:</strong> your ranked {{ state }} list appears in <a href="{% url 'state_review' %}">State Review</a> for you to approve or decline.</li>
+        <li><strong>Finally:</strong> the MoE Officer gives the final decision on the candidates you approved.</li>
+    </ol>
+</div>
+{% endif %}
+
+{# ---- Headline numbers ---- #}
+<div class="row g-3">
+    <div class="col-6 col-lg">
+        <div class="stat-tile">
+            <div class="label">Eligible teachers</div>
+            <div class="value">{{ funnel.eligible }}</div>
+            <div class="sub">from the certification lists</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="stat-tile">
+            <div class="label">Applied</div>
+            <div class="value">{{ funnel.applied }}</div>
+            <div class="sub">{% if application_rate is not None %}{{ application_rate }}% of eligible teachers{% else %}no eligible list yet{% endif %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="stat-tile">
+            <div class="label">Waiting for you</div>
+            <div class="value">{{ funnel.awaiting_you }}</div>
+            <div class="sub">{% if funnel.awaiting_you %}<a href="{% url 'state_review' %}">Review now →</a>{% elif not compiled_yet %}arrives after the MoE compiles{% else %}nothing to review{% endif %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="stat-tile">
+            <div class="label"><i class="bi bi-check-circle-fill" style="color:#059669;"></i>Approved</div>
+            <div class="value">{{ funnel.approved }}</div>
+            <div class="sub">{% if compiled_yet %}by you{% else %}none yet: you decide after the MoE compiles{% endif %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg">
+        <div class="stat-tile">
+            <div class="label"><i class="bi bi-x-circle-fill" style="color:#dc2626;"></i>Declined</div>
+            <div class="value">{{ funnel.declined }}</div>
+            <div class="sub">{% if compiled_yet %}by you{% else %}none yet{% endif %}</div>
+        </div>
+    </div>
+</div>
+
+{# ---- Quota ---- #}
+<h2 class="section-title">Minimum quota</h2>
+<div class="card" style="padding:1.25rem 1.5rem;">
+    {% if quota_rows %}
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+            <div><span style="font-family:'Lexend',sans-serif; font-size:1.6rem; font-weight:700;">{{ quota_filled }}</span>
+                <span style="color:#6b7280;">of {{ quota_need }} places filled ({{ quota_percent }}%)</span></div>
+            <div style="color:#374151;">
+                {% if quota_remaining %}<strong>{{ quota_remaining }}</strong> more approval(s) needed{% else %}<i class="bi bi-check-circle-fill" style="color:#059669;"></i> All minimum quotas filled{% endif %}
+            </div>
+        </div>
+        <div class="meter meter-lg {% if not quota_remaining %}full{% endif %}" role="img" aria-label="{{ quota_filled }} of {{ quota_need }} quota places filled">
+            <span style="width:{{ quota_percent }}%;"></span>
+        </div>
+
+        <table class="table" style="margin:1.25rem 0 0; font-size:0.9rem;">
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Tech Track</th>
+                    <th style="text-align:right;">Applied</th>
+                    <th style="text-align:right;">Approved</th>
+                    <th style="text-align:right;">Needed</th>
+                    <th style="min-width:180px;">Filled</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in quota_rows %}
+                <tr>
+                    <td>{{ row.district|default:"State-wide" }}</td>
+                    <td>{{ row.tech_track }}</td>
+                    <td style="text-align:right;">{{ row.applied }}</td>
+                    <td style="text-align:right;">{{ row.approved }}</td>
+                    <td style="text-align:right;">{{ row.need }}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <div class="meter {% if not row.remaining %}full{% endif %}" style="flex:1;" role="img" aria-label="{{ row.filled }} of {{ row.need }} filled">
+                                <span style="width:{{ row.percent }}%;"></span>
+                            </div>
+                            <span style="white-space:nowrap; color:#374151;">{{ row.filled }}/{{ row.need }}</span>
+                        </div>
+                        {% if row.remaining and row.applied < row.need %}
+                            <div style="font-size:0.78rem; color:#b45309; margin-top:0.2rem;"><i class="bi bi-exclamation-triangle-fill"></i> {% if row.applied %}Not enough applicants to fill this quota{% else %}No applicants yet{% endif %}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p style="font-size:0.8rem; color:#9ca3af; margin:0.75rem 0 0;">
+            Each district needs at least {{ district_min }} approved teachers per technology track
+            ({{ no_district_min }} state-wide in states without districts). Every district (PPD) is listed, including
+            ones nobody has applied from yet. "Applied" counts this year's applications, before and after compiling;
+            "Approved" counts State and MoE approvals. Candidates rejected by the MoE do not count toward the quota.
+        </p>
+    {% else %}
+        <p style="color:#6b7280; margin:0;">No compiled applications yet, so there is no quota to track. Quotas appear once the MoE Officer compiles the applications.</p>
+    {% endif %}
+</div>
+
+<div class="row g-3">
+    {# ---- Where candidates are now ---- #}
+    <div class="col-lg-7">
+        <h2 class="section-title">Where applications are now</h2>
+        <div class="card">
+            <div class="step-row"><span class="n">{{ funnel.awaiting_compile }}</span><span class="what">Submitted — waiting for the MoE Officer to compile</span></div>
+            <div class="step-row"><span class="n">{{ funnel.awaiting_you }}</span><span class="what">Compiled — waiting for your decision</span></div>
+            <div class="step-row"><span class="n">{{ funnel.declined }}</span><span class="what">Declined by you</span></div>
+            <div class="step-row"><span class="n">{{ funnel.awaiting_moe }}</span><span class="what">Approved by you — waiting for the MoE final decision</span></div>
+            <div class="step-row"><span class="n">{{ funnel.moe_approved }}</span><span class="what">Approved by the MoE <span class="hint">· recognition letter sent</span></span></div>
+            <div class="step-row"><span class="n">{{ funnel.moe_rejected }}</span><span class="what">Rejected by the MoE</span></div>
+        </div>
+        <div style="margin-top:0.75rem;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#374151; margin-bottom:0.3rem;">
+                <span>Your decisions</span><span>{{ decided_percent }}% of applications decided</span>
+            </div>
+            <div class="meter" role="img" aria-label="{{ decided_percent }}% of applications decided"><span style="width:{{ decided_percent }}%;"></span></div>
+        </div>
+    </div>
+
+    {# ---- By technology track ---- #}
+    <div class="col-lg-5">
+        <h2 class="section-title">By technology track</h2>
+        <div class="card">
+            <table class="table" style="margin:0; font-size:0.9rem;">
+                <thead>
+                    <tr>
+                        <th style="padding-left:1rem;">Track</th>
+                        <th style="text-align:right;">Applied</th>
+                        <th style="text-align:right;">Approved</th>
+                        <th style="text-align:right; padding-right:1rem;">Declined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in by_track %}
+                    <tr>
+                        <td style="padding-left:1rem;">{{ t.track }}</td>
+                        <td style="text-align:right;">{{ t.applied }}</td>
+                        <td style="text-align:right;">{{ t.approved }}</td>
+                        <td style="text-align:right; padding-right:1rem;">{{ t.declined }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

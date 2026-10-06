@@ -1,0 +1,6 @@
+<div style="font-size:0.75rem; color:#6b7280;">
+    <a href="mailto:{{ application.email }}" style="color:#6b7280;"><i class="bi bi-envelope"></i> {{ application.email }}</a>
+    {% if application.whatsapp_number %}
+    &nbsp;<a href="https://wa.me/{{ application.whatsapp_number|cut:'+' }}" target="_blank" rel="noopener" style="color:#15803d;"><i class="bi bi-whatsapp"></i> {{ application.whatsapp_number }}</a>
+    {% endif %}
+</div>

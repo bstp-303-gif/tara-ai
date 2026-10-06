@@ -120,6 +120,14 @@ class ProgrammeSettings(models.Model):
     recognition_letter_subject = models.CharField(max_length=255, blank=True)
     recognition_letter_body = models.TextField(blank=True)
 
+    # --- Monthly reminder (sent to the current year's GPGDs in the 3rd week of each month) ---
+    monthly_reminder_subject = models.CharField(max_length=255, blank=True)
+    monthly_reminder_body = models.TextField(blank=True)
+    reminder_day = models.PositiveSmallIntegerField(
+        default=15, help_text='Day of the month the reminder goes out (15 = start of the 3rd week).')
+    report_day = models.PositiveSmallIntegerField(
+        default=7, help_text="Day of the month last month's statistics go to directors and leaders (7 = end of the 1st week).")
+
     # --- Application form copy (apply.html): section headings, field labels, help text ---
     apply_form_section_labels = models.JSONField(default=dict, blank=True)
     apply_form_field_labels = models.JSONField(default=dict, blank=True)
@@ -158,8 +166,11 @@ class Application(models.Model):
     full_name = models.CharField(max_length=255)
     ic_number = models.CharField(max_length=20)
     email = models.EmailField()
+    whatsapp_number = models.CharField(max_length=20, blank=True, help_text='Malaysian mobile number, stored as +60…')
     current_grade = models.CharField(max_length=50)
     school_name = models.CharField(max_length=255)
+    school_leader_name = models.CharField(max_length=255, blank=True, help_text='Principal / headmaster (Pengetua / Guru Besar).')
+    school_leader_email = models.EmailField(blank=True, help_text="Receives the monthly report on this GPGD's activities.")
     district = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
 
@@ -179,6 +190,12 @@ class Application(models.Model):
     training_experience = models.TextField(help_text='Training, coaching, mentoring, or sharing experience.')
     awards = models.TextField(blank=True, help_text='Awards, recognitions, or achievements.')
 
+    # Annual national recognitions (see constants.ANNUAL_RECOGNITIONS): [{"name", "years", "source"}],
+    # where source is "declared" (from the form) or "records" (a past GPGD found by ranking.compile_and_rank).
+    recognitions = models.JSONField(default=list, blank=True)
+    never_recognised = models.BooleanField(
+        default=False, help_text='Declared on the form: has never held an annual national recognition.')
+
     # Additional
     additional_info = models.TextField(blank=True)
 
@@ -189,6 +206,8 @@ class Application(models.Model):
     score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     rank_in_state = models.PositiveIntegerField(null=True, blank=True)
     is_recommended = models.BooleanField(default=False, help_text='Auto-flagged to meet the district/state minimum quota for its technology track.')
+    reserved_place = models.BooleanField(
+        default=False, help_text='Recommended through the place reserved for a teacher never recognised before.')
     compiled_at = models.DateTimeField(null=True, blank=True)
 
     # State Officer decision
@@ -204,6 +223,8 @@ class Application(models.Model):
     # Recognition dashboard metadata — set once, at the moment MoE approves (see moe_review()).
     recognized_year = models.PositiveIntegerField(null=True, blank=True, help_text='Calendar year this GPGD was officially recognised.')
     award_category = models.CharField(max_length=100, blank=True, default='', help_text='Optional award/recognition category, e.g. "Excellence in Digital Leadership".')
+    recognition_letter_sent_at = models.DateTimeField(null=True, blank=True, help_text='When the Letter of Recognition was emailed.')
+    recognition_letter_error = models.TextField(blank=True, help_text='Why the last attempt to email the letter failed.')
 
     def save(self, *args, **kwargs):
         if not self.reference_number:
@@ -211,11 +232,77 @@ class Application(models.Model):
             self.reference_number = f"GPGD-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
 
+    @property
+    def is_never_recognised(self):
+        """Declared "never recognised" on the form, and no recognition found in our own records either."""
+        return self.never_recognised and not self.recognitions
+
+    def recognitions_display(self):
+        """e.g. "Edufluencer KPM (2024, 2025); GPGD (2025, from records)"."""
+        return '; '.join(
+            f"{r['name']} ({r['years']}{', from records' if r.get('source') == 'records' else ''})"
+            for r in self.recognitions
+        )
+
     def __str__(self):
         return f"{self.reference_number} — {self.full_name}"
 
     class Meta:
         ordering = ['-submitted_at']
+
+
+class ReportRecipient(models.Model):
+    """Who receives the monthly statistics email: the BSTP Director (national), a State Director (one
+    state) or a District Education Lead (one PPD). School leaders come from each GPGD's application."""
+    LEVEL_CHOICES = [('bstp', 'BSTP Director'), ('state', 'State Director'), ('district', 'District Education Lead')]
+
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
+    state = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    email = models.EmailField()
+
+    class Meta:
+        unique_together = ('level', 'state', 'district')
+
+    def __str__(self):
+        return f"{self.get_level_display()} {self.district or self.state} <{self.email}>"
+
+
+class MonthlyReportLog(models.Model):
+    """One row per monthly statistics email: makes sending idempotent, so a scheduled run that fires
+    twice (or a manual "Send now") never emails the same person the same report twice."""
+    period = models.CharField(max_length=7, help_text='"YYYY-MM": the month the report covers.')
+    level = models.CharField(max_length=15)  # bstp, state, district, school_leader
+    scope = models.CharField(max_length=255, blank=True, help_text='The state, district or school the report covers.')
+    email = models.EmailField()
+    success = models.BooleanField(default=True)
+    error_message = models.TextField(blank=True)
+    sent_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('period', 'level', 'scope', 'email')
+        ordering = ['-sent_at']
+
+
+class TrackLimit(models.Model):
+    """The most teachers that may be recognised for one technology track this year, in a whole state
+    (district blank) or in one district (PPD) of it, e.g. a limit set by the provider. Set by the Admin
+    or MoE Officer; no row means no limit. An approval must fit both the state and the district maximum
+    (agents/ranking.py:limit_reached)."""
+
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100, blank=True, default='', help_text='Blank = the whole state.')
+    tech_track = models.CharField(max_length=50, choices=Application.TRACK_CHOICES)
+    maximum = models.PositiveIntegerField()
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('state', 'district', 'tech_track')
+
+    def __str__(self):
+        return f"{self.district or self.state} — {self.tech_track}: max {self.maximum}"
 
 
 class AgentActivityLog(models.Model):
@@ -301,7 +388,11 @@ class ActivityReport(models.Model):
     end_time = models.TimeField()
     hours = models.DecimalField(max_digits=5, decimal_places=2)
     target_audience = models.JSONField(default=list, help_text='Subset of: teachers, students, school_leaders, others.')
-    num_participants = models.PositiveIntegerField()
+    num_participants = models.PositiveIntegerField(help_text='Total of the four counts below; set on save.')
+    num_teachers = models.PositiveIntegerField(default=0)
+    num_students = models.PositiveIntegerField(default=0)
+    num_school_leaders = models.PositiveIntegerField(default=0)
+    num_others = models.PositiveIntegerField(default=0)
     training_mode = models.CharField(max_length=20, choices=MODE_CHOICES)
     venue_platform = models.CharField(max_length=255, help_text='Venue name, or online platform used.')
     description = models.TextField(blank=True)
@@ -312,9 +403,19 @@ class ActivityReport(models.Model):
 
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        # The total and audience list follow from the per-audience counts.
+        counts = {'teachers': self.num_teachers, 'students': self.num_students,
+                  'school_leaders': self.num_school_leaders, 'others': self.num_others}
+        self.num_participants = sum(counts.values())
+        self.target_audience = [a for a, n in counts.items() if n]
+        super().save(*args, **kwargs)
+
     def audience_display(self):
+        counts = {'teachers': self.num_teachers, 'students': self.num_students,
+                  'school_leaders': self.num_school_leaders, 'others': self.num_others}
         labels = dict(self.AUDIENCE_CHOICES)
-        return ', '.join(labels.get(a, a) for a in self.target_audience)
+        return ', '.join(f'{labels[a]} {n}' for a, n in counts.items() if n)
 
     def __str__(self):
         return f"{self.gpgd.full_name} — {self.training_title} ({self.training_date})"

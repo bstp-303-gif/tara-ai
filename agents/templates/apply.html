@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block sidebar %}{% endblock %}
 {% block title %}GPGD Application Form{% endblock %}
 
 {% block content %}
@@ -43,6 +44,11 @@
                             {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.whatsapp_number.label }} <span style="color:red">*</span></label>
+                            {{ form.whatsapp_number }}
+                            {% if form.whatsapp_number.errors %}<div class="text-danger small">{{ form.whatsapp_number.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">{{ form.current_grade.label }} <span style="color:red">*</span></label>
                             {{ form.current_grade }}
                             {% if form.current_grade.errors %}<div class="text-danger small">{{ form.current_grade.errors }}</div>{% endif %}
@@ -53,14 +59,45 @@
                             {% if form.school_name.errors %}<div class="text-danger small">{{ form.school_name.errors }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">{{ form.district.label }} <span style="color:red">*</span></label>
-                            {{ form.district }}
-                            {% if form.district.errors %}<div class="text-danger small">{{ form.district.errors }}</div>{% endif %}
+                            <label class="form-label fw-semibold">{{ form.school_leader_name.label }} <span style="color:red">*</span></label>
+                            {{ form.school_leader_name }}
+                            {% if form.school_leader_name.errors %}<div class="text-danger small">{{ form.school_leader_name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.school_leader_email.label }} <span style="color:red">*</span></label>
+                            {{ form.school_leader_email }}
+                            <div class="form-text">{{ form.school_leader_email.help_text }}</div>
+                            {% if form.school_leader_email.errors %}<div class="text-danger small">{{ form.school_leader_email.errors }}</div>{% endif %}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{{ form.state.label }} <span style="color:red">*</span></label>
                             {{ form.state }}
                             {% if form.state.errors %}<div class="text-danger small">{{ form.state.errors }}</div>{% endif %}
+                            <script>
+                                // Show only the chosen state's districts (PPD) in the District dropdown.
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const state = document.getElementById('{{ form.state.id_for_label }}');
+                                    const district = document.getElementById('{{ form.district.id_for_label }}');
+                                    function filter() {
+                                        district.querySelectorAll('optgroup').forEach(function (group) {
+                                            const show = group.label === state.value;
+                                            group.hidden = !show;
+                                            group.disabled = !show;
+                                        });
+                                        const chosen = district.selectedOptions[0];
+                                        if (chosen && chosen.parentElement.tagName === 'OPTGROUP' && chosen.parentElement.disabled) {
+                                            district.value = '';
+                                        }
+                                    }
+                                    state.addEventListener('change', filter);
+                                    filter();
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{{ form.district.label }} <span style="color:red">*</span></label>
+                            {{ form.district }}
+                            {% if form.district.errors %}<div class="text-danger small">{{ form.district.errors }}</div>{% endif %}
                         </div>
                     </div>
                 </div>
@@ -142,7 +179,38 @@
                 </div>
             </div>
 
-            <!-- SECTION 6: Additional Information -->
+            <!-- SECTION 6: Annual National Recognitions -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
+                    <i class="bi bi-patch-check"></i> {{ section_labels.section_recognitions }} <span style="color:#fecaca">*</span>
+                </div>
+                <div class="card-body" style="padding:1.5rem;">
+                    <p class="text-muted small" style="margin-bottom:1rem;">
+                        Tick every annual national-level recognition you have received and enter the year(s).
+                        These are given for a particular year, unlike awards. Having none does not count against you.
+                    </p>
+                    {% for checkbox, years in form.recognition_rows %}
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-md-6"><div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="{{ checkbox.html_name }}" id="{{ checkbox.id_for_label }}" {% if checkbox.value %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.label }}</label>
+                        </div></div>
+                        <div class="col-md-6">{{ years }}{% if years.errors %}<div class="text-danger small">{{ years.errors|join:" " }}</div>{% endif %}</div>
+                    </div>
+                    {% endfor %}
+                    <div class="row g-2 align-items-center mb-3">
+                        <div class="col-md-6"><label class="form-label small mb-1" for="{{ form.rec_other.id_for_label }}">{{ form.rec_other.label }}</label>{{ form.rec_other }}</div>
+                        <div class="col-md-6">{{ form.rec_other_years }}{% if form.rec_other_years.errors %}<div class="text-danger small">{{ form.rec_other_years.errors|join:" " }}</div>{% endif %}</div>
+                    </div>
+                    <div class="form-check" style="border-top:1px solid #e5e7eb; padding-top:0.75rem; margin-top:0.25rem;">
+                        <input type="checkbox" class="form-check-input" name="never_recognised" id="id_never_recognised" {% if form.never_recognised.value %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="id_never_recognised">{{ form.never_recognised.label }}</label>
+                    </div>
+                    {% if form.never_recognised.errors %}<div class="text-danger small">{{ form.never_recognised.errors|join:" " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- SECTION 7: Additional Information -->
             <div class="card" style="margin-bottom:2rem;">
                 <div class="card-header" style="background:var(--gradient-brand); color:#fff; font-weight:600; padding:0.85rem 1.1rem; border:none;">
                     <i class="bi bi-chat-text"></i> {{ section_labels.section_additional }}

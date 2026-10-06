@@ -4,10 +4,12 @@ Reusable pipeline operations shared between the manual dashboard buttons
 
 Kept separate from both so neither module has to import the other.
 """
+import calendar
 import os
 import smtplib
 import socket
 import threading
+from datetime import timedelta
 
 import pandas as pd
 from django.conf import settings
@@ -52,7 +54,7 @@ def _classify_email_error(exc):
     return 'email_other', f"Unexpected error type ({type(exc).__name__}) — see technical detail below."
 
 
-def _send_mail_with_hard_timeout(subject, body, to_email):
+def _send_mail_with_hard_timeout(subject, body, to_email, html=None):
     """send_mail(), bounded by a hard wall-clock timeout.
 
     settings.EMAIL_TIMEOUT is meant to bound smtplib's own socket operations, but on
@@ -67,7 +69,7 @@ def _send_mail_with_hard_timeout(subject, body, to_email):
 
     def _worker():
         try:
-            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [to_email], fail_silently=False)
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [to_email], fail_silently=False, html_message=html)
             outcome['ok'] = True
         except Exception as e:
             outcome['error'] = e
@@ -88,13 +90,14 @@ def _send_mail_with_hard_timeout(subject, body, to_email):
 from .collector import normalize_dataframe
 from .eligibility import normalize_and_deduplicate, save_dataframe_to_excel, save_to_database
 from .models import (
-    Application, ErrorLog, FileUpload, InvitationRecord, MonthlyReminderLog, ProgrammeSettings, Teacher,
+    Application, ErrorLog, FileUpload, InvitationExclusion, InvitationRecord, MonthlyReminderLog,
+    ProgrammeSettings, Teacher,
 )
 
 PROVIDERS = ['Google', 'Microsoft', 'Apple']
 
 
-def send_single_email_async(subject, body, to_email, context_label):
+def send_single_email_async(subject, body, to_email, context_label, on_sent=None, on_failed=None):
     """Fire-and-forget a one-off email (acknowledgements, recognition letters, ...).
 
     Runs off-thread so the request handler that triggered it (e.g. a teacher
@@ -106,7 +109,11 @@ def send_single_email_async(subject, body, to_email, context_label):
     def _worker():
         try:
             _send_mail_with_hard_timeout(subject, body, to_email)
+            if on_sent:
+                on_sent()
         except Exception as e:
+            if on_failed:
+                on_failed(str(e))
             category, suggested_action = _classify_email_error(e)
             ErrorLog.objects.create(
                 category=category,
@@ -117,12 +124,33 @@ def send_single_email_async(subject, body, to_email, context_label):
 
     threading.Thread(target=_worker, daemon=True).start()
 
-TEMP_DIR = os.path.join(settings.BASE_DIR, 'temp_uploads')
+TEMP_DIR = getattr(settings, 'GPGD_UPLOAD_DIR', os.path.join(settings.BASE_DIR, 'temp_uploads'))
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 COMBINED_PATH = os.path.join(TEMP_DIR, 'combined_normalized.xlsx')
 DEDUP_PATH = os.path.join(TEMP_DIR, 'deduplicated_list.xlsx')
 ELIGIBLE_PATH = os.path.join(TEMP_DIR, 'eligible_candidates.xlsx')
+
+
+def prune_stale_exclusions():
+    """Forget Admin removals for teachers who no longer appear in any provider's latest valid upload.
+
+    Called after a certification file is deleted, so deleting the files and re-uploading them
+    starts from a clean slate instead of silently keeping the old removals.
+    Returns the number of exclusions cleared.
+    """
+    current_ics = set()
+    for provider in PROVIDERS:
+        file_record = FileUpload.objects.filter(
+            provider=provider, validation_status='valid'
+        ).order_by('-uploaded_at').first()
+        if not file_record or not os.path.exists(file_record.file_path):
+            continue
+        normalized_df = normalize_dataframe(pd.read_excel(file_record.file_path), provider)
+        if normalized_df is not None:
+            current_ics.update(str(ic).strip() for ic in normalized_df['ic'])
+    deleted, _ = InvitationExclusion.objects.exclude(ic_number__in=current_ics).delete()
+    return deleted
 
 
 def run_certification_pipeline():
@@ -185,6 +213,17 @@ def _make_apply_token(ic_number):
 def submissions_closed(deadline):
     """Applications are accepted up to and including the deadline day."""
     return bool(deadline) and timezone.localdate() > deadline
+
+
+def compile_block_reason(deadline):
+    """Why Compile & Rank can't run yet, or None. Applications are ranked once, after the form closes,
+    so every applicant in a state is ranked against everyone else who applied there."""
+    if not deadline:
+        return 'No submission deadline is set. Applications are compiled and ranked once, after the deadline has passed.'
+    if not submissions_closed(deadline):
+        return (f"Applications are still open until {deadline.strftime('%d %B %Y')}. Compile & Rank becomes "
+                f"available on {(deadline + timedelta(days=1)).strftime('%d %B %Y')}, once every teacher has had the chance to apply.")
+    return None
 
 
 def invitation_block_reason(deadline):
@@ -290,16 +329,38 @@ def read_report_token(token, max_age_days=60):
         return None
 
 
+def current_cohort_year():
+    """The recognition year of the newest group of GPGDs, or None if nobody has been recognised yet.
+    Recognition is annual: this group reports (and is counted in the monthly statistics) until the next
+    year's group is recognised. Earlier groups stay on the dashboards, by year."""
+    return (Application.objects.filter(status='Approved', recognized_year__isnull=False)
+            .order_by('-recognized_year').values_list('recognized_year', flat=True).first())
+
+
+def current_gpgds():
+    """The GPGDs in the current (newest) recognition group."""
+    return Application.objects.filter(status='Approved', recognized_year=current_cohort_year())
+
+
+def month_label(period):
+    """ "2026-09" -> "September 2026"."""
+    year, month = (int(p) for p in period.split('-'))
+    return f"{calendar.month_name[month]} {year}"
+
+
 def send_monthly_report_reminders(period=None):
-    """Email every recognized GPGD a secure link to submit their monthly activity report.
+    """Email every GPGD in the current recognition group a secure link to report this month's activities.
 
     Idempotent per (application, period) via MonthlyReminderLog — safe to re-run (e.g. if the
     scheduled task fires twice, or an officer also clicks the manual "Send Now" override).
     """
-    period = period or timezone.now().strftime('%Y-%m')
+    period = period or timezone.localdate().strftime('%Y-%m')
     site_url = getattr(settings, 'GPGD_SITE_URL', 'http://localhost:8000')
+    programme = ProgrammeSettings.load()
+    subject_template = programme.monthly_reminder_subject or content_defaults.DEFAULT_MONTHLY_REMINDER_SUBJECT
+    body_template = programme.monthly_reminder_body or content_defaults.DEFAULT_MONTHLY_REMINDER_BODY
 
-    recognized = Application.objects.filter(status='Approved')
+    recognized = current_gpgds()
     sent = 0
     skipped_already_sent = 0
     no_email = 0
@@ -317,26 +378,10 @@ def send_monthly_report_reminders(period=None):
             continue
 
         token = make_report_token(application.reference_number)
-        report_url = f"{site_url}/agents/report/{token}/"
-
-        subject = f"Monthly GPGD Activity Report — {period}"
-        body = f"""Dear {application.full_name},
-
-This is your monthly reminder to report the professional development activities you've conducted as a Guru Peneraju Generasi Digital (GPGD) — training, mentoring, coaching, or knowledge-sharing sessions delivered this month.
-
-Please submit one report for each activity using the secure link below:
-
-Report here: {report_url}
-
-You'll need: the training title, date, time, number of hours, target audience, number of participants, training mode, a brief description, and two evidence photos (supporting documents are optional).
-
-Thank you for your continued contribution to digital education in Malaysia.
-
-Yours sincerely,
-Sektor Pengintegrasian Teknologi Pendidikan (SPTP)
-Bahagian Sumber dan Teknologi Pendidikan (BSTP)
-Kementerian Pendidikan Malaysia
-"""
+        values = {'full_name': application.full_name, 'month': month_label(period),
+                  'report_url': f"{site_url}/agents/report/{token}/"}
+        subject = content_defaults.render_placeholders(subject_template, **values)
+        body = content_defaults.render_placeholders(body_template, **values)
         try:
             _send_mail_with_hard_timeout(subject, body, application.email)
             MonthlyReminderLog.objects.update_or_create(

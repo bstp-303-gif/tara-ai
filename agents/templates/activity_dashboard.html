@@ -26,6 +26,14 @@
     <div class="card-body" style="padding:1.25rem 1.5rem;">
         <form method="get" class="filter-bar">
             <div class="filter-field">
+                <label>GPGDs recognised in</label>
+                <select name="year" class="form-select form-select-sm">
+                    {% for y in years %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}{% if y == current_year %} (current){% endif %}</option>
+                    {% empty %}<option value="">None yet</option>{% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
                 <label>Technology Track</label>
                 <select name="tech_track" class="form-select form-select-sm">
                     <option value="">All Tracks</option>
@@ -61,7 +69,15 @@
             <div class="filter-field">
                 <a href="{% url 'activity_dashboard' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
             </div>
+            <div class="filter-field">
+                <a href="?{% if download_query %}{{ download_query }}&amp;{% endif %}year={{ year|default:'' }}&amp;download=1" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Download Excel</a>
+            </div>
         </form>
+        {% if year and year != current_year %}
+        <div style="margin-top:0.75rem; font-size:0.85rem; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:0.5rem 0.75rem;">
+            Showing an earlier year: GPGDs recognised in {{ year }}. They no longer receive reminders and aren't in the monthly reports.
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -152,10 +168,11 @@
             </div>
             <div class="card-body" style="padding:1.25rem;">
                 <p style="color:#374151; font-size:0.9rem; margin-bottom:1rem;">
-                    Normally sent automatically to every recognized GPGD on the 1st of each month.
-                    Use this to trigger it manually (e.g. for testing, or a missed run).
+                    Sent automatically to the current GPGDs each month (day set in
+                    <a href="{% url 'edit_monthly_reminder' %}">Monthly Reminder</a>). Use this to send it now,
+                    e.g. for a missed run. Anyone already reminded this month is skipped.
                 </p>
-                <form method="post" action="{% url 'send_monthly_reminders' %}" onsubmit="return confirm('Send this month\'s activity report reminder to every recognized GPGD who hasn\'t already been reminded?');">
+                <form method="post" action="{% url 'send_monthly_reminders' %}" onsubmit="return confirm('Send this month\'s activity report reminder to every current GPGD who hasn\'t already been reminded?');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Send Monthly Reminders Now</button>
                 </form>

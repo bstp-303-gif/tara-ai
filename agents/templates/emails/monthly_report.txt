@@ -1,0 +1,26 @@
+{% autoescape off %}GPGD Monthly Training Report — {{ month }}
+{{ title }}
+
+Dear {{ name|default:"Sir/Madam" }},
+
+{% if level == 'school_leader' %}Below are the trainings your school's GPGD(s) reported for {{ month }}.{% else %}Below are the trainings reported by GPGDs for {{ month }}.{% endif %}
+
+Teachers trained:        {{ totals.num_teachers }}
+Students trained:        {{ totals.num_students }}
+School leaders trained:  {{ totals.num_school_leaders }}
+Others:                  {{ totals.num_others }}
+Activities:              {{ totals.activities }}
+Hours:                   {{ totals.hours|floatformat:"-1" }}
+GPGDs reporting:         {{ totals.gpgds_reporting }} of {{ totals.gpgds }}
+{% if rows %}
+By {{ row_label|lower }} (teachers / students / activities / hours / GPGDs reporting):
+{% for row in rows %}- {{ row.name }}: {{ row.num_teachers }} / {{ row.num_students }} / {{ row.activities }} / {{ row.hours|floatformat:"-1" }} / {{ row.gpgds_reporting }} of {{ row.gpgds }}
+{% endfor %}{% endif %}{% if activities %}
+Activities reported:
+{% for a in activities %}- {{ a.training_date|date:"d M" }}, {{ a.gpgd.full_name }}: {{ a.training_title }} ({{ a.audience_display }})
+{% endfor %}{% endif %}
+Yours sincerely,
+Sektor Pengintegrasian Teknologi Pendidikan (SPTP)
+Bahagian Sumber dan Teknologi Pendidikan (BSTP)
+Kementerian Pendidikan Malaysia
+{% endautoescape %}

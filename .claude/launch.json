@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["manage.py", "runserver"],
       "port": 8000
+    },
+    {
+      "name": "Demo Server",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["manage.py", "runserver", "8001", "--settings=mygpgd.settings_demo"],
+      "port": 8001
     }
   ]
 }

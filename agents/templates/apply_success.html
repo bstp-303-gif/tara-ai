@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block sidebar %}{% endblock %}
 {% block title %}Application Submitted — GPGD{% endblock %}
 
 {% block content %}
@@ -13,20 +14,8 @@
             <div style="font-size:1.75rem; font-weight:700; color:#15803d; letter-spacing:2px;">{{ application.reference_number }}</div>
         </div>
 
-        <p style="color:#374151; margin-bottom:0.5rem;">An acknowledgement email has been sent to <strong>{{ application.email }}</strong>.</p>
+        <p style="color:#374151; margin-bottom:0.5rem;">An acknowledgement email has been sent to your email address.</p>
         <p style="color:#6b7280; font-size:0.875rem; margin-bottom:2rem;">Please keep your reference number for tracking purposes. We will contact you regarding the next steps of the selection process.</p>
-
-        <div class="card" style="padding:1.5rem; text-align:left; margin-bottom:2rem;">
-            <h5 style="font-weight:600; margin-bottom:1rem;">Application Summary</h5>
-            <table style="width:100%; font-size:0.9rem;">
-                <tr><td style="color:#6b7280; padding:0.3rem 0; width:40%;">Name</td><td><strong>{{ application.full_name }}</strong></td></tr>
-                <tr><td style="color:#6b7280; padding:0.3rem 0;">IC Number</td><td>{{ application.ic_number }}</td></tr>
-                <tr><td style="color:#6b7280; padding:0.3rem 0;">School</td><td>{{ application.school_name }}</td></tr>
-                <tr><td style="color:#6b7280; padding:0.3rem 0;">Technology Track</td><td>{{ application.tech_track }}</td></tr>
-                <tr><td style="color:#6b7280; padding:0.3rem 0;">Status</td><td><span style="background:#dcfce7; color:#15803d; padding:0.15rem 0.6rem; border-radius:4px;">{{ application.status }}</span></td></tr>
-                <tr><td style="color:#6b7280; padding:0.3rem 0;">Submitted</td><td>{{ application.submitted_at|date:"d M Y, H:i" }}</td></tr>
-            </table>
-        </div>
 
         <p style="color:#6b7280; font-size:0.875rem;">
             For enquiries, contact BSTP at <a href="mailto:sptp@moe.gov.my">sptp@moe.gov.my</a>

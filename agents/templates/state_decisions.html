@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Approved &amp; Declined — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Approved &amp; Declined — {{ state }}</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Candidates you have already decided on. Approved candidates go to the MoE Officer for the final decision.
+    You can change a decision until the MoE Officer has acted on it.
+</p>
+
+<div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+    <a href="?show=all" class="btn btn-sm {% if show == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All ({{ counts.all }})</a>
+    <a href="?show=approved" class="btn btn-sm {% if show == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">Approved ({{ counts.approved }})</a>
+    <a href="?show=declined" class="btn btn-sm {% if show == 'declined' %}btn-danger{% else %}btn-outline-danger{% endif %}">Declined ({{ counts.declined }})</a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="table table-hover" style="margin:0;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem;">Rank</th>
+                    <th>Name</th>
+                    <th>District</th>
+                    <th>Tech Track</th>
+                    <th>Your Decision</th>
+                    <th>Remarks</th>
+                    <th>MoE Final Decision</th>
+                    <th style="min-width:200px;">Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td style="padding:1rem;"><strong>#{{ application.rank_in_state }}</strong></td>
+                    <td>
+                        {{ application.full_name }}<br>
+                        <span style="color:#6b7280; font-size:0.8rem;">{{ application.reference_number }}</span>
+                        <div>{% include 'partials/recognition_badge.html' %}</div>
+                        {% include 'partials/contact.html' %}
+                    </td>
+                    <td>{{ application.district }}</td>
+                    <td>{{ application.tech_track }}</td>
+                    <td>
+                        {% if application.status == 'State Declined' %}
+                            <span class="status-badge status-invalid">Declined</span>
+                        {% else %}
+                            <span class="status-badge status-valid">Approved</span>
+                        {% endif %}
+                        <br><span style="color:#6b7280; font-size:0.8rem;">{{ application.state_decision_at|date:"d M Y, H:i" }}</span>
+                    </td>
+                    <td>{{ application.state_remarks|default:"—" }}</td>
+                    <td>
+                        {% if application.status == 'Approved' %}
+                            <span class="status-badge status-valid">✅ Approved by MoE</span>
+                        {% elif application.status == 'Rejected' %}
+                            <span class="status-badge status-invalid">Rejected by MoE</span>
+                        {% elif application.status == 'State Approved' %}
+                            <span style="color:#6b7280;">Waiting for MoE</span>
+                        {% else %}
+                            <span style="color:#9ca3af;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if application.status in editable_statuses %}
+                        <form method="post" action="{% url 'state_review' %}" style="display:flex; gap:0.4rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="application_id" value="{{ application.id }}">
+                            <input type="hidden" name="remarks" value="{{ application.state_remarks }}">
+                            <input type="hidden" name="next" value="state_decisions">
+                            {% if application.status == 'State Declined' %}
+                                <button type="submit" name="decision" value="approve" class="btn btn-sm btn-outline-success">Approve instead</button>
+                            {% else %}
+                                <button type="submit" name="decision" value="decline" class="btn btn-sm btn-outline-danger">Decline instead</button>
+                            {% endif %}
+                        </form>
+                        {% else %}
+                            <span style="color:#9ca3af; font-size:0.85rem;">Locked (MoE decided)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center; color:#6b7280; padding:2rem;">
+                    {% if show == 'approved' %}No approved candidates yet.{% elif show == 'declined' %}No declined candidates yet.{% else %}You haven't approved or declined any candidates yet.{% endif %}
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

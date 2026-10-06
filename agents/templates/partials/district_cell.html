@@ -1,0 +1,17 @@
+{# One count in the application grid. Linked to the applicant list when it belongs to a row and isn't empty. #}
+{% if c.total and row_key is not None %}
+<a class="grid-cell{% if c.below_min %} short{% endif %}{% if row_key == selected_row and track|default:'' == selected_track|default:'' %} selected{% endif %}"
+   href="?{% if selected_state %}state={{ selected_state|urlencode }}&amp;{% endif %}row={{ row_key|urlencode }}{% if track %}&amp;track={{ track|urlencode }}{% endif %}#list"
+   title="{{ c.total }} applied: {{ c.approved }} approved, {{ c.declined }} declined, {{ c.pending }} not decided yet">
+{% else %}
+<div class="grid-cell{% if not c.total %} zero{% endif %}{% if c.below_min %} short{% endif %}">
+{% endif %}
+    <div class="total">{{ c.total }}</div>
+    {% if c.total %}
+    <div class="split">
+        <i class="bi bi-check-circle-fill" style="color:#059669;"></i> {{ c.approved }}
+        &nbsp;<i class="bi bi-x-circle-fill" style="color:#dc2626;"></i> {{ c.declined }}
+        &nbsp;<i class="bi bi-hourglass-split"></i> {{ c.pending }}
+    </div>
+    {% endif %}
+{% if c.total and row_key is not None %}</a>{% else %}</div>{% endif %}

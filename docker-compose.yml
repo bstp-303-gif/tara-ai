@@ -14,6 +14,24 @@ services:
       # survives `docker compose down`/rebuilds.
       - DJANGO_DB_PATH=/app/data/db.sqlite3
 
+  # Sends the monthly reminder (3rd week) and monthly statistics (end of 1st week) when due.
+  # Checks every hour; sending is idempotent, so nothing goes out twice.
+  scheduler:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - sqlite-data:/app/data
+      - media-data:/app/media
+      - temp-uploads:/app/temp_uploads
+    environment:
+      - DJANGO_DB_PATH=/app/data/db.sqlite3
+    # Waits for the web service to apply database migrations before the first check.
+    entrypoint: ["sh", "-c", "sleep 120; while true; do python manage.py run_scheduled_jobs; sleep 3600; done"]
+    depends_on:
+      - web
+    restart: unless-stopped
+
   caddy:
     image: caddy:2-alpine
     ports:

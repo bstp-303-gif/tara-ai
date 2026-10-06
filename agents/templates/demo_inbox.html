@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block sidebar %}{% endblock %}
+{% block title %}Demo Inbox — MyGPGD J360{% endblock %}
+
+{% block extra_head %}
+<style>
+    .inbox { display:flex; gap:1rem; align-items:flex-start; }
+    .inbox-list { width:38%; min-width:280px; max-height:78vh; overflow-y:auto; }
+    .inbox-item { display:block; padding:0.7rem 0.9rem; border-bottom:1px solid #f1f1f6; color:#18181b; text-decoration:none; }
+    .inbox-item:hover { background:#f6f6fd; }
+    .inbox-item.active { background:#eef2ff; box-shadow:inset 3px 0 0 #4f46e5; }
+    .inbox-item .kind { font-size:0.7rem; font-weight:700; text-transform:uppercase; color:#4f46e5; }
+    .inbox-item .to { font-size:0.8rem; color:#6b7280; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .inbox-read { flex:1; min-width:0; }
+    .mail-body { white-space:pre-wrap; font-size:0.95rem; line-height:1.55; }
+    .mail-body a { font-weight:700; }
+    @media (max-width: 900px) { .inbox { flex-direction:column; } .inbox-list { width:100%; max-height:40vh; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.6rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;"><i class="bi bi-inbox"></i> Demo Inbox</h1>
+<p style="color:#6b7280; margin-bottom:1rem;">
+    Every email the demo has sent: invitations, acknowledgements, recognition letters, reminders and monthly reports.
+    In the real system these go to each person's own mailbox. Search for a teacher's name or email, open the email,
+    and click its link to continue as that person.
+</p>
+
+<form method="get" style="display:flex; gap:0.5rem; margin-bottom:1rem; max-width:560px;">
+    <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search by recipient or subject, e.g. invitation" aria-label="Search emails">
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if q %}<a href="{% url 'demo_inbox' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+</form>
+
+{% if emails %}
+<div class="inbox">
+    <div class="card inbox-list">
+        <div style="padding:0.6rem 0.9rem; font-size:0.8rem; color:#6b7280; border-bottom:1px solid #ececf3;">
+            {{ total }} email{{ total|pluralize }}{% if total > emails|length %}, showing the newest {{ emails|length }}{% endif %}
+        </div>
+        {% for m in emails %}
+        <a class="inbox-item {% if m.id == selected.id %}active{% endif %}" href="?{% if q %}q={{ q|urlencode }}&amp;{% endif %}id={{ m.id|urlencode }}">
+            <div class="kind">{{ m.kind }}</div>
+            <div style="font-weight:600; font-size:0.9rem;">{{ m.subject|truncatechars:70 }}</div>
+            <div class="to">To: {{ m.to }}{% if m.date %} · {{ m.date|date:"d M, H:i" }}{% endif %}</div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if selected %}
+    <div class="card inbox-read">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #ececf3;">
+            <div style="font-size:1.15rem; font-weight:700;">{{ selected.subject }}</div>
+            <div style="font-size:0.85rem; color:#6b7280; margin-top:0.25rem;">
+                From: GPGD Programme &lt;noreply@moe.gov.my&gt; · To: <strong>{{ selected.to }}</strong>{% if selected.date %} · {{ selected.date|date:"d M Y, H:i" }}{% endif %}
+            </div>
+        </div>
+        {% if selected.html %}
+            <iframe srcdoc="{{ selected.html|force_escape }}" title="Email" style="width:100%; height:70vh; border:0;"></iframe>
+        {% else %}
+            <div class="mail-body" style="padding:1.25rem;">{{ selected.text|urlize }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="card" style="padding:2rem; text-align:center; color:#6b7280;">
+    {% if q %}No emails match "{{ q }}".{% else %}No emails yet. Send some from the system, for example <strong>Approve &amp; Send Invitations</strong> on the Admin dashboard.{% endif %}
+</div>
+{% endif %}
+{% endblock %}

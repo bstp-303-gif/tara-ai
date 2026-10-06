@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "agents",
 ]
 
@@ -118,6 +119,9 @@ if os.environ.get('DB_HOST'):
             "PASSWORD": os.environ.get('DB_PASSWORD', ''),
             "HOST": os.environ.get('DB_HOST', ''),
             "PORT": os.environ.get('DB_PORT', '5432'),
+            # Reuse connections across requests: opening one to the remote database takes ~2s.
+            "CONN_MAX_AGE": 600,
+            "CONN_HEALTH_CHECKS": True,
             "OPTIONS": {
                 "options": f"-c search_path={DB_SCHEMA},public",
             },
@@ -200,6 +204,7 @@ SECURE_SSL_REDIRECT = not DEBUG
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if not DEBUG else None
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+CSRF_FAILURE_VIEW = 'agents.views.csrf_failure'
 SECURE_HSTS_SECONDS = 3600 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG

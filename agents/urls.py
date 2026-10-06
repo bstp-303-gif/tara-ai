@@ -1,14 +1,20 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
-from . import views
+from . import demo_views, views
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('officer/', views.officer_home, name='officer_home'),
     path('compile-applications/', views.compile_applications, name='compile_applications'),
     path('state/review/', views.state_review, name='state_review'),
+    path('state/decisions/', views.state_decisions, name='state_decisions'),
+    path('state/statistics/', views.state_statistics, name='state_statistics'),
+    path('state/by-district/', views.state_by_district, name='state_by_district'),
     path('moe/review/', views.moe_review, name='moe_review'),
+    path('moe/by-district/', views.moe_by_district, name='moe_by_district'),
+    path('moe/limits/', views.track_limits, name='track_limits'),
+    path('moe/decisions/', views.moe_decisions, name='moe_decisions'),
 
     path('upload-certifications/', views.upload_certifications, name='upload_certifications'),
     path('agent1-results/', views.agent1_results, name='agent1_results'),
@@ -25,6 +31,10 @@ urlpatterns = [
     path('settings/invitation-email/', views.edit_invitation_email, name='edit_invitation_email'),
     path('settings/recognition-letter/', views.edit_recognition_letter, name='edit_recognition_letter'),
     path('settings/application-form/', views.edit_application_form, name='edit_application_form'),
+    path('settings/monthly-reminder/', views.edit_monthly_reminder, name='edit_monthly_reminder'),
+    path('manage/report-recipients/', views.report_recipients, name='report_recipients'),
+    path('monthly-reports/', views.monthly_reports_page, name='monthly_reports'),
+    path('demo/inbox/', demo_views.inbox, name='demo_inbox'),  # demo settings only; 404 elsewhere
     path('apply/<str:token>/', views.apply, name='apply'),
     path('apply-success/<str:ref>/', views.apply_success, name='apply_success'),
     path('download-dedup/', views.download_deduplicated, name='download_dedup'),

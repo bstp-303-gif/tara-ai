@@ -1,0 +1,74 @@
+{# Approve / decline several candidates at once, on State Review and MoE Review.               #}
+{# Row tick boxes (class "pick") sit in the table but belong to #bulk-form through form="bulk-form". #}
+{# Include with show_award=True on MoE Review for the award category box.                       #}
+<form method="post" id="bulk-form">
+    {% csrf_token %}
+    <input type="hidden" name="filters" value="{{ filters }}">
+</form>
+
+<div id="bulk-bar" style="position:sticky; bottom:0; z-index:1000; display:none; margin:0 -0.25rem; padding:0.75rem 1rem;
+     background:#1e3a5f; color:#fff; border-radius:12px 12px 0 0; box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+     flex-wrap:wrap; gap:0.6rem; align-items:center;">
+    <strong><span id="bulk-count">0</span> ticked</strong>
+    <button type="button" class="btn btn-sm btn-link text-white p-0" id="bulk-clear">Untick all</button>
+    <input type="text" name="remarks" form="bulk-form" class="form-control form-control-sm" placeholder="Remarks for all ticked (optional)" style="max-width:240px;" aria-label="Remarks for all ticked candidates">
+    {% if show_award %}<input type="text" name="award_category" form="bulk-form" class="form-control form-control-sm" placeholder="Award category (optional)" style="max-width:200px;" aria-label="Award category for all ticked candidates">{% endif %}
+    <div style="margin-left:auto; display:flex; gap:0.5rem;">
+        <button type="submit" form="bulk-form" name="bulk" value="approve" class="btn btn-sm btn-success">Approve ticked</button>
+        <button type="submit" form="bulk-form" name="bulk" value="decline" class="btn btn-sm btn-outline-light">Decline ticked</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const picks = () => [...document.querySelectorAll('input.pick')];
+    const bar = document.getElementById('bulk-bar');
+    function update() {
+        const ticked = picks().filter(p => p.checked).length;
+        document.getElementById('bulk-count').textContent = ticked;
+        bar.style.display = ticked ? 'flex' : 'none';
+        document.querySelectorAll('input.pick-group').forEach(function (box) {
+            const inGroup = picks().filter(p => p.dataset.group === box.dataset.group);
+            box.checked = inGroup.length > 0 && inGroup.every(p => p.checked);
+        });
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('pick-group')) {
+            picks().filter(p => p.dataset.group === e.target.dataset.group).forEach(p => { p.checked = e.target.checked; });
+        }
+        if (e.target.classList.contains('pick') || e.target.classList.contains('pick-group')) update();
+    });
+    document.addEventListener('click', function (e) {
+        const button = e.target.closest('.tick-recommended');
+        if (!button) return;
+        picks().filter(p => p.dataset.group === button.dataset.group && p.dataset.recommended === '1').forEach(p => { p.checked = true; });
+        update();
+    });
+    document.getElementById('bulk-clear').addEventListener('click', function () {
+        picks().forEach(p => { p.checked = false; });
+        update();
+    });
+    const approveAll = document.getElementById('approve-all-recommended');
+    // Ticks every Recommended candidate shown, then asks once. Cancel leaves them ticked to review first.
+    if (approveAll) approveAll.addEventListener('click', function () {
+        picks().forEach(p => { p.checked = p.dataset.recommended === '1'; });
+        update();
+        const ticked = picks().filter(p => p.checked).length;
+        if (ticked && confirm('Approve all ' + ticked + ' Recommended candidate(s) shown?\n\n'
+                + 'Cancel to review the ticks first: untick anyone, then click "Approve ticked".')) {
+            confirmed = true;
+            document.querySelector('#bulk-bar button[value="approve"]').click();
+        } else {
+            bar.scrollIntoView({behavior: 'smooth', block: 'end'});
+        }
+    });
+    let confirmed = false;
+    document.getElementById('bulk-form').addEventListener('submit', function (e) {
+        const ticked = picks().filter(p => p.checked).length;
+        const verb = e.submitter && e.submitter.value === 'decline' ? 'Decline' : 'Approve';
+        if (!ticked || (!confirmed && !confirm(verb + ' ' + ticked + ' ticked candidate(s)?'))) e.preventDefault();
+        confirmed = false;
+    });
+    update();
+})();
+</script>

@@ -6,11 +6,13 @@ from django.shortcuts import redirect
 
 # Paths a logged-in State Officer is allowed to reach. Everything else
 # (upload, dashboard, manage/*, MoE review, admin, ...) redirects them
-# back to their own review page — they only ever need that one screen.
-STATE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/state/review')
+# back to their own review page — they only need their own /agents/state/ screens.
+STATE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/state/')
 
-# Same idea for MoE Officers: their own review page, plus the Compile & Rank action on it.
-MOE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/moe/review', '/agents/compile-applications')
+# Same idea for MoE Officers: their own /agents/moe/ pages, the Compile & Rank action, and the
+# (view-only) Recognition Dashboard of everyone they have recognised.
+MOE_OFFICER_ALLOWED_PREFIXES = ('/agents/login', '/agents/logout', '/agents/moe/', '/agents/compile-applications',
+                                '/agents/recognition-dashboard')
 
 
 class StateOfficerRestrictMiddleware:

@@ -1,14 +1,15 @@
 """
 Autonomous pipeline agent for MyGPGD J360.
 
-Everything between "a file was uploaded" / "a teacher applied" and the
-human approval gates is this agent's job: run the certification pipeline
-and compile & rank applications, deciding via tool use what actually needs
-doing right now. Invitation emails are deliberately NOT one of its tools —
-the Admin reviews the eligible list and sends them (human in the loop).
+Turning uploaded certification files into the teacher roster is this
+agent's job: it runs the certification pipeline, deciding via tool use
+what actually needs doing right now. Invitation emails are deliberately NOT
+one of its tools — the Admin reviews the eligible list and sends them (human
+in the loop). Nor is Compile & Rank: the MoE Officer runs it once, after the
+submission deadline, so every applicant is ranked against the full field.
 
-Invoked synchronously from agents/views.py right after the two events it
-reacts to (a valid upload, a submitted application). Every run is logged to
+Invoked from agents/views.py right after the events it reacts to (a valid
+upload, a deleted file). Every run is logged to
 AgentActivityLog regardless of outcome, so failures (most commonly: no
 ANTHROPIC_API_KEY configured yet) never break the human-facing request —
 they just show up in the dashboard's Agent Activity panel.
@@ -20,8 +21,8 @@ import threading
 import anthropic
 from django.conf import settings
 
-from . import pipeline_ops, ranking
-from .models import AgentActivityLog, Application, FileUpload
+from . import pipeline_ops
+from .models import AgentActivityLog, FileUpload
 
 MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-5')
 MAX_STEPS = 6
@@ -30,8 +31,8 @@ SYSTEM_PROMPT = """You are the autonomous pipeline agent for MyGPGD J360, a Mala
 Education programme that certifies teachers as digital leaders (GPGD). Staff upload certification \
 files and human State and MoE Officers make the approval decisions — those steps are never \
 yours to take. Your responsibility is turning uploaded certification files into a deduplicated, \
-eligibility-classified teacher roster, and compiling and ranking submitted applications so they're \
-ready for State Officer review. You never email teachers: once the roster is ready, the Admin \
+eligibility-classified teacher roster. Compiling and ranking applications is not your job either: \
+the MoE Officer does it once, after the submission deadline. You never email teachers: once the roster is ready, the Admin \
 reviews the eligible list and decides when to send invitations, so just mention in your summary \
 that the eligible list is awaiting Admin approval.
 
@@ -56,19 +57,6 @@ TOOLS = [
                        "leaving outdated teachers/eligible-candidates on the dashboard. Call it whenever the "
                        "set of valid files has changed (a new upload, or a delete), even if that set is now "
                        "empty — it never 'erases good data', it only ever reflects what's currently uploaded.",
-        'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False},
-    },
-    {
-        'name': 'get_pending_applications',
-        'description': "Count submitted teacher applications that have not yet been scored, ranked, "
-                       "and compiled for State Officer review.",
-        'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False},
-    },
-    {
-        'name': 'compile_and_rank_applications',
-        'description': "Score every pending application, rank it within its state, and flag top "
-                       "candidates against district/technology quotas. Moves applications from "
-                       "'Application Submitted'/'Under Review' to 'Compiled', ready for State Officer review.",
         'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False},
     },
     {
@@ -102,15 +90,6 @@ def _tool_run_certification_pipeline(_tool_input):
     return pipeline_ops.run_certification_pipeline()
 
 
-def _tool_get_pending_applications(_tool_input):
-    return {'pending_count': Application.objects.filter(status__in=ranking.PIPELINE_ENTRY_STATUSES).count()}
-
-
-def _tool_compile_and_rank_applications(_tool_input):
-    stats, shortfalls = ranking.compile_and_rank()
-    return {'stats': stats, 'shortfalls': shortfalls}
-
-
 def _tool_log_note(tool_input):
     return {'logged': True, 'note': tool_input.get('note', '')}
 
@@ -139,8 +118,6 @@ def _format_anthropic_error(exc):
 TOOL_IMPLEMENTATIONS = {
     'get_certification_upload_status': _tool_get_certification_upload_status,
     'run_certification_pipeline': _tool_run_certification_pipeline,
-    'get_pending_applications': _tool_get_pending_applications,
-    'compile_and_rank_applications': _tool_compile_and_rank_applications,
     'log_note': _tool_log_note,
 }
 

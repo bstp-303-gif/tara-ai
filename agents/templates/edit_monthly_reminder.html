@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Monthly Reminder — MyGPGD J360{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.75rem; font-weight:700; color:#1e3a5f; margin-bottom:0.25rem;">Monthly Reminder</h1>
+<p style="color:#6b7280; margin-bottom:1.5rem;">
+    Sent automatically every month to the current GPGDs{% if cohort_year %} (recognised in {{ cohort_year }}: {{ gpgd_count }} GPGD{{ gpgd_count|pluralize }}){% endif %},
+    asking them to report that month's activities through their secure link. Earlier years' GPGDs are not reminded.
+</p>
+
+{% if is_default %}
+<div class="alert" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">This is the default text: nothing has been customised yet. Edit and save below to change it.</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header" style="background:#f9fafb; padding:1rem;"><h5 style="margin:0; font-weight:600;">Schedule</h5></div>
+        <div class="card-body" style="padding:1.5rem;">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="reminder_day">Reminder to GPGDs: day of the month</label>
+                    <input type="number" id="reminder_day" name="reminder_day" class="form-control" min="1" max="28" value="{{ reminder_day }}" required style="max-width:120px;">
+                    <div class="form-text">15 = start of the 3rd week. Asks GPGDs to report this month's activities.</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="report_day">Monthly statistics to leaders: day of the month</label>
+                    <input type="number" id="report_day" name="report_day" class="form-control" min="1" max="28" value="{{ report_day }}" required style="max-width:120px;">
+                    <div class="form-text">7 = end of the 1st week. Sends last month's figures to the BSTP Director, State Directors, District Education Leads and school leaders (<a href="{% url 'monthly_reports' %}">Monthly Reports</a>).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header" style="background:#f9fafb; padding:1rem;"><h5 style="margin:0; font-weight:600;">Available placeholders</h5></div>
+        <div class="card-body" style="padding:1.5rem;">
+            <p style="color:#6b7280; margin-bottom:0.5rem;">These get replaced automatically when the email is sent:</p>
+            <ul style="margin-bottom:0;">{% for p in placeholders %}<li><code>{{ p }}</code></li>{% endfor %}</ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding:1.5rem;">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Subject</label>
+                <input type="text" name="subject" class="form-control" value="{{ subject }}" maxlength="255" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Body</label>
+                <textarea name="body" class="form-control" rows="24" style="font-family:monospace; font-size:0.9rem;" required>{{ body }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

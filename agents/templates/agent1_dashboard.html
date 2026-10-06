@@ -141,8 +141,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for teacher in teachers %}
-                        {% if teacher.eligibility_status == 'Eligible' %}
+                    {% for teacher in eligible_preview %}
                             <tr>
                                 <td><strong>{{ teacher.full_name }}</strong></td>
                                 <td>{{ teacher.ic_number }}</td>
@@ -163,13 +162,12 @@
                                 </td>
                                 <td><span class="status-badge status-valid"><i class="bi bi-check-circle-fill"></i> Eligible</span></td>
                             </tr>
-                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
             </div>
             <p style="color: #71717a; padding: 1rem; text-align: center; font-size: 0.875rem;">
-                Showing all {{ eligible }} eligible candidates. Download the full list for offline use.
+                {% if eligible > eligible_preview|length %}Showing the first {{ eligible_preview|length }} of {{ eligible }} eligible candidates. Download the full list to see everyone.{% else %}Showing all {{ eligible }} eligible candidates. Download the full list for offline use.{% endif %}
             </p>
         {% else %}
             <p style="color: #71717a; padding: 2.5rem 1rem; margin: 0; text-align: center;"><i class="bi bi-inbox" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; color:#c7c7d1;"></i>No eligible candidates yet. Upload and process files to see results.</p>
@@ -410,23 +408,24 @@
 
 <div class="card" style="margin-bottom: 2rem; border: 1px solid #a7f3d0;">
     <div class="card-header" style="background:#ecfdf5; border-bottom:1px solid #a7f3d0; padding:1rem 1.25rem;">
-        <h5 style="margin:0; font-weight:600; color:#065f46;"><i class="bi bi-list-check"></i> Compile &amp; Rank Applications (manual override)</h5>
+        <h5 style="margin:0; font-weight:600; color:#065f46;"><i class="bi bi-list-check"></i> Compile &amp; Rank Applications</h5>
     </div>
     <div class="card-body" style="padding:1.5rem;">
         <p style="color:#374151; margin-bottom:1rem;">
-            Scores and ranks every submitted application within its state, and auto-flags the top-ranked
-            candidates needed to fill each district's minimum quota (2 per technology; 5 per technology for
-            Perlis, WP Putrajaya, and WP Labuan, which have no districts). Once compiled, each state's ranked
-            shortlist becomes available to that State Officer for approval.
+            Once the submission deadline{% if submission_deadline %} ({{ submission_deadline|date:"d M Y" }}){% endif %} has passed,
+            compile all applications in one go (from here or the MoE Review page): each is scored, ranked within
+            its state, and the top-ranked candidates needed to fill each district's minimum quota (2 per technology;
+            5 per technology for Perlis, WP Putrajaya, and WP Labuan, which have no districts) are flagged as
+            Recommended. Each state's ranked shortlist then goes to that State Officer for approval.
         </p>
-        {% if not deadline_passed %}
+        {% if compile_block_reason %}
             <p style="color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.75rem 1rem; border-radius:9px; margin-bottom:1rem;">
-                <i class="bi bi-exclamation-triangle"></i> The submission deadline{% if submission_deadline %} ({{ submission_deadline|date:"d M Y" }}){% endif %} hasn't passed yet. You can still compile now if needed.
+                <i class="bi bi-hourglass-split"></i> {{ compile_block_reason }}
             </p>
         {% endif %}
-        <form method="post" action="{% url 'compile_applications' %}" onsubmit="return confirm('Compile and rank {{ pending_compile_count }} pending application(s)? This moves them into the State Officer review queue.');">
+        <form method="post" action="{% url 'compile_applications' %}" onsubmit="return confirm('Compile and rank {{ pending_compile_count }} pending application(s)? This sends them to their State Officers for review.');">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success" {% if not pending_compile_count %}disabled{% endif %}>
+            <button type="submit" class="btn btn-success" {% if compile_block_reason or not pending_compile_count %}disabled{% endif %}>
                 <i class="bi bi-list-check"></i> Compile &amp; Rank ({{ pending_compile_count }} pending)
             </button>
         </form>

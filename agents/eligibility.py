@@ -121,10 +121,9 @@ def save_to_database(deduplicated_df):
         with transaction.atomic():
             Teacher.objects.all().delete()
 
-            for idx, row in deduplicated_df.iterrows():
-                if str(row['ic']).strip() in excluded_ics:
-                    continue  # removed by the Admin from the eligible list
-                Teacher.objects.create(
+            # One bulk INSERT instead of a round trip per teacher (the database may be remote).
+            Teacher.objects.bulk_create([
+                Teacher(
                     ic_number=str(row['ic']).strip(),
                     full_name=str(row['name']).strip(),
                     email=str(row['email']).strip(),
@@ -137,6 +136,9 @@ def save_to_database(deduplicated_df):
                     multi_certified=bool(row['multi_certified']),
                     eligibility_status=row['eligibility_status']
                 )
+                for _, row in deduplicated_df.iterrows()
+                if str(row['ic']).strip() not in excluded_ics  # removed by the Admin from the eligible list
+            ], batch_size=500)
         return True
     except Exception as e:
         print(f"Error saving to database: {str(e)}")

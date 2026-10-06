@@ -1,0 +1,5 @@
+{% if application.is_never_recognised %}
+    <span class="status-badge" style="background:#e0e7ff; color:#3730a3; font-size:0.72rem;" title="Has never received an annual national-level recognition">★ Never recognised</span>
+{% elif application.recognitions %}
+    <span style="color:#6b7280; font-size:0.75rem;" title="Annual national-level recognitions">Recognised: {{ application.recognitions_display }}</span>
+{% endif %}

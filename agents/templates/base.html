@@ -450,7 +450,9 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+{% include 'partials/demo_banner.html' %}
     <div class="app-shell">
+        {% block sidebar %}{# Public candidate pages override this with nothing — no officer menu. #}
         <aside class="sidebar">
             {% if user.is_authenticated and user.officerprofile and user.officerprofile.role == 'state_officer' %}
                 <a class="sidebar-brand" href="{% url 'state_review' %}">
@@ -458,7 +460,10 @@
                     <span class="brand-text">MyGPGD J360<small>STATE OFFICER</small></span>
                 </a>
                 <ul class="sidebar-nav">
-                    <li><a class="side-link active" href="{% url 'state_review' %}"><i class="bi bi-clipboard-check"></i> State Review ({{ user.officerprofile.state }})</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'state_statistics' %}active{% endif %}" href="{% url 'state_statistics' %}"><i class="bi bi-graph-up"></i> Statistics</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'state_by_district' %}active{% endif %}" href="{% url 'state_by_district' %}"><i class="bi bi-grid-3x3-gap"></i> By District</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'state_review' %}active{% endif %}" href="{% url 'state_review' %}"><i class="bi bi-clipboard-check"></i> State Review ({{ user.officerprofile.state }})</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'state_decisions' %}active{% endif %}" href="{% url 'state_decisions' %}"><i class="bi bi-list-check"></i> Approved &amp; Declined</a></li>
                 </ul>
                 <div class="sidebar-footer">
                     <form method="post" action="{% url 'logout' %}">
@@ -472,7 +477,11 @@
                     <span class="brand-text">MyGPGD J360<small>MOE OFFICER</small></span>
                 </a>
                 <ul class="sidebar-nav">
-                    <li><a class="side-link active" href="{% url 'moe_review' %}"><i class="bi bi-clipboard-check"></i> MoE Review</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'moe_review' %}active{% endif %}" href="{% url 'moe_review' %}"><i class="bi bi-clipboard-check"></i> MoE Review</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'moe_decisions' %}active{% endif %}" href="{% url 'moe_decisions' %}"><i class="bi bi-patch-check"></i> Recognised &amp; Rejected</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'moe_by_district' %}active{% endif %}" href="{% url 'moe_by_district' %}"><i class="bi bi-grid-3x3-gap"></i> By District</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'recognition_dashboard' %}active{% endif %}" href="{% url 'recognition_dashboard' %}"><i class="bi bi-award"></i> Recognition Dashboard</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'track_limits' %}active{% endif %}" href="{% url 'track_limits' %}"><i class="bi bi-sliders"></i> Maximum per State</a></li>
                 </ul>
                 <div class="sidebar-footer">
                     <form method="post" action="{% url 'logout' %}">
@@ -493,14 +502,18 @@
                     <li class="sidebar-section-label">GPGD Programme</li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'recognition_dashboard' %}active{% endif %}" href="{% url 'recognition_dashboard' %}"><i class="bi bi-award"></i> Recognition Dashboard</a></li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'activity_dashboard' %}active{% endif %}" href="{% url 'activity_dashboard' %}"><i class="bi bi-calendar2-check"></i> Activity Reports</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'monthly_reports' %}active{% endif %}" href="{% url 'monthly_reports' %}"><i class="bi bi-envelope-paper-heart"></i> Monthly Reports</a></li>
                     <li class="sidebar-section-label">Manage</li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'manage_providers' %}active{% endif %}" href="{% url 'manage_providers' %}"><i class="bi bi-diagram-3"></i> Providers &amp; Rules</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'track_limits' %}active{% endif %}" href="{% url 'track_limits' %}"><i class="bi bi-sliders"></i> Maximum per State</a></li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'manage_applications' %}active{% endif %}" href="{% url 'manage_applications' %}"><i class="bi bi-file-earmark-text"></i> Applications</a></li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'manage_teachers' %}active{% endif %}" href="{% url 'manage_teachers' %}"><i class="bi bi-people"></i> Teachers</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'report_recipients' %}active{% endif %}" href="{% url 'report_recipients' %}"><i class="bi bi-person-lines-fill"></i> Report Recipients</a></li>
                     <li class="sidebar-section-label">Settings</li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'edit_invitation_email' %}active{% endif %}" href="{% url 'edit_invitation_email' %}"><i class="bi bi-envelope-paper"></i> Invitation Email</a></li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'edit_recognition_letter' %}active{% endif %}" href="{% url 'edit_recognition_letter' %}"><i class="bi bi-patch-check"></i> Recognition Letter</a></li>
                     <li><a class="side-link {% if request.resolver_match.url_name == 'edit_application_form' %}active{% endif %}" href="{% url 'edit_application_form' %}"><i class="bi bi-ui-checks"></i> Application Form</a></li>
+                    <li><a class="side-link {% if request.resolver_match.url_name == 'edit_monthly_reminder' %}active{% endif %}" href="{% url 'edit_monthly_reminder' %}"><i class="bi bi-alarm"></i> Monthly Reminder</a></li>
                 </ul>
                 <div class="sidebar-footer">
                     {% if user.is_authenticated %}
@@ -514,6 +527,7 @@
                 </div>
             {% endif %}
         </aside>
+        {% endblock %}
 
         <div class="main-wrap">
             <div class="container-main">
