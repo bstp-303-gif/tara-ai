@@ -51,6 +51,28 @@ PER_DISTRICT_TRACK = [0] * 12 + [1] * 13 + [2] * 25 + [3] * 25 + [4] * 15 + [5] 
 PER_STATE_TRACK = [3, 4, 5, 6, 7, 8]
 NO_DISTRICT_TOWNS = {'Perlis': 'Kangar', 'W.P. Labuan': 'Labuan', 'W.P. Putrajaya': 'Putrajaya'}
 
+# The presentation's story: Puan Aisyah, 18 years in a rural school, never recognised. She is not
+# invited when the demo starts (the presenter's "Approve & Send" emails her) and never applies by
+# herself (the presenter applies as her). Her group, PPD Gua Musang / Google, holds only her and three
+# well-known, already-recognised teachers with higher scores, so Compile & Rank gives them the top
+# place and her the place kept for teachers never recognised.
+SPOTLIGHT_STATE, SPOTLIGHT_DISTRICT, SPOTLIGHT_TRACK = 'Kelantan', 'PPD Gua Musang', 'Google'
+AISYAH = {'name': 'Aisyah binti Hassan', 'ic': '830514-03-5262', 'email': 'aisyah.hassan@moe-school.edu.my',
+          'school': 'SK Pos Harmoni, Gua Musang', 'cert': ('Google Certified Educator', 'Level 2')}
+WELL_KNOWN = [
+    {'name': 'Mohd Faizal bin Yusof', 'ic': '790211-03-5117', 'email': 'faizal.yusof.gm@moe-school.edu.my',
+     'school': 'SMK Gua Musang Jaya', 'cert': ('Google Certified Trainer', 'Trainer'), 'lnpt': 97,
+     'recognitions': [{'name': 'Edufluencer KPM', 'years': '2024, 2025', 'source': 'declared'}]},
+    {'name': 'Tan Mei Ling', 'ic': '810930-03-5390', 'email': 'tan.meiling.gm@moe-school.edu.my',
+     'school': 'SMK Taman Gua Musang', 'cert': ('Google Certified Coach', 'Coach'), 'lnpt': 96,
+     'recognitions': [{'name': 'Cikgu Juara Digital', 'years': '2025', 'source': 'declared'}]},
+    {'name': 'Siti Hajar binti Omar', 'ic': '850707-03-5524', 'email': 'sitihajar.omar.gm@moe-school.edu.my',
+     'school': 'SK Bandar Gua Musang', 'cert': ('Google Certified Trainer', 'Trainer'), 'lnpt': 95,
+     'recognitions': [{'name': 'Pakar Jauhari Digital', 'years': '2023, 2024', 'source': 'declared'},
+                      {'name': 'Edufluencer KPM', 'years': '2025', 'source': 'declared'}]},
+]
+WELL_KNOWN_BY_IC = {t['ic']: t for t in WELL_KNOWN}
+
 
 def _town(district):
     """The place name used in school names: "PPD Batu Pahat" -> "Batu Pahat", "Perlis" -> "Kangar"."""
@@ -220,7 +242,16 @@ class Command(BaseCommand):
             provider = teacher['certs'][0][0]
             if teacher['certs'][0][1:] != INELIGIBLE_CERTS[provider] and self.rng.random() < 0.12:
                 second = self.rng.choice([t for t in TRACKS if t != provider])
-                teacher['certs'].append((second, *self.rng.choice(ELIGIBLE_CERTS[second])))
+                if not (teacher['district'] == SPOTLIGHT_DISTRICT and second == SPOTLIGHT_TRACK):
+                    teacher['certs'].append((second, *self.rng.choice(ELIGIBLE_CERTS[second])))
+
+        fixed = [AISYAH, *WELL_KNOWN]
+        fixed_ics = {t['ic'] for t in fixed}
+        people = [p for p in people if p['ic'] not in fixed_ics and not (
+            p['district'] == SPOTLIGHT_DISTRICT and any(c[0] == SPOTLIGHT_TRACK for c in p['certs']))]
+        people += [{'name': t['name'], 'ic': t['ic'], 'email': t['email'], 'school': t['school'],
+                    'state': SPOTLIGHT_STATE, 'district': SPOTLIGHT_DISTRICT, 'certs': [(SPOTLIGHT_TRACK, *t['cert'])]}
+                   for t in fixed]
         self.district_by_ic = {p['ic']: p['district'] for p in people}
         return people
 
@@ -288,10 +319,12 @@ class Command(BaseCommand):
         if not eligible:
             raise CommandError('No eligible teachers yet — upload the three files in demo/files/ first.')
         with_email = [t for t in eligible if t.email and t.email.lower() != 'nan']
-        not_invited = {t.ic_number for t in with_email[-3:]}
+        others = [t for t in with_email if t.ic_number != AISYAH['ic']]
+        # Puan Aisyah is invited live (Approve & Send) and applies live, so she is left out of both.
+        not_invited = {t.ic_number for t in others[-3:]} | {AISYAH['ic']}
         # Keep one multi-certified teacher unapplied, to show the technology-track choice live.
-        multi = next((t for t in with_email if t.multi_certified and t.ic_number not in not_invited), None)
-        not_applied = {t.ic_number for t in with_email[:3]} | ({multi.ic_number} if multi else set())
+        multi = next((t for t in others if t.multi_certified and t.ic_number not in not_invited), None)
+        not_applied = {t.ic_number for t in others[:3]} | ({multi.ic_number} if multi else set()) | {AISYAH['ic']}
 
 
         for teacher in with_email:
@@ -301,13 +334,19 @@ class Command(BaseCommand):
                 ic_number=teacher.ic_number, defaults={'status': 'sent', 'email': teacher.email, 'sent_by': 'admin'})
             if teacher.ic_number in not_applied or hasattr(teacher, 'application'):
                 continue
+            if teacher.ic_number in WELL_KNOWN_BY_IC:
+                self._well_known_application(teacher, WELL_KNOWN_BY_IC[teacher.ic_number])
+                continue
+            tracks = [p.strip() for p in teacher.provider.split(',')]
+            if self._district_of(teacher) == SPOTLIGHT_DISTRICT and len(tracks) > 1:
+                tracks = [t for t in tracks if t != SPOTLIGHT_TRACK]  # keep Puan Aisyah's group to the four
             Application.objects.create(
                 teacher=teacher, full_name=teacher.full_name, ic_number=teacher.ic_number, email=teacher.email,
                 whatsapp_number=f"+601{self.rng.choice('0123456789')}{self.rng.randrange(1000000, 9999999)}",
                 current_grade=self.rng.choice(['DG41', 'DG44', 'DG48', 'DG52']), school_name=teacher.school,
                 **self._school_leader(teacher.school),
                 district=self._district_of(teacher), state=teacher.state,
-                tech_track=self.rng.choice([p.strip() for p in teacher.provider.split(',')]),
+                tech_track=self.rng.choice(tracks),
                 certifications=teacher.certification,
                 previous_gpgd=self.rng.choice(PREVIOUS_GPGD) if self.rng.random() < 0.3 else '',
                 lnpt_current=self._lnpt(), lnpt_previous=self._lnpt(), lnpt_two_years=self._lnpt(),
@@ -317,6 +356,21 @@ class Command(BaseCommand):
             )
             teacher.eligibility_status = 'Application Submitted'
             teacher.save(update_fields=['eligibility_status'])
+
+    def _well_known_application(self, teacher, profile):
+        """One of the three visible, already-recognised teachers in Puan Aisyah's group: strong scores."""
+        Application.objects.create(
+            teacher=teacher, full_name=teacher.full_name, ic_number=teacher.ic_number, email=teacher.email,
+            whatsapp_number=f"+6019{self.rng.randrange(1000000, 9999999)}", current_grade='DG52',
+            school_name=teacher.school, **self._school_leader(teacher.school), district=SPOTLIGHT_DISTRICT,
+            state=SPOTLIGHT_STATE, tech_track=SPOTLIGHT_TRACK, certifications=teacher.certification,
+            previous_gpgd='State-level facilitator for digital learning programmes since 2022.',
+            lnpt_current=profile['lnpt'], lnpt_previous=profile['lnpt'], lnpt_two_years=profile['lnpt'] - 1,
+            training_experience=self.rng.choice(TRAINING), awards=self.rng.choice(AWARDS),
+            never_recognised=False, recognitions=profile['recognitions'],
+        )
+        teacher.eligibility_status = 'Application Submitted'
+        teacher.save(update_fields=['eligibility_status'])
 
     def _recognitions(self):
         """About a third have never held an annual national recognition; the rest hold one or two."""
@@ -416,8 +470,29 @@ class Command(BaseCommand):
         lines = ['# Demo application links', '',
                  'Teachers who were invited but have not applied yet. Open a link to fill in the form as that teacher.',
                  'Regenerated each time `seed_demo` runs.', '']
+        aisyah = Teacher.objects.filter(ic_number=AISYAH['ic'], eligibility_status='Eligible').first()
+        if aisyah:
+            lines += [
+                '## Puan Aisyah (for the presentation)', '',
+                f"**{aisyah.full_name}**, {AISYAH['school']}, {SPOTLIGHT_DISTRICT}, {SPOTLIGHT_STATE}. "
+                'Her invitation arrives in the Demo Inbox when you click Approve & Send; this is the same link:  ',
+                f"{site}/agents/apply/{pipeline_ops._make_apply_token(aisyah.ic_number)}/", '',
+                'Suggested answers on the form:', '',
+                '- WhatsApp: 013-456 7890 · Current grade: DG44',
+                "- School leader: Guru Besar SK Pos Harmoni · gurubesar.posharmoni@school.example",
+                f'- State: {SPOTLIGHT_STATE} · District: {SPOTLIGHT_DISTRICT} · Track: Google (preselected)',
+                '- LNPT: 92 / 90 / 91',
+                '- Training experience: 18 years in a rural school; coaches students after school, builds her own '
+                'digital learning materials, and trains teachers across PPD Gua Musang.',
+                '- Awards: leave blank',
+                '- Annual national recognitions: tick "I have never received any annual national-level recognition"', '',
+                'After Compile & Rank, log in as `kelantan_officer`: in State Review, filter to PPD Gua Musang. '
+                'She holds the Recommended place kept for teachers never recognised, beside three well-known teachers.',
+                '', '## Other invited teachers who have not applied', '',
+            ]
         invited = set(InvitationRecord.objects.filter(status='sent').values_list('ic_number', flat=True))
-        for teacher in Teacher.objects.filter(eligibility_status='Eligible', ic_number__in=invited).order_by('state'):
+        for teacher in Teacher.objects.filter(eligibility_status='Eligible', ic_number__in=invited).exclude(
+                ic_number=AISYAH['ic']).order_by('state'):
             note = ' — multi-certified, must choose a technology track' if teacher.multi_certified else ''
             lines.append(f"- **{teacher.full_name}** ({teacher.state}, {teacher.provider}){note}  ")
             lines.append(f"  {site}/agents/apply/{pipeline_ops._make_apply_token(teacher.ic_number)}/")

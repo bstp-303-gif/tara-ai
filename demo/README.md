@@ -58,7 +58,9 @@ Password for every account: **`Demo#2026`**
    name ("Email sent", "Not sent yet", "No email"). Click **Approve & Send Invitations**: 3 invitations go out.
 3. **Teacher: receive the email and apply.** Click **Open the Demo Inbox** in the orange bar (or go to
    http://localhost:8001/agents/demo/inbox/). It shows every email the demo has sent, like a mailbox.
-   - Search **invitation**, open one of the 3 new invitations, and point out the teacher's name and the deadline.
+   - Search **aisyah**: open **Puan Aisyah's** invitation (Aisyah binti Hassan, SK Pos Harmoni, PPD Gua Musang,
+     Kelantan; 18 years in a rural school, never recognised). Point out her name and the deadline.
+   - Fill in her form with the suggested answers at the top of `demo/LINKS.md`, ticking "never received any".
    - Click the **Apply here** link in the email: the teacher's application form opens, already filled in.
      (Best in a private window, or after logging out, so it looks exactly as a teacher sees it.)
    - Fill in the remaining fields (WhatsApp, school leader, district, LNPT scores and so on) and, in
@@ -71,7 +73,9 @@ Password for every account: **`Demo#2026`**
    1,109 applications are ranked within each state. About two-thirds are flagged **Recommended**, and
    112 district/track groups are reported below the minimum. The system also checks last year's GPGD
    records: 3 Johor applicants are found there, even if they declared "never recognised".
-7. **State Officer.** Log out, then log in as `johor_officer`.
+7. **State Officer.** Log out, then log in as `kelantan_officer`. Filter State Review to **PPD Gua Musang**: Puan
+   Aisyah ranks 61st in Kelantan, behind three well-known recognised teachers, yet holds the **reserved place**.
+   (Johor below works the same way, as a second example.)
    - **State Review**: the ranked Johor list. Each name shows **★ Never recognised** or the recognitions held.
      Johor has 4 **reserved places**, e.g. PPD Johor Bahru / Microsoft: a Recommended place kept for the
      best-scoring never-recognised teacher, who ranks below others in the state. Approve a few and decline one.
