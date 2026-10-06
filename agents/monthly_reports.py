@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from . import pipeline_ops, ranking
 from .constants import MALAYSIA_STATES, PPD_BY_STATE
-from .models import ActivityReport, ErrorLog, MonthlyReportLog, ReportRecipient
+from .models import ActivityReport, ErrorLog, MonthlyBriefing, MonthlyReportLog, ReportRecipient
 
 COUNT_FIELDS = ['num_teachers', 'num_students', 'num_school_leaders', 'num_others']
 
@@ -70,10 +70,13 @@ def build_reports(period):
     gpgds, reports = collect(period)
     month = pipeline_ops.month_label(period)
     emails = []
+    # The Reporting Agent's briefings, once the Admin has approved them (BSTP and State Directors only).
+    briefings = {b.scope: b for b in MonthlyBriefing.objects.filter(period=period, status='approved')}
 
     def add(level, scope, email, name, title, totals, rows=None, row_label=None, activities=None):
+        briefing = briefings.get('Malaysia' if level == 'bstp' else scope) if level in ('bstp', 'state') else None
         context = {'title': title, 'month': month, 'name': name, 'totals': totals, 'rows': rows or [],
-                   'row_label': row_label, 'activities': activities or [], 'level': level}
+                   'row_label': row_label, 'activities': activities or [], 'level': level, 'briefing': briefing}
         emails.append({
             'level': level, 'scope': scope, 'email': email, 'name': name,
             'subject': f"GPGD Monthly Training Report — {month} — {title}",

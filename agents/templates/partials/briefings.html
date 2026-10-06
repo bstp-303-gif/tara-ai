@@ -1,0 +1,75 @@
+{# Reporting Agent briefings on the Monthly Reports page: prepare, review, edit, approve. #}
+<div class="card" id="briefings" style="margin-bottom:1.25rem; border:1px solid #ddd6fe; scroll-margin-top:4rem;">
+    <div style="padding:0.9rem 1.1rem; background:#f5f3ff; border-bottom:1px solid #ddd6fe; border-radius:14px 14px 0 0; display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+        <div style="flex:1; min-width:260px;">
+            <div style="font-weight:700; color:#5b21b6;"><i class="bi bi-robot"></i> AI briefings: Reporting Agent</div>
+            <div style="font-size:0.85rem; color:#4c1d95;">
+                The agent looks through {{ month }}'s figures using its tools, then writes a short summary with points needing
+                attention for the BSTP Director and each State Director. Every number it writes is checked against the data.
+                Nothing is sent until you approve it here.
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="period" value="{{ period }}">
+            <button type="submit" name="action" value="prepare_briefings" class="btn btn-sm" style="background:#7c3aed; color:#fff;"
+                    {% if briefing_running or not ai_ready %}disabled{% endif %}>
+                <i class="bi bi-stars"></i> {% if briefings %}Prepare again{% else %}Prepare briefings{% endif %}
+            </button>
+        </form>
+    </div>
+
+    <div style="padding:1rem 1.1rem;">
+        {% if not ai_ready %}
+            <p style="margin:0; color:#b45309;">The Claude API key is not set, so the Reporting Agent can't run. Reports still go out without a summary.</p>
+        {% elif briefing_running %}
+            <p style="margin:0; color:#5b21b6;"><span class="spinner-border spinner-border-sm"></span>
+                The Reporting Agent is working: reading the national and state figures, then writing each briefing. This page refreshes by itself.</p>
+            <script>setTimeout(function () { location.reload(); }, 8000);</script>
+        {% elif briefings %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="period" value="{{ period }}">
+                {% for b in briefings %}
+                <div style="border:1px solid #ececf3; border-radius:10px; padding:0.75rem 0.9rem; margin-bottom:0.75rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                        <strong>{% if b.scope == 'Malaysia' %}Malaysia (BSTP Director){% else %}{{ b.scope }} (State Director){% endif %}</strong>
+                        <label style="font-size:0.85rem; display:flex; gap:0.35rem; align-items:center;">
+                            <input type="checkbox" class="form-check-input" name="approve" value="{{ b.id }}" {% if b.status == 'approved' %}checked{% endif %}>
+                            Approved{% if b.edited %} <span style="color:#6b7280;">(edited by you)</span>{% endif %}
+                        </label>
+                    </div>
+                    <textarea name="summary_{{ b.id }}" class="form-control form-control-sm" rows="3" aria-label="Summary for {{ b.scope }}">{{ b.summary }}</textarea>
+                    <label class="form-label small mt-2 mb-1" for="flags_{{ b.id }}">Needs attention (one per line)</label>
+                    <textarea id="flags_{{ b.id }}" name="flags_{{ b.id }}" class="form-control form-control-sm" rows="2">{{ b.flags|join:"
+" }}</textarea>
+                </div>
+                {% endfor %}
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="this.form.querySelectorAll('input[name=approve]').forEach(c => c.checked = true)">Tick all</button>
+                    <button type="submit" name="action" value="approve_briefings" class="btn btn-sm btn-success"><i class="bi bi-check2-circle"></i> Save &amp; approve ticked</button>
+                </div>
+            </form>
+        {% else %}
+            <p style="margin:0; color:#6b7280;">No briefings for {{ month }} yet. Click <strong>Prepare briefings</strong>.</p>
+        {% endif %}
+
+        {% if briefing_run and not briefing_running %}
+        <details style="margin-top:0.9rem;">
+            <summary style="cursor:pointer; color:#5b21b6; font-weight:600;">
+                How the agent worked: {{ briefing_run.actions_taken|length }} tool call{{ briefing_run.actions_taken|length|pluralize }},
+                {{ briefing_run.triggered_at|date:"d M, H:i" }}{% if briefing_run.status == 'error' %} <span style="color:#b91c1c;">(problem: {{ briefing_run.error_message }})</span>{% endif %}
+            </summary>
+            <ol style="margin:0.5rem 0 0; padding-left:1.2rem; font-size:0.85rem; max-height:320px; overflow-y:auto;">
+                {% for step in briefing_run.actions_taken %}
+                <li style="margin-bottom:0.2rem;">
+                    <code>{{ step.tool }}</code>{% if step.input.state %} ({{ step.input.state }}){% elif step.input.scope %} ({{ step.input.scope }}){% endif %}
+                    {% if step.result.error %}<span style="color:#b45309;"> → {{ step.result.error }}</span>{% elif step.result.saved %}<span style="color:#15803d;"> → saved</span>{% endif %}
+                </li>
+                {% endfor %}
+            </ol>
+            {% if briefing_run.summary %}<p style="font-size:0.85rem; margin:0.5rem 0 0; color:#374151;"><em>Agent:</em> {{ briefing_run.summary }}</p>{% endif %}
+        </details>
+        {% endif %}
+    </div>
+</div>

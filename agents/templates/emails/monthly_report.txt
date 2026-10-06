@@ -2,7 +2,12 @@
 {{ title }}
 
 Dear {{ name|default:"Sir/Madam" }},
-
+{% if briefing %}
+SUMMARY: {{ briefing.summary }}{% if briefing.flags %}
+Needs attention:{% for flag in briefing.flags %}
+- {{ flag }}{% endfor %}{% endif %}
+(Prepared by TARA AI's Reporting Agent from the figures below, and reviewed by BSTP.)
+{% endif %}
 {% if level == 'school_leader' %}Below are the trainings your school's GPGD(s) reported for {{ month }}.{% else %}Below are the trainings reported by GPGDs for {{ month }}.{% endif %}
 
 Teachers trained:        {{ totals.num_teachers }}

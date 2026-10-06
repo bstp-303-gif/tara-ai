@@ -251,6 +251,30 @@ class Application(models.Model):
         ordering = ['-submitted_at']
 
 
+class MonthlyBriefing(models.Model):
+    """A plain-language summary of one month's training activity, written by the Reporting Agent
+    (agents/reporting_agent.py) for the BSTP Director (scope "Malaysia") or one State Director (scope =
+    state). Only an Admin-approved briefing goes into the monthly report email."""
+    STATUS_CHOICES = [('draft', 'Draft — awaiting Admin approval'), ('approved', 'Approved')]
+
+    period = models.CharField(max_length=7, help_text='"YYYY-MM": the month it covers.')
+    scope = models.CharField(max_length=100, help_text='"Malaysia" or a state.')
+    summary = models.TextField()
+    flags = models.JSONField(default=list, blank=True, help_text='Short "needs attention" points.')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    edited = models.BooleanField(default=False, help_text='Changed by the Admin after the agent wrote it.')
+    agent_run = models.ForeignKey('AgentActivityLog', null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    generated_at = models.DateTimeField(auto_now_add=True)
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('period', 'scope')
+
+    def __str__(self):
+        return f"{self.period} {self.scope} ({self.status})"
+
+
 class ReportRecipient(models.Model):
     """Who receives the monthly statistics email: the BSTP Director (national), a State Director (one
     state) or a District Education Lead (one PPD). School leaders come from each GPGD's application."""
@@ -306,9 +330,10 @@ class TrackLimit(models.Model):
 
 
 class AgentActivityLog(models.Model):
-    """Audit trail for the autonomous pipeline agent — one row per run."""
+    """Audit trail for the AI agents (pipeline and reporting) — one row per run."""
 
     STATUS_CHOICES = [
+        ('running', 'Running'),
         ('success', 'Success'),
         ('error', 'Error'),
     ]

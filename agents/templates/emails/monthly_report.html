@@ -8,6 +8,17 @@
 </td></tr>
 <tr><td style="padding:20px 24px;">
     <p style="margin:0 0 12px;">Dear {{ name|default:"Sir/Madam" }},</p>
+    {% if briefing %}
+    <div style="background:#f5f3ff; border-left:4px solid #7c3aed; border-radius:6px; padding:12px 14px; margin:0 0 16px;">
+        <div style="font-size:12px; font-weight:bold; color:#5b21b6; text-transform:uppercase; margin-bottom:4px;">Summary</div>
+        <div style="font-size:14px; line-height:1.5;">{{ briefing.summary }}</div>
+        {% if briefing.flags %}
+        <div style="font-size:12px; font-weight:bold; color:#b45309; margin:10px 0 2px;">Needs attention</div>
+        <ul style="margin:0; padding-left:18px; font-size:13px;">{% for flag in briefing.flags %}<li>{{ flag }}</li>{% endfor %}</ul>
+        {% endif %}
+        <div style="font-size:11px; color:#6b7280; margin-top:8px;">Prepared by TARA AI's Reporting Agent from the figures below, and reviewed by BSTP.</div>
+    </div>
+    {% endif %}
     <p style="margin:0 0 16px;">{% if level == 'school_leader' %}Below are the trainings your school's GPGD(s) reported for {{ month }}.{% else %}Below are the trainings reported by GPGDs for {{ month }}.{% endif %}</p>
 
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate; border-spacing:6px; margin:0 -6px 12px;">

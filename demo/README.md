@@ -91,9 +91,16 @@ Password for every account: **`Demo#2026`**
      day the leaders' statistics go out (day 7, end of the 1st week). Both editable.
    - **Manage → Report Recipients**: BSTP Director, State Directors and District Education Leads (demo addresses
      are filled in for everyone). Click a state for its districts, or fill everyone in from Excel.
-   - **Monthly Reports**: pick last month, see the national totals (teachers, students, activities, hours), click
-     any recipient to preview their email (BSTP, 16 State Directors, 143 PPD leads, ~140 school leaders), then
-     **Send now**. Open the Demo Inbox to show what each leader receives.
+   - **Monthly Reports**: pick last month, see the national totals (teachers, students, activities, hours).
+   - **AI briefings (Reporting Agent, the second agent)**: click **Prepare briefings**. In about a minute the agent
+     reads the national figures, then all 16 states in parallel, and writes a summary with "needs attention" points
+     for the BSTP Director and each State Director. Open **How the agent worked** to show its tool calls. Every
+     number is checked against the data. Edit if you like, tick, **Save & approve ticked** (human in the loop).
+     (Automatically, the agent drafts these two days before the reports go out.)
+   - Click the **BSTP** or a **State Director** recipient: the approved summary is at the top of their email.
+     Then **Send now**, and open the Demo Inbox to show what each leader receives.
+   - Note: the briefings need last year's group (it has the activity reports). Prepare them **before** approving
+     anyone this year in the demo, or the current group switches to this year's, which has no reports yet.
    - **Activity report form** (link in any reminder email in `demo/sent_emails/`): participants are now entered as
      teachers, students, school leaders and others.
 

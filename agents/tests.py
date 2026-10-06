@@ -15,7 +15,7 @@ from .eligibility import eligible_tracks, save_to_database
 from .forms import ActivityReportForm, ApplicationForm
 from .models import (
     Application, CertificationRule, FileUpload, InvitationExclusion, InvitationRecord, OfficerProfile, ProgrammeSettings, Provider, Teacher,
-    TrackLimit, ActivityReport, MonthlyReminderLog, ReportRecipient,
+    TrackLimit, ActivityReport, MonthlyBriefing, MonthlyReminderLog, ReportRecipient,
 )
 
 
@@ -1012,3 +1012,96 @@ class MoeDecisionsPageTests(TestCase):
 
     def test_moe_can_open_the_recognition_dashboard(self):
         self.assertEqual(self.client.get(reverse('recognition_dashboard')).status_code, 200)
+
+
+class _Block:
+    def __init__(self, type, **fields):
+        self.type = type
+        self.__dict__.update(fields)
+
+
+class _Response:
+    def __init__(self, stop_reason, *blocks):
+        self.stop_reason, self.content = stop_reason, list(blocks)
+
+
+def _tool(id, name, **tool_input):
+    return _Block('tool_use', id=id, name=name, input=tool_input)
+
+
+@override_settings(ANTHROPIC_API_KEY='test-key')
+class ReportingAgentTests(TestCase):
+    """The Reporting Agent: facts from its tools, number checking, Admin approval, and the emails."""
+
+    def setUp(self):
+        from . import reporting_agent
+        self.agent = reporting_agent
+        gpgd = Application.objects.create(
+            full_name='Aina', ic_number='900101-01-1234', email='aina@example.com', current_grade='DG41',
+            school_name='SK Kulai', school_leader_email='gb@example.com', district='PPD Kulai', state='Johor',
+            tech_track='Google', certifications='x', lnpt_current=90, lnpt_previous=90, lnpt_two_years=90,
+            training_experience='x', status='Approved', recognized_year=2026)
+        ActivityReport(gpgd=gpgd, training_title='Session', training_date=date(2026, 9, 3), start_time='09:00',
+                       end_time='11:00', hours=2, num_teachers=37, num_students=120, training_mode='online',
+                       venue_platform='Meet', photo_1='p1.png', photo_2='p2.png').save()
+        ReportRecipient.objects.create(level='bstp', email='director@example.com')
+        ReportRecipient.objects.create(level='state', state='Johor', email='jpn@example.com')
+
+    def test_facts_come_from_the_database(self):
+        national = self.agent.national_facts('2026-09')
+        self.assertEqual((national['national']['num_teachers'], national['national']['num_students']), (37, 120))
+        johor = self.agent.state_facts('2026-09', 'Johor')
+        self.assertIn('PPD Tangkak', johor['districts_without_gpgds'])
+        self.assertEqual(johor['gpgds_not_reporting_this_month'], 0)
+
+    def test_numbers_are_checked(self):
+        facts = self.agent.national_facts('2026-09')
+        self.assertEqual(self.agent.unsupported_numbers('37 teachers and 120 students in September 2026.', facts), [])
+        self.assertEqual(self.agent.unsupported_numbers('About 500 teachers were trained.', facts), ['500'])
+
+    @mock.patch('agents.reporting_agent.anthropic.Anthropic')
+    def test_agent_corrects_an_invented_number_and_saves_drafts(self, client_class):
+        create = client_class.return_value.beta.messages.create
+        create.side_effect = [
+            _Response('tool_use', _tool('t1', 'get_national_overview')),
+            _Response('tool_use', _tool('t2', 'get_state_detail', state='Johor'),
+                      _tool('t3', 'save_briefing', scope='Malaysia', summary='Over 500 teachers trained.', flags=[])),
+            _Response('tool_use',
+                      _tool('t4', 'save_briefing', scope='Malaysia', summary='37 teachers and 120 students were trained.', flags=[]),
+                      _tool('t5', 'save_briefing', scope='Johor', summary='Johor trained 37 teachers.',
+                            flags=['PPD Tangkak has no GPGDs.'])),
+            _Response('end_turn', _Block('text', text='Prepared 2 briefings.')),
+        ]
+        run = self.agent.prepare_briefings('2026-09')
+        self.assertEqual(run.status, 'success')
+        rejected = [a for a in run.actions_taken if a['tool'] == 'save_briefing' and 'error' in a['result']]
+        self.assertEqual(len(rejected), 1)
+        self.assertIn('500', rejected[0]['result']['error'])
+        self.assertEqual(set(MonthlyBriefing.objects.values_list('scope', 'status')), {('Malaysia', 'draft'), ('Johor', 'draft')})
+        # The model is asked with the refusal fallback on.
+        self.assertEqual(create.call_args.kwargs['fallbacks'], 'default')
+
+    def test_only_approved_briefings_go_into_the_emails(self):
+        draft = MonthlyBriefing.objects.create(period='2026-09', scope='Malaysia', summary='Draft text.')
+        MonthlyBriefing.objects.create(period='2026-09', scope='Johor', summary='Johor did well.', flags=['Check PPD Muar.'],
+                                       status='approved')
+        emails = {e['level']: e for e in monthly_reports.build_reports('2026-09')}
+        self.assertNotIn('Draft text.', emails['bstp']['html'])
+        self.assertIn('Johor did well.', emails['state']['html'])
+        self.assertIn('Check PPD Muar.', emails['state']['text'])
+        self.assertNotIn('Johor did well.', emails['school_leader']['html'])  # directors only
+
+    def test_admin_edits_and_approves_on_the_page(self):
+        self.client.force_login(User.objects.create_user(username='admin', password='test-pass-123'))
+        b = MonthlyBriefing.objects.create(period='2026-09', scope='Malaysia', summary='Agent text.', flags=['One'])
+        self.client.post(reverse('monthly_reports'), {
+            'period': '2026-09', 'action': 'approve_briefings', 'approve': [b.id],
+            f'summary_{b.id}': 'Edited text.', f'flags_{b.id}': 'One\nTwo'})
+        b.refresh_from_db()
+        self.assertEqual((b.status, b.summary, b.flags, b.edited), ('approved', 'Edited text.', ['One', 'Two'], True))
+
+    def test_missing_key_is_reported_not_raised(self):
+        with override_settings(ANTHROPIC_API_KEY=''), mock.patch.dict('os.environ', {'ANTHROPIC_API_KEY': ''}):
+            run = self.agent.prepare_briefings('2026-09')
+        self.assertEqual(run.status, 'error')
+        self.assertIn('ANTHROPIC_API_KEY', run.error_message)

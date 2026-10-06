@@ -122,6 +122,8 @@ class Command(BaseCommand):
 
         if options['applications']:
             self._invite_and_apply()
+            if not Application.objects.filter(status='Approved').exists():
+                self._previous_cohort()  # last year's GPGDs and their activity reports, for the monthly reports
         else:
             self._reset()
             files = self._write_certification_files()

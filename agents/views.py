@@ -23,7 +23,7 @@ from django.views.decorators.http import require_http_methods
 
 import pandas as pd
 
-from . import ai_agent, content_defaults, monthly_reports, pipeline_ops, ranking
+from . import ai_agent, content_defaults, monthly_reports, pipeline_ops, ranking, reporting_agent
 from .collector import highlight_missing_values, normalize_dataframe, save_normalized_file, validate_file
 from .constants import MALAYSIA_STATES, PPD_BY_STATE, canonical_state
 from .decorators import admin_or_moe_officer_required, admin_required, moe_officer_required, state_officer_required
@@ -31,7 +31,7 @@ from .eligibility import eligible_tracks
 from .forms import ActivityReportForm, ApplicationForm, CertificationFileUploadForm, CertificationRuleForm, ProviderForm, TeacherForm
 from .models import (
     ActivityReport, AgentActivityLog, Application, CertificationRule, ErrorLog, FileUpload,
-    InvitationExclusion, InvitationRecord, MonthlyReminderLog, MonthlyReportLog, ProgrammeSettings, Provider,
+    InvitationExclusion, InvitationRecord, MonthlyBriefing, MonthlyReminderLog, MonthlyReportLog, ProgrammeSettings, Provider,
     ReportRecipient, Teacher, TrackLimit,
 )
 
@@ -1937,6 +1937,32 @@ def monthly_reports_page(request):
     if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', period):
         period = monthly_reports.previous_period()
 
+    back = f"{reverse('monthly_reports')}?period={period}"
+    if request.method == 'POST' and request.POST.get('action') == 'prepare_briefings':
+        if reporting_agent.is_running(period):
+            messages.warning(request, 'The Reporting Agent is already working on this month.')
+        else:
+            reporting_agent.prepare_briefings_async(period, trigger=f'requested by {request.user.get_username()}')
+            messages.success(request, '🤖 The Reporting Agent is preparing the briefings. This takes about a minute; '
+                                      'the page refreshes by itself.')
+        return redirect(back + '#briefings')
+
+    if request.method == 'POST' and request.POST.get('action') in ('save_briefings', 'approve_briefings'):
+        approve = request.POST.get('action') == 'approve_briefings'
+        for briefing in MonthlyBriefing.objects.filter(period=period):
+            summary = request.POST.get(f'summary_{briefing.id}', briefing.summary).strip()
+            flags = [f.strip() for f in request.POST.get(f'flags_{briefing.id}', '\n'.join(briefing.flags)).splitlines() if f.strip()]
+            if summary != briefing.summary or flags != briefing.flags:
+                briefing.summary, briefing.flags, briefing.edited = summary, flags, True
+            if approve and str(briefing.id) in request.POST.getlist('approve'):
+                briefing.status, briefing.approved_by, briefing.approved_at = 'approved', request.user, timezone.now()
+            elif str(briefing.id) not in request.POST.getlist('approve'):
+                briefing.status, briefing.approved_by, briefing.approved_at = 'draft', None, None
+            briefing.save()
+        approved = MonthlyBriefing.objects.filter(period=period, status='approved').count()
+        messages.success(request, f'✅ Briefings saved. {approved} approved; only approved briefings go into the emails.')
+        return redirect(back + '#briefings')
+
     if request.method == 'POST':
         threading.Thread(target=_send_monthly_reports_background,
                          args=(period, request.user.get_username()), daemon=True).start()
@@ -1970,5 +1996,11 @@ def monthly_reports_page(request):
         'missing': monthly_reports.missing_recipients(),
         'cohort_year': pipeline_ops.current_cohort_year(),
         'report_day': programme.report_day,
+        'briefings': sorted(MonthlyBriefing.objects.filter(period=period),
+                            key=lambda b: (b.scope != reporting_agent.NATIONAL, b.scope)),
+        'briefing_running': reporting_agent.is_running(period),
+        'briefing_run': AgentActivityLog.objects.filter(
+            trigger_reason__startswith=f'Reporting Agent: briefings for {pipeline_ops.month_label(period)}').first(),
+        'ai_ready': bool(getattr(settings, 'ANTHROPIC_API_KEY', '') or os.environ.get('ANTHROPIC_API_KEY')),
     }
     return render(request, 'monthly_reports.html', context)
